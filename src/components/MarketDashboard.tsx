@@ -10,7 +10,7 @@ function Sparkline({ seed }: { seed: number }) {
   const points = useMemo(() => {
     let v = 50;
     return Array.from({ length: 24 }, (_, i) => {
-      v += Math.sin(i * seed) * 6 + (Math.random() - 0.5) * 4;
+      v += Math.sin(i * seed) * 6 + Math.cos(i * (seed + 1.7)) * 3;
       return `${(i / 23) * 100},${Math.max(4, Math.min(56, 60 - v / 2))}`;
     }).join(" ");
   }, [seed]);
