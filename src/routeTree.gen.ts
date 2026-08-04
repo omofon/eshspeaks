@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SectionIndexRouteImport } from './routes/$section/index'
+import { Route as SectionSubsegmentIndexRouteImport } from './routes/$section/$subsegment/index'
+import { Route as SectionSubsegmentSlugRouteImport } from './routes/$section/$subsegment/$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SectionIndexRoute = SectionIndexRouteImport.update({
+  id: '/$section/',
+  path: '/$section/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SectionSubsegmentIndexRoute = SectionSubsegmentIndexRouteImport.update({
+  id: '/$section/$subsegment/',
+  path: '/$section/$subsegment/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SectionSubsegmentSlugRoute = SectionSubsegmentSlugRouteImport.update({
+  id: '/$section/$subsegment/$slug',
+  path: '/$section/$subsegment/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
+  '/search': typeof SearchRoute
+  '/$section/': typeof SectionIndexRoute
+  '/$section/$subsegment/$slug': typeof SectionSubsegmentSlugRoute
+  '/$section/$subsegment/': typeof SectionSubsegmentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
+  '/search': typeof SearchRoute
+  '/$section': typeof SectionIndexRoute
+  '/$section/$subsegment/$slug': typeof SectionSubsegmentSlugRoute
+  '/$section/$subsegment': typeof SectionSubsegmentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
+  '/search': typeof SearchRoute
+  '/$section/': typeof SectionIndexRoute
+  '/$section/$subsegment/$slug': typeof SectionSubsegmentSlugRoute
+  '/$section/$subsegment/': typeof SectionSubsegmentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/pricing'
+    | '/register'
+    | '/search'
+    | '/$section/'
+    | '/$section/$subsegment/$slug'
+    | '/$section/$subsegment/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/pricing'
+    | '/register'
+    | '/search'
+    | '/$section'
+    | '/$section/$subsegment/$slug'
+    | '/$section/$subsegment'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/pricing'
+    | '/register'
+    | '/search'
+    | '/$section/'
+    | '/$section/$subsegment/$slug'
+    | '/$section/$subsegment/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
+  RegisterRoute: typeof RegisterRoute
+  SearchRoute: typeof SearchRoute
+  SectionIndexRoute: typeof SectionIndexRoute
+  SectionSubsegmentSlugRoute: typeof SectionSubsegmentSlugRoute
+  SectionSubsegmentIndexRoute: typeof SectionSubsegmentIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +143,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$section/': {
+      id: '/$section/'
+      path: '/$section'
+      fullPath: '/$section/'
+      preLoaderRoute: typeof SectionIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$section/$subsegment/': {
+      id: '/$section/$subsegment/'
+      path: '/$section/$subsegment'
+      fullPath: '/$section/$subsegment/'
+      preLoaderRoute: typeof SectionSubsegmentIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$section/$subsegment/$slug': {
+      id: '/$section/$subsegment/$slug'
+      path: '/$section/$subsegment/$slug'
+      fullPath: '/$section/$subsegment/$slug'
+      preLoaderRoute: typeof SectionSubsegmentSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
+  RegisterRoute: RegisterRoute,
+  SearchRoute: SearchRoute,
+  SectionIndexRoute: SectionIndexRoute,
+  SectionSubsegmentSlugRoute: SectionSubsegmentSlugRoute,
+  SectionSubsegmentIndexRoute: SectionSubsegmentIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
