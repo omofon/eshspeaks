@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as TheSeatRouteImport } from './routes/the-seat'
 import { Route as SectionIndexRouteImport } from './routes/$section/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as AccountNewslettersRouteImport } from './routes/account/newsletters'
@@ -43,6 +44,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TheSeatRoute = TheSeatRouteImport.update({
+  id: '/the-seat',
+  path: '/the-seat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SectionIndexRoute = SectionIndexRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/the-seat': typeof TheSeatRoute
   '/account/newsletters': typeof AccountNewslettersRoute
   '/$section/': typeof SectionIndexRoute
   '/account/': typeof AccountIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/the-seat': typeof TheSeatRoute
   '/account/newsletters': typeof AccountNewslettersRoute
   '/$section': typeof SectionIndexRoute
   '/account': typeof AccountIndexRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/the-seat': typeof TheSeatRoute
   '/account/newsletters': typeof AccountNewslettersRoute
   '/$section/': typeof SectionIndexRoute
   '/account/': typeof AccountIndexRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/search'
+    | '/the-seat'
     | '/account/newsletters'
     | '/$section/'
     | '/account/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/search'
+    | '/the-seat'
     | '/account/newsletters'
     | '/$section'
     | '/account'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/search'
+    | '/the-seat'
     | '/account/newsletters'
     | '/$section/'
     | '/account/'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
+  TheSeatRoute: typeof TheSeatRoute
   AccountNewslettersRoute: typeof AccountNewslettersRoute
   SectionIndexRoute: typeof SectionIndexRoute
   AccountIndexRoute: typeof AccountIndexRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/the-seat': {
+      id: '/the-seat'
+      path: '/the-seat'
+      fullPath: '/the-seat'
+      preLoaderRoute: typeof TheSeatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$section/': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
+  TheSeatRoute: TheSeatRoute,
   AccountNewslettersRoute: AccountNewslettersRoute,
   SectionIndexRoute: SectionIndexRoute,
   AccountIndexRoute: AccountIndexRoute,
