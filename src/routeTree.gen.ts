@@ -15,6 +15,8 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SectionIndexRouteImport } from './routes/$section/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
+import { Route as AccountNewslettersRouteImport } from './routes/account/newsletters'
 import { Route as SectionSubsegmentIndexRouteImport } from './routes/$section/$subsegment/index'
 import { Route as SectionSubsegmentSlugRouteImport } from './routes/$section/$subsegment/$slug'
 
@@ -48,6 +50,16 @@ const SectionIndexRoute = SectionIndexRouteImport.update({
   path: '/$section/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountNewslettersRoute = AccountNewslettersRouteImport.update({
+  id: '/account/newsletters',
+  path: '/account/newsletters',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SectionSubsegmentIndexRoute = SectionSubsegmentIndexRouteImport.update({
   id: '/$section/$subsegment/',
   path: '/$section/$subsegment/',
@@ -65,7 +77,9 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/account/newsletters': typeof AccountNewslettersRoute
   '/$section/': typeof SectionIndexRoute
+  '/account/': typeof AccountIndexRoute
   '/$section/$subsegment/$slug': typeof SectionSubsegmentSlugRoute
   '/$section/$subsegment/': typeof SectionSubsegmentIndexRoute
 }
@@ -75,7 +89,9 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/account/newsletters': typeof AccountNewslettersRoute
   '/$section': typeof SectionIndexRoute
+  '/account': typeof AccountIndexRoute
   '/$section/$subsegment/$slug': typeof SectionSubsegmentSlugRoute
   '/$section/$subsegment': typeof SectionSubsegmentIndexRoute
 }
@@ -86,7 +102,9 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/account/newsletters': typeof AccountNewslettersRoute
   '/$section/': typeof SectionIndexRoute
+  '/account/': typeof AccountIndexRoute
   '/$section/$subsegment/$slug': typeof SectionSubsegmentSlugRoute
   '/$section/$subsegment/': typeof SectionSubsegmentIndexRoute
 }
@@ -98,7 +116,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/search'
+    | '/account/newsletters'
     | '/$section/'
+    | '/account/'
     | '/$section/$subsegment/$slug'
     | '/$section/$subsegment/'
   fileRoutesByTo: FileRoutesByTo
@@ -108,7 +128,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/search'
+    | '/account/newsletters'
     | '/$section'
+    | '/account'
     | '/$section/$subsegment/$slug'
     | '/$section/$subsegment'
   id:
@@ -118,7 +140,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/search'
+    | '/account/newsletters'
     | '/$section/'
+    | '/account/'
     | '/$section/$subsegment/$slug'
     | '/$section/$subsegment/'
   fileRoutesById: FileRoutesById
@@ -129,7 +153,9 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
+  AccountNewslettersRoute: typeof AccountNewslettersRoute
   SectionIndexRoute: typeof SectionIndexRoute
+  AccountIndexRoute: typeof AccountIndexRoute
   SectionSubsegmentSlugRoute: typeof SectionSubsegmentSlugRoute
   SectionSubsegmentIndexRoute: typeof SectionSubsegmentIndexRoute
 }
@@ -178,6 +204,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SectionIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/newsletters': {
+      id: '/account/newsletters'
+      path: '/account/newsletters'
+      fullPath: '/account/newsletters'
+      preLoaderRoute: typeof AccountNewslettersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$section/$subsegment/': {
       id: '/$section/$subsegment/'
       path: '/$section/$subsegment'
@@ -201,7 +241,9 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
+  AccountNewslettersRoute: AccountNewslettersRoute,
   SectionIndexRoute: SectionIndexRoute,
+  AccountIndexRoute: AccountIndexRoute,
   SectionSubsegmentSlugRoute: SectionSubsegmentSlugRoute,
   SectionSubsegmentIndexRoute: SectionSubsegmentIndexRoute,
 }
