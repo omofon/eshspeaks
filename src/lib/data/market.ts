@@ -6,7 +6,14 @@ export const marketSeed: MarketTicker[] = [
   { label: "Brent crude", value: 78.92, prefix: "$", direction: "up", changePct: 1.14 },
   { label: "Inflation (y/y)", value: 24.8, unit: "%", direction: "down", changePct: -0.3 },
   { label: "MPR", value: 27.5, unit: "%", direction: "up", changePct: 0.0 },
-  { label: "Ext. reserves", value: 38.4, prefix: "$", unit: "bn", direction: "up", changePct: 0.22 },
+  {
+    label: "Ext. reserves",
+    value: 38.4,
+    prefix: "$",
+    unit: "bn",
+    direction: "up",
+    changePct: 0.22,
+  },
 ];
 
 /** Deterministic-ish random walk used by the ticker components. */

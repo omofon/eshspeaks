@@ -48,10 +48,18 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-4 border-t border-background/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-4 text-xs text-background/60">
-            <Link to="/pricing" className="hover:text-background">Pricing</Link>
-            <Link to="/search" className="hover:text-background">Search</Link>
-            <Link to="/account/newsletters" className="hover:text-background">Newsletters</Link>
-            <Link to="/the-seat" className="hover:text-background">The Seat</Link>
+            <Link to="/pricing" className="hover:text-background">
+              Pricing
+            </Link>
+            <Link to="/search" className="hover:text-background">
+              Search
+            </Link>
+            <Link to="/account/newsletters" className="hover:text-background">
+              Newsletters
+            </Link>
+            <Link to="/the-seat" className="hover:text-background">
+              The Seat
+            </Link>
             <span>© 2026 EshSpeaks Media</span>
           </div>
           <DevTierToggle />

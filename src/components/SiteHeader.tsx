@@ -15,7 +15,10 @@ export function SiteHeader() {
       <div className="bg-navy text-background">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex items-center justify-between gap-4 py-4">
-            <Link to="/" className="font-serif text-2xl leading-none tracking-tight text-background">
+            <Link
+              to="/"
+              className="font-serif text-2xl leading-none tracking-tight text-background"
+            >
               EshSpeaks
             </Link>
 
@@ -57,7 +60,11 @@ export function SiteHeader() {
                 onClick={() => setOpen((v) => !v)}
                 className="rounded-sm p-1.5 text-background md:hidden"
               >
-                {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
+                {open ? (
+                  <X className="h-5 w-5" strokeWidth={1.75} />
+                ) : (
+                  <Menu className="h-5 w-5" strokeWidth={1.75} />
+                )}
               </button>
             </div>
           </div>

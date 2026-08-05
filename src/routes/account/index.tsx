@@ -12,7 +12,10 @@ export const Route = createFileRoute("/account/")({
   head: () => ({
     meta: [
       { title: "Your account — EshSpeaks" },
-      { name: "description", content: "Manage your EshSpeaks tier, section preferences and comment history." },
+      {
+        name: "description",
+        content: "Manage your EshSpeaks tier, section preferences and comment history.",
+      },
       { property: "og:title", content: "Your account — EshSpeaks" },
       { property: "og:description", content: "Tier, preferences and comment history." },
       { property: "og:type", content: "website" },
@@ -24,7 +27,11 @@ export const Route = createFileRoute("/account/")({
 
 function AccountPage() {
   const { tier, isPremium, isLoggedIn } = useTier();
-  const [followed, setFollowed] = useState<string[]>(["politics", "business-economy", "security-watch"]);
+  const [followed, setFollowed] = useState<string[]>([
+    "politics",
+    "business-economy",
+    "security-watch",
+  ]);
 
   if (!isLoggedIn) {
     return (

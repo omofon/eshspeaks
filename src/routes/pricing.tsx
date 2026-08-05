@@ -9,7 +9,11 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Premium plans — EshSpeaks" },
-      { name: "description", content: "Compare EshSpeaks premium monthly and annual plans: ad-free reading, investigations and the market dashboard." },
+      {
+        name: "description",
+        content:
+          "Compare EshSpeaks premium monthly and annual plans: ad-free reading, investigations and the market dashboard.",
+      },
       { property: "og:title", content: "Premium plans — EshSpeaks" },
       { property: "og:description", content: "Monthly and annual premium plans." },
       { property: "og:type", content: "website" },
@@ -19,7 +23,12 @@ export const Route = createFileRoute("/pricing")({
   }),
 });
 
-const freeFeatures = ["Free articles across all sections", "Comment and reply", "General newsletter", "Advertising supported"];
+const freeFeatures = [
+  "Free articles across all sections",
+  "Comment and reply",
+  "General newsletter",
+  "Advertising supported",
+];
 const premiumFeatures = [
   "Every premium investigation",
   "Ad-free reading",

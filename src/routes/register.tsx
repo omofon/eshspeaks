@@ -9,7 +9,10 @@ export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
       { title: "Create an account — EshSpeaks" },
-      { name: "description", content: "Create a free EshSpeaks account to comment, follow sections and get newsletters." },
+      {
+        name: "description",
+        content: "Create a free EshSpeaks account to comment, follow sections and get newsletters.",
+      },
       { property: "og:title", content: "Create an account — EshSpeaks" },
       { property: "og:description", content: "Join EshSpeaks." },
       { property: "og:type", content: "website" },
@@ -29,7 +32,8 @@ function RegisterPage() {
     e.preventDefault();
     const next: Record<string, string> = {};
     if (values.name.trim().length < 2) next["name"] = "Enter your full name.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email)) next["email"] = "Enter a valid email address.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email))
+      next["email"] = "Enter a valid email address.";
     if (values.password.length < 8) next["password"] = "Use at least 8 characters.";
     setErrors(next);
     if (Object.keys(next).length === 0) {

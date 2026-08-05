@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="EshSpeaks">
+  <rect width="64" height="64" rx="6" fill="#0D1B3D"/>
+  <!-- Masthead rule -->
+  <rect x="12" y="12" width="40" height="3" fill="#F5F1E8"/>
+  <!-- Editorial "E": three column rules of decreasing measure -->
+  <rect x="12" y="23" width="30" height="5" fill="#F5F1E8"/>
+  <rect x="12" y="33" width="22" height="5" fill="#C9541F"/>
+  <rect x="12" y="43" width="30" height="5" fill="#F5F1E8"/>
+  <!-- Spine -->
+  <rect x="12" y="23" width="5" height="25" fill="#F5F1E8"/>
+  <!-- Premium accent dot -->
+  <circle cx="48" cy="45" r="4" fill="#D9A441"/>
+</svg>

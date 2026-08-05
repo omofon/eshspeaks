@@ -10,7 +10,11 @@ export const Route = createFileRoute("/account/newsletters")({
   head: () => ({
     meta: [
       { title: "Newsletters — EshSpeaks" },
-      { name: "description", content: "Choose the EshSpeaks newsletters you receive, including per-section curated sends." },
+      {
+        name: "description",
+        content:
+          "Choose the EshSpeaks newsletters you receive, including per-section curated sends.",
+      },
       { property: "og:title", content: "Newsletters — EshSpeaks" },
       { property: "og:description", content: "Manage EshSpeaks newsletter subscriptions." },
       { property: "og:type", content: "website" },
@@ -58,7 +62,8 @@ function NewslettersPage() {
 
       <h1 className="mt-3 font-serif text-4xl text-navy">Newsletters</h1>
       <p className="mt-2 max-w-2xl text-base text-muted-foreground">
-        Choose what lands in your inbox. Section sends go out weekly, the morning brief every weekday.
+        Choose what lands in your inbox. Section sends go out weekly, the morning brief every
+        weekday.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_340px]">
@@ -84,7 +89,9 @@ function NewslettersPage() {
                     on={on}
                     label={s.name}
                     onClick={() =>
-                      setSubscribed((prev) => (on ? prev.filter((x) => x !== s.slug) : [...prev, s.slug]))
+                      setSubscribed((prev) =>
+                        on ? prev.filter((x) => x !== s.slug) : [...prev, s.slug],
+                      )
                     }
                   />
                 </li>

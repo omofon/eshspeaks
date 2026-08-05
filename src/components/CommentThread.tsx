@@ -33,7 +33,13 @@ export function CommentThread({ count }: { count: number }) {
     }
     setError("");
     setPosted((prev) => [
-      { id: `local-${prev.length}`, author: "You", initials: "YO", time: "Just now", body: draft.trim() },
+      {
+        id: `local-${prev.length}`,
+        author: "You",
+        initials: "YO",
+        time: "Just now",
+        body: draft.trim(),
+      },
       ...prev,
     ]);
     setDraft("");
@@ -104,7 +110,8 @@ export function CommentThread({ count }: { count: number }) {
                       <Avatar initials={r.initials} />
                       <div>
                         <p className="text-sm font-medium text-navy">
-                          {r.author} <span className="font-normal text-muted-foreground">· {r.time}</span>
+                          {r.author}{" "}
+                          <span className="font-normal text-muted-foreground">· {r.time}</span>
                         </p>
                         <p className="mt-1 text-sm leading-relaxed">{r.body}</p>
                       </div>

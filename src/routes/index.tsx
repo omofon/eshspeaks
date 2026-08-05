@@ -1,6 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteShell } from "@/components/SiteShell";
-import { FeaturedCard, ListCard, CuratedCard, ARTICLE_ROUTE, articleParams } from "@/components/ArticleCard";
+import {
+  FeaturedCard,
+  ListCard,
+  CuratedCard,
+  ARTICLE_ROUTE,
+  articleParams,
+} from "@/components/ArticleCard";
 import { AdSlot } from "@/components/AdSlot";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { allArticles, leadStory, trending } from "@/lib/data/articles";
@@ -17,7 +23,10 @@ export const Route = createFileRoute("/")({
           "The front page of EshSpeaks: politics, business and economy, security watch and state of play, reported from Nigeria.",
       },
       { property: "og:title", content: "EshSpeaks — front page" },
-      { property: "og:description", content: "Nigerian politics, business and security reporting." },
+      {
+        property: "og:description",
+        content: "Nigerian politics, business and security reporting.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
     ],
@@ -85,8 +94,13 @@ function Index() {
             <h2 className="font-serif text-xl text-navy">Trending</h2>
             <ol className="mt-3 space-y-3">
               {trending.map((a, i) => (
-                <li key={a.slug} className="flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
-                  <span className="font-mono text-sm text-accent">{String(i + 1).padStart(2, "0")}</span>
+                <li
+                  key={a.slug}
+                  className="flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0"
+                >
+                  <span className="font-mono text-sm text-accent">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <Link
                     to={ARTICLE_ROUTE}
                     params={articleParams(a)}

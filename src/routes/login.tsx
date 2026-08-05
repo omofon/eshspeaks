@@ -9,7 +9,10 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — EshSpeaks" },
-      { name: "description", content: "Sign in to your EshSpeaks account to comment and manage newsletters." },
+      {
+        name: "description",
+        content: "Sign in to your EshSpeaks account to comment and manage newsletters.",
+      },
       { property: "og:title", content: "Sign in — EshSpeaks" },
       { property: "og:description", content: "Sign in to EshSpeaks." },
       { property: "og:type", content: "website" },
@@ -28,7 +31,8 @@ function LoginPage() {
   function submit(e: FormEvent) {
     e.preventDefault();
     const next: Record<string, string> = {};
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email)) next["email"] = "Enter a valid email address.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email))
+      next["email"] = "Enter a valid email address.";
     if (values.password.length < 8) next["password"] = "Password must be at least 8 characters.";
     setErrors(next);
     if (Object.keys(next).length === 0) {
@@ -87,7 +91,9 @@ function LoginPage() {
                 onChange={(e) => setValues({ ...values, password: e.target.value })}
                 className="mt-1 w-full rounded-sm border border-border bg-card px-3 py-2 text-sm outline-none focus:border-accent"
               />
-              {errors["password"] ? <p className="mt-1 text-sm text-down">{errors["password"]}</p> : null}
+              {errors["password"] ? (
+                <p className="mt-1 text-sm text-down">{errors["password"]}</p>
+              ) : null}
             </div>
             <button
               type="submit"

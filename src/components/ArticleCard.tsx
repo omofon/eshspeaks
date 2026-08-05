@@ -57,7 +57,9 @@ export function ListCard({ a, compact = false }: { a: ArticleType; compact?: boo
           {a.title}
         </h3>
       </Link>
-      {!compact ? <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.dek}</p> : null}
+      {!compact ? (
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.dek}</p>
+      ) : null}
       <div className="mt-2">
         <Meta a={a} />
       </div>
@@ -74,7 +76,9 @@ export function CuratedCard({ a }: { a: ArticleType }) {
         <span className="text-xs text-muted-foreground">Curated</span>
       </div>
       <Link to={ARTICLE_ROUTE} params={articleParams(a)} className="block group">
-        <h3 className="font-serif text-lg leading-snug text-navy group-hover:text-accent">{a.title}</h3>
+        <h3 className="font-serif text-lg leading-snug text-navy group-hover:text-accent">
+          {a.title}
+        </h3>
       </Link>
       <a
         href={a.curatedUrl ?? "#"}

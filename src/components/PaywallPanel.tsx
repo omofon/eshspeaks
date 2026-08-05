@@ -10,10 +10,12 @@ export function PaywallPanel() {
         <Lock className="h-3 w-3" strokeWidth={2} />
         Premium reporting
       </div>
-      <h2 className="mt-2 font-serif text-2xl text-navy">The rest of this story is for subscribers</h2>
+      <h2 className="mt-2 font-serif text-2xl text-navy">
+        The rest of this story is for subscribers
+      </h2>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        This piece is built on documents and first-hand briefings. Premium keeps that reporting funded,
-        removes advertising, and unlocks the full archive across all eight sections.
+        This piece is built on documents and first-hand briefings. Premium keeps that reporting
+        funded, removes advertising, and unlocks the full archive across all eight sections.
       </p>
       <ul className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
         {[

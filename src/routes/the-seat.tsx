@@ -13,7 +13,10 @@ export const Route = createFileRoute("/the-seat")({
           "The Seat is a constituency-level briefing on Nigerian representation: who holds the seat, what they voted for, and what changed.",
       },
       { property: "og:title", content: "The Seat — constituency intelligence" },
-      { property: "og:description", content: "A constituency-level briefing on Nigerian representation." },
+      {
+        property: "og:description",
+        content: "A constituency-level briefing on Nigerian representation.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/the-seat" },
     ],
@@ -22,10 +25,43 @@ export const Route = createFileRoute("/the-seat")({
 });
 
 const states = [
-  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River",
-  "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano",
-  "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo",
-  "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara",
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
 ];
 
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
@@ -53,7 +89,8 @@ function CaptureForm() {
           You are on the list
         </p>
         <p className="mt-2 text-sm text-background/70">
-          The first briefing for {values.constituency} goes out at the start of the next sitting week.
+          The first briefing for {values.constituency} goes out at the start of the next sitting
+          week.
         </p>
       </div>
     );
@@ -66,7 +103,9 @@ function CaptureForm() {
 
       <div className="mt-5 space-y-4">
         <div>
-          <label htmlFor="seat-name" className="text-sm text-background/80">Name</label>
+          <label htmlFor="seat-name" className="text-sm text-background/80">
+            Name
+          </label>
           <input
             id="seat-name"
             value={values.name}
@@ -76,7 +115,9 @@ function CaptureForm() {
           {errors["name"] ? <p className="mt-1 text-sm text-down">{errors["name"]}</p> : null}
         </div>
         <div>
-          <label htmlFor="seat-email" className="text-sm text-background/80">Email address</label>
+          <label htmlFor="seat-email" className="text-sm text-background/80">
+            Email address
+          </label>
           <input
             id="seat-email"
             value={values.email}
@@ -86,7 +127,9 @@ function CaptureForm() {
           {errors["email"] ? <p className="mt-1 text-sm text-down">{errors["email"]}</p> : null}
         </div>
         <div>
-          <label htmlFor="seat-constituency" className="text-sm text-background/80">Constituency or state</label>
+          <label htmlFor="seat-constituency" className="text-sm text-background/80">
+            Constituency or state
+          </label>
           <select
             id="seat-constituency"
             value={values.constituency}
@@ -95,10 +138,14 @@ function CaptureForm() {
           >
             <option value="">Select a state</option>
             {states.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
-          {errors["constituency"] ? <p className="mt-1 text-sm text-down">{errors["constituency"]}</p> : null}
+          {errors["constituency"] ? (
+            <p className="mt-1 text-sm text-down">{errors["constituency"]}</p>
+          ) : null}
         </div>
       </div>
 
@@ -146,7 +193,9 @@ function PrintForm() {
       ) : (
         <form onSubmit={submit} className="mt-5 space-y-4">
           <div>
-            <label htmlFor="print-email" className="text-sm font-medium">Email address</label>
+            <label htmlFor="print-email" className="text-sm font-medium">
+              Email address
+            </label>
             <input
               id="print-email"
               value={values.email}
@@ -156,7 +205,9 @@ function PrintForm() {
             {errors["email"] ? <p className="mt-1 text-sm text-down">{errors["email"]}</p> : null}
           </div>
           <div>
-            <label htmlFor="print-address" className="text-sm font-medium">Delivery address</label>
+            <label htmlFor="print-address" className="text-sm font-medium">
+              Delivery address
+            </label>
             <textarea
               id="print-address"
               rows={3}
@@ -164,10 +215,14 @@ function PrintForm() {
               onChange={(e) => setValues({ ...values, address: e.target.value })}
               className="mt-1 w-full rounded-sm border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
             />
-            {errors["address"] ? <p className="mt-1 text-sm text-down">{errors["address"]}</p> : null}
+            {errors["address"] ? (
+              <p className="mt-1 text-sm text-down">{errors["address"]}</p>
+            ) : null}
           </div>
           <div>
-            <label htmlFor="print-copies" className="text-sm font-medium">Copies</label>
+            <label htmlFor="print-copies" className="text-sm font-medium">
+              Copies
+            </label>
             <select
               id="print-copies"
               value={values.copies}
@@ -175,7 +230,9 @@ function PrintForm() {
               className="mt-1 w-full rounded-sm border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
             >
               {["1", "5", "25", "100"].map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </div>
@@ -207,14 +264,16 @@ function TheSeatPage() {
 
           <div className="grid gap-10 py-16 lg:grid-cols-[1.1fr_1fr]">
             <div>
-              <p className="font-mono text-xs tracking-[0.2em] text-accent">Constituency intelligence</p>
+              <p className="font-mono text-xs tracking-[0.2em] text-accent">
+                Constituency intelligence
+              </p>
               <h1 className="mt-4 font-serif text-5xl leading-[1.05] text-background md:text-6xl">
                 Know who holds your seat, and what they did with it
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-background/75">
                 Every sitting week, The Seat sends one page on your representative: bills sponsored,
-                votes cast, attendance, constituency spend and the questions left unanswered. Written
-                plainly, sourced from the record.
+                votes cast, attendance, constituency spend and the questions left unanswered.
+                Written plainly, sourced from the record.
               </p>
               <dl className="mt-8 grid max-w-lg grid-cols-3 gap-4 border-t border-background/20 pt-6">
                 {[
@@ -241,8 +300,14 @@ function TheSeatPage() {
             <ul className="mt-6 divide-y divide-border">
               {[
                 ["The record", "Bills sponsored and co-sponsored, with plain-language summaries."],
-                ["The votes", "How your representative voted, including the divisions that were not recorded."],
-                ["The money", "Constituency project allocations, awarded contractors and delivery status."],
+                [
+                  "The votes",
+                  "How your representative voted, including the divisions that were not recorded.",
+                ],
+                [
+                  "The money",
+                  "Constituency project allocations, awarded contractors and delivery status.",
+                ],
                 ["The gaps", "Sittings missed, questions unanswered, and commitments left open."],
               ].map(([title, body]) => (
                 <li key={title} className="py-5">

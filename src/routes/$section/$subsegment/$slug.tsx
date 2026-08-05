@@ -43,7 +43,11 @@ function ArticlePage() {
   return (
     <SiteShell>
       <nav className="text-sm text-muted-foreground">
-        <Link to="/$section" params={{ section: section.slug }} className="text-accent hover:underline">
+        <Link
+          to="/$section"
+          params={{ section: section.slug }}
+          className="text-accent hover:underline"
+        >
           {section.name}
         </Link>
         <span> / </span>
@@ -62,13 +66,15 @@ function ArticlePage() {
             <SectionTag section={section} />
             {article.premium ? <PremiumBadge /> : null}
           </div>
-          <h1 className="mt-3 font-serif text-4xl leading-tight text-navy md:text-5xl">{article.title}</h1>
+          <h1 className="mt-3 font-serif text-4xl leading-tight text-navy md:text-5xl">
+            {article.title}
+          </h1>
           <p className="mt-4 max-w-2xl font-serif text-xl leading-relaxed text-muted-foreground">
             {article.dek}
           </p>
           <p className="mt-4 border-y border-rule py-3 text-sm text-muted-foreground">
-            By <span className="font-medium text-foreground">{article.byline}</span> in {article.location} ·{" "}
-            {article.date} · {article.readMinutes} min read
+            By <span className="font-medium text-foreground">{article.byline}</span> in{" "}
+            {article.location} · {article.date} · {article.readMinutes} min read
           </p>
 
           <div className="mt-6 max-w-2xl space-y-5 text-[17px] leading-8">

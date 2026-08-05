@@ -49,7 +49,11 @@ function SubsegmentPage() {
   return (
     <SiteShell>
       <nav className="text-sm text-muted-foreground">
-        <Link to="/$section" params={{ section: sectionSlug }} className="text-accent hover:underline">
+        <Link
+          to="/$section"
+          params={{ section: sectionSlug }}
+          className="text-accent hover:underline"
+        >
           {section.name}
         </Link>
         <span> / {sub.name}</span>

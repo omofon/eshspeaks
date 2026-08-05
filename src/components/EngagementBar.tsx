@@ -19,7 +19,9 @@ export function EngagementBar({ likes, comments }: { likes: number; comments: nu
         type="button"
         onClick={() => setLiked((v) => !v)}
         className={`inline-flex items-center gap-2 rounded-sm border px-3 py-1.5 text-sm ${
-          liked ? "border-accent bg-accent text-accent-foreground" : "border-border text-foreground hover:border-navy"
+          liked
+            ? "border-accent bg-accent text-accent-foreground"
+            : "border-border text-foreground hover:border-navy"
         }`}
       >
         <ThumbsUp className="h-4 w-4" strokeWidth={1.75} />
@@ -57,7 +59,9 @@ export function EngagementBar({ likes, comments }: { likes: number; comments: nu
             )}
             {copied ? "Link copied" : "Copy link"}
           </button>
-          <p className="px-2 pt-1 text-xs text-muted-foreground">Sharing is mocked in this build.</p>
+          <p className="px-2 pt-1 text-xs text-muted-foreground">
+            Sharing is mocked in this build.
+          </p>
         </div>
       ) : null}
     </div>

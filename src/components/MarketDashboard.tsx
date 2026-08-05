@@ -61,7 +61,11 @@ export function MarketDashboard() {
       <section className="rule-top mt-10 pt-6">
         <div className="flex items-baseline justify-between">
           <h2 className="font-serif text-2xl text-navy">Market coverage</h2>
-          <Link to="/$section" params={{ section: "business-economy" }} className="text-sm text-accent hover:underline">
+          <Link
+            to="/$section"
+            params={{ section: "business-economy" }}
+            className="text-sm text-accent hover:underline"
+          >
             All business & economy
           </Link>
         </div>
