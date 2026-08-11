@@ -1,3 +1,5 @@
+"use client";
+
 import { useTier } from "@/lib/tier";
 import type { Tier } from "@/lib/data/types";
 

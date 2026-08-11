@@ -1,0 +1,42 @@
+import type { Metadata } from "next";
+import { Newsreader, Inter, IBM_Plex_Mono } from "next/font/google";
+import "./globals.css";
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: "ESHSPEAKS",
+    template: "%s | ESHSPEAKS",
+  },
+  description:
+    "A modern Nigerian editorial newsroom for politics, business, culture and public life.",
+  metadataBase: new URL("https://www.eshspeaks.com"),
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
+        {children}
+      </body>
+    </html>
+  );
+}

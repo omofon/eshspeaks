@@ -5,16 +5,16 @@ platform with free/premium tiers and a standalone lead-gen product, "The Seat."
 Styled as a modern editorial newsroom — not a blog theme, not a SaaS dashboard.
 
 The original brief called for Next.js App Router with static export. This is
-built on **TanStack Start** instead, which keeps file-based routing and adds SSR;
-routes live in `src/routes/` rather than `app/`. Everything else in the brief
-holds.
+now implemented as a conventional Next.js App Router project with the active
+routes under `app/`. The legacy TanStack route files were removed after the
+migration.
 
 ## Stack
 
-- TanStack Start (React 19, file-based routing) on Vite 8
+- Next.js App Router (React 19)
 - Tailwind CSS v4
 - TypeScript (strict)
-- Nitro for the deploy build — targets Vercel automatically in CI
+- Vercel-ready deployment
 - Mock data only. No backend, no real auth. Logged-out / free / premium states
   are driven client-side by `src/lib/tier.tsx` and a small dev toggle.
 
@@ -38,16 +38,13 @@ npm run dev
 
 ## Deploying to Vercel
 
-The repo is ready to import as-is. Vercel detects the Vite build, and Nitro
-emits a Vercel-compatible bundle when `VERCEL=1` is set in the build
-environment, which Vercel does automatically.
+The repo is ready to import as-is. Vercel uses the Next.js build directly.
 
 - Build command: `npm run build`
 - Install command: `npm install`
-- Output: handled by Nitro's Vercel preset — leave the output directory blank
+- Output: default Next.js output
 
-No environment variables are required. `vercel.json` pins the framework to
-`vite` and adds long-lived cache headers for hashed assets.
+No environment variables are required.
 
 ## Design rules
 

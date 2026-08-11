@@ -1,3 +1,5 @@
+"use client";
+
 import { useTier } from "@/lib/tier";
 
 type Variant = "leaderboard" | "in-feed" | "sidebar";

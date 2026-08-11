@@ -1,14 +1,12 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { getSection } from "@/lib/data/sections";
 import type { Article as ArticleType } from "@/lib/data/types";
 import { SectionTag } from "./SectionTag";
 import { PremiumBadge } from "./PremiumBadge";
 
-export const ARTICLE_ROUTE = "/$section/$subsegment/$slug" as const;
-
-export function articleParams(a: ArticleType) {
-  return { section: a.section, subsegment: a.subsegment, slug: a.slug };
+function articleHref(a: ArticleType) {
+  return { pathname: `/${a.section}/${a.subsegment}/${a.slug}` };
 }
 
 function Meta({ a }: { a: ArticleType }) {
@@ -27,7 +25,7 @@ export function FeaturedCard({ a }: { a: ArticleType }) {
         {section ? <SectionTag section={section} /> : null}
         {a.premium ? <PremiumBadge /> : null}
       </div>
-      <Link to={ARTICLE_ROUTE} params={articleParams(a)} className="block group">
+      <Link href={articleHref(a)} className="block group">
         <h2 className="font-serif text-3xl leading-tight text-navy group-hover:text-accent md:text-4xl">
           {a.title}
         </h2>
@@ -48,7 +46,7 @@ export function ListCard({ a, compact = false }: { a: ArticleType; compact?: boo
         {section ? <SectionTag section={section} /> : null}
         {a.premium ? <PremiumBadge /> : null}
       </div>
-      <Link to={ARTICLE_ROUTE} params={articleParams(a)} className="block group">
+      <Link href={articleHref(a)} className="block group">
         <h3
           className={`font-serif leading-snug text-navy group-hover:text-accent ${
             compact ? "text-base" : "text-xl"
@@ -75,7 +73,7 @@ export function CuratedCard({ a }: { a: ArticleType }) {
         {section ? <SectionTag section={section} /> : null}
         <span className="text-xs text-muted-foreground">Curated</span>
       </div>
-      <Link to={ARTICLE_ROUTE} params={articleParams(a)} className="block group">
+      <Link href={articleHref(a)} className="block group">
         <h3 className="font-serif text-lg leading-snug text-navy group-hover:text-accent">
           {a.title}
         </h3>

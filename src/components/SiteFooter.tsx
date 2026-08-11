@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { sections } from "@/lib/data/sections";
 import { NewsletterSignup } from "./NewsletterSignup";
 import { DevTierToggle } from "./DevTierToggle";
@@ -12,8 +14,7 @@ export function SiteFooter() {
             {sections.map((s) => (
               <div key={s.slug}>
                 <Link
-                  to="/$section"
-                  params={{ section: s.slug }}
+                  href={`/${s.slug}`}
                   className="font-sans text-sm font-medium text-background hover:text-accent"
                 >
                   {s.name}
@@ -22,8 +23,7 @@ export function SiteFooter() {
                   {s.subsegments.map((sub) => (
                     <li key={sub.slug}>
                       <Link
-                        to="/$section/$subsegment"
-                        params={{ section: s.slug, subsegment: sub.slug }}
+                        href={`/${s.slug}/${sub.slug}`}
                         className="text-xs text-background/65 hover:text-background"
                       >
                         {sub.name}
@@ -48,16 +48,16 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-4 border-t border-background/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-4 text-xs text-background/60">
-            <Link to="/pricing" className="hover:text-background">
+            <Link href="/pricing" className="hover:text-background">
               Pricing
             </Link>
-            <Link to="/search" className="hover:text-background">
+            <Link href="/search" className="hover:text-background">
               Search
             </Link>
-            <Link to="/account/newsletters" className="hover:text-background">
+            <Link href="/account" className="hover:text-background">
               Newsletters
             </Link>
-            <Link to="/the-seat" className="hover:text-background">
+            <Link href="/the-seat" className="hover:text-background">
               The Seat
             </Link>
             <span>© 2026 EshSpeaks Media</span>

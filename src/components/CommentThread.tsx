@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, type FormEvent } from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { mockComments } from "@/lib/data/comments";
 import { useTier } from "@/lib/tier";
 
@@ -71,11 +73,11 @@ export function CommentThread({ count }: { count: number }) {
         <div className="mt-4 rounded-sm border border-border bg-card p-4 text-sm">
           <p className="text-muted-foreground">
             Sign in to join the discussion.{" "}
-            <Link to="/login" className="text-accent hover:underline">
+            <Link href="/login" className="text-accent hover:underline">
               Sign in
             </Link>{" "}
             or{" "}
-            <Link to="/register" className="text-accent hover:underline">
+            <Link href="/register" className="text-accent hover:underline">
               create an account
             </Link>
             .

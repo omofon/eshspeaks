@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { Check, Lock } from "lucide-react";
 import { useTier } from "@/lib/tier";
 
@@ -32,7 +34,7 @@ export function PaywallPanel() {
       </ul>
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Link
-          to="/pricing"
+          href="/pricing"
           className="rounded-sm bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-navy"
         >
           See plans
