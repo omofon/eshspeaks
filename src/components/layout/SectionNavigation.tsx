@@ -7,16 +7,16 @@ import { SectionDropdown } from "./SectionDropdown";
 
 export function SectionNavigation() {
   return (
-    <nav className="bg-background">
+    <nav className="bg-navy text-background">
       <div className="container-eshspeaks">
         <div className="flex justify-center">
           <ul className="flex gap-8 py-3">
             {sections.map((s) => (
               <li key={s.slug} className="flex items-center">
                 {s.subsegments && s.subsegments.length > 0 ? (
-                  <SectionDropdown section={s as any} />
+                  <SectionDropdown section={s as any} inverted />
                 ) : (
-                  <Link href={`/${s.slug}`} className="text-sm md:text-base text-foreground/85 hover:text-foreground hover:underline-offset-2">
+                  <Link href={`/${s.slug}`} className="text-sm md:text-base text-background/85 hover:text-accent hover:underline-offset-2">
                     {s.name}
                   </Link>
                 )}

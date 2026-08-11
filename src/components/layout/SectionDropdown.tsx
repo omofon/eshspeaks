@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Section } from "@/lib/data/types";
 
-export function SectionDropdown({ section }: { section: Section }) {
+export function SectionDropdown({ section, inverted }: { section: Section; inverted?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -38,7 +38,7 @@ export function SectionDropdown({ section }: { section: Section }) {
         onBlur={(e) => {
           if (!ref.current?.contains(e.relatedTarget as Node)) setOpen(false);
         }}
-        className="inline-flex items-center gap-1 text-sm text-foreground/90 hover:text-foreground"
+        className={`inline-flex items-center gap-1 text-sm ${inverted ? "text-background/90 hover:text-background" : "text-foreground/90 hover:text-foreground"}`}
       >
         {section.name}
         <span aria-hidden>▾</span>
