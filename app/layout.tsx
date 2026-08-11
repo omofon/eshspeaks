@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Newsreader, Inter, IBM_Plex_Mono, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -21,6 +21,12 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const bodoni = Bodoni_Moda({
+  subsets: ["latin"],
+  variable: "--font-bodoni",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "ESHSPEAKS",
@@ -34,7 +40,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
+      <body className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable} ${bodoni.variable}`}>
         {children}
       </body>
     </html>

@@ -47,9 +47,10 @@ export function SectionDropdown({ section }: { section: Section }) {
       <div
         role="menu"
         aria-label={`${section.name} menu`}
-        className={`absolute left-0 z-40 mt-2 w-56 rounded bg-card p-3 shadow-card ring-1 ring-border transition-opacity duration-150 ${
+        className={`absolute left-0 z-40 mt-2 w-56 rounded bg-card p-3 shadow-card ring-1 ring-border transition-opacity duration-150 motion-reduce:transition-none ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
+        style={{ willChange: "opacity" }}
       >
         <div className="flex flex-col gap-2">
           <Link href={`/${section.slug}`} className="text-sm font-semibold text-foreground">

@@ -10,13 +10,13 @@ export function SectionNavigation() {
     <nav className="bg-background">
       <div className="container-eshspeaks">
         <div className="flex justify-center">
-          <ul className="flex gap-6 py-3">
+          <ul className="flex gap-8 py-3">
             {sections.map((s) => (
               <li key={s.slug} className="flex items-center">
                 {s.subsegments && s.subsegments.length > 0 ? (
                   <SectionDropdown section={s as any} />
                 ) : (
-                  <Link href={`/${s.slug}`} className="text-sm text-foreground/90 hover:text-foreground">
+                  <Link href={`/${s.slug}`} className="text-sm md:text-base text-foreground/85 hover:text-foreground hover:underline-offset-2">
                     {s.name}
                   </Link>
                 )}
@@ -24,7 +24,7 @@ export function SectionNavigation() {
             ))}
 
             <li>
-              <Link href="/the-seat" className="text-sm text-accent hover:underline">
+              <Link href="/the-seat" className="text-sm md:text-base text-accent hover:underline">
                 The Seat
               </Link>
             </li>
