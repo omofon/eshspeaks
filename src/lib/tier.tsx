@@ -31,13 +31,18 @@ export function TierProvider({ children }: { children: ReactNode }) {
   const [tier, setTierState] = useState<Tier>("free");
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(KEY) as Tier | null;
-    if (stored) setTierState(stored);
+    if (stored && ["logged-out", "free", "premium"].includes(stored)) {
+      setTierState(stored);
+    }
   }, []);
 
   const setTier = useCallback((t: Tier) => {
     setTierState(t);
-    window.localStorage.setItem(KEY, t);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(KEY, t);
+    }
   }, []);
 
   const value = useMemo(

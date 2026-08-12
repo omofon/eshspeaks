@@ -1,22 +1,56 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ==========================================================================
+   ESHSPEAKS Design System v1.0
+   Navy foundation · Orange signature · Restrained maroon · White canvas
+   Editorial serif (Newsreader) · Sans UI (Inter) · Mono metadata (IBM Plex Mono)
+   Wordmark typeface: Bodoni Moda (--font-wordmark)
+   ========================================================================== */
+
 :root {
-  --background: #FAFAF8;
+  /* --- Canvas & surfaces --- */
+  --background: #fcfbf8; /* off-white editorial canvas */
   --background-soft: #ffffff;
   --card: #ffffff;
-  --foreground: #1b1b1b;
-  --text-primary: #1b1b1b;
-  --text-secondary: #5f6368;
-  --text-muted: #7b7f86;
-  --border: #dfdfda;
-  --rule: #d8d4ce;
-  --brand-navy: #0D1B3D;
-  --brand-navy-soft: #172a56;
-  --brand-accent: #C9541F;
-  --brand-accent-soft: #f9e8df;
-  --brand-gold: #D9A441;
-  --brand-gold-foreground: #3d2c0a;
+  --card-foreground: #111111;
+
+  /* --- Text --- */
+  --foreground: #111111; /* near-black, never pure black */
+  --text-primary: #111111;
+  --text-secondary: #4e5257;
+  --text-muted: #74797f;
+  --text-inverse: #fcfbf8;
+
+  /* --- Lines --- */
+  --border: #e3e0d9;
+  --rule: #d3cfc6;
+  --rule-strong: #0d1b3d;
+
+  /* --- Brand: navy (foundation) --- */
+  --navy: #0d1b3d;
+  --navy-soft: #172a56;
+  --navy-deep: #070f24;
+  --navy-tint: #edf0f7;
+
+  /* --- Brand: orange (signature accent) --- */
+  --accent: #c9541f;
+  --accent-hover: #a9430f;
+  --accent-soft: #faeadf;
+  --accent-foreground: #ffffff;
+
+  /* --- Brand: maroon (editorial depth, secondary) --- */
+  --maroon: #6e1f2a;
+  --maroon-soft: #f6eaec;
+  --maroon-foreground: #ffffff;
+
+  /* --- Support --- */
+  --gold: #d9a441;
+  --gold-foreground: #3d2c0a;
+  --muted: #f2f0eb;
+  --muted-foreground: #5f6368;
+
+  /* --- Feedback --- */
   --success: #2b7a4b;
   --success-soft: #eaf7ee;
   --warning: #a85b00;
@@ -27,31 +61,96 @@
   --info-soft: #eef4ff;
   --market-up: #2b7a4b;
   --market-down: #b42318;
+
+  /* --- Section tints (category indicators) --- */
+  --tint-politics: #2f4b8f;
+  --tint-business: #1f6b6b;
+  --tint-security: #a33321;
+  --tint-culture: #6e1f2a;
+  --tint-opinion: #6e1f2a;
+  --tint-technology: #1e6b4f;
+  --tint-society: #7a5a16;
+  --tint-interviews: #c9541f;
+
+  /* --- Radius (restrained editorial geometry) --- */
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.08);
-  --font-serif: var(--font-newsreader);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-ibm-plex-mono);
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* --- Elevation (minimal) --- */
+  --shadow-card: 0 1px 2px rgba(13, 27, 61, 0.08);
+  --shadow-raised: 0 6px 20px -8px rgba(13, 27, 61, 0.18);
+
+  /* --- Spacing scale --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* --- Layout --- */
+  --container-max: 1280px;
+  --measure: 680px; /* article reading column */
+
+  /* --- Type families (next/font vars with web-safe fallbacks) --- */
+  --font-serif: var(--font-newsreader, "Newsreader"), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter, "Inter"), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  --font-wordmark:
+    var(--font-blackletter, "UnifrakturCook"), var(--font-bodoni, "Bodoni Moda"), var(--font-serif);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-background-soft: var(--background-soft);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --color-foreground: var(--foreground);
+
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+
   --color-border: var(--border);
   --color-rule: var(--rule);
-  --color-brand-navy: var(--brand-navy);
-  --color-brand-navy-soft: var(--brand-navy-soft);
-  --color-brand-accent: var(--brand-accent);
-  --color-brand-accent-soft: var(--brand-accent-soft);
-  --color-brand-gold: var(--brand-gold);
-  --color-brand-gold-foreground: var(--brand-gold-foreground);
+  --color-rule-strong: var(--rule-strong);
+
+  --color-navy: var(--navy);
+  --color-navy-soft: var(--navy-soft);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-tint: var(--navy-tint);
+  --color-primary: var(--navy);
+  --color-primary-foreground: var(--text-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-brand-accent: var(--accent);
+  --color-brand-accent-soft: var(--accent-soft);
+  --color-brand-navy: var(--navy);
+  --color-brand-navy-soft: var(--navy-soft);
+  --color-brand-orange: var(--accent);
+  --color-brand-gold: var(--gold);
+  --color-brand-gold-foreground: var(--gold-foreground);
+
+  --color-maroon: var(--maroon);
+  --color-maroon-soft: var(--maroon-soft);
+  --color-maroon-foreground: var(--maroon-foreground);
+
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -60,41 +159,53 @@
   --color-error-soft: var(--error-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-up: var(--market-up);
+  --color-down: var(--market-down);
   --color-market-up: var(--market-up);
   --color-market-down: var(--market-down);
+
+  --color-tint-politics: var(--tint-politics);
+  --color-tint-business: var(--tint-business);
+  --color-tint-security: var(--tint-security);
+  --color-tint-culture: var(--tint-culture);
+  --color-tint-opinion: var(--tint-opinion);
+  --color-tint-technology: var(--tint-technology);
+  --color-tint-society: var(--tint-society);
+  --color-tint-interviews: var(--tint-interviews);
+
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
+  --font-wordmark: var(--font-wordmark);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
 }
 
 @layer base {
   * {
-    @apply box-border;
+    box-sizing: border-box;
+    border-color: var(--border);
   }
 
   html {
     text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    @apply min-h-screen bg-background text-foreground antialiased;
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans);
-    line-height: 1.5;
-  }
-
-  a {
-    @apply transition-colors;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  a:hover,
-  a:focus-visible {
-    @apply text-brand-navy;
-  }
-
-  ::selection {
-    @apply bg-brand-accent-soft text-brand-navy;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
   }
 
   h1,
@@ -104,15 +215,316 @@
   h5,
   h6 {
     font-family: var(--font-serif);
+    color: var(--navy);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--navy);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
-@layer utilities {
-  .container-eshspeaks {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
-  }
+/* ==========================================================================
+   Layout utilities
+   ========================================================================== */
 
-  .text-balance {
-    text-wrap: balance;
+@utility container-eshspeaks {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--container-max);
+  padding-inline: 16px;
+  @media (min-width: 640px) {
+    padding-inline: 24px;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 32px;
+  }
+}
+
+@utility measure {
+  max-width: var(--measure);
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* ==========================================================================
+   Editorial type utilities
+   ========================================================================== */
+
+@utility wordmark {
+  font-family: var(--font-wordmark);
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  /* Blackletter masthead: never uppercase it, the caps are the drawing */
+  text-transform: none;
+}
+
+@utility display-xl {
+  font-family: var(--font-serif);
+  font-size: clamp(2.75rem, 6vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+}
+
+@utility headline-lg {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+@utility headline-md {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+}
+
+@utility headline-sm {
+  font-family: var(--font-serif);
+  font-size: clamp(1.125rem, 1.4vw, 1.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+@utility body-editorial {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+  @media (min-width: 768px) {
+    font-size: 1.1875rem;
+  }
+}
+
+@utility pull-quote {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 3vw, 2.125rem);
+  line-height: 1.28;
+  color: var(--navy);
+  border-left: 3px solid var(--accent);
+  padding-left: 1.25rem;
+}
+
+@utility meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@utility kicker {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@utility kicker-muted {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Rules, cards, buttons
+   ========================================================================== */
+
+@utility rule-top {
+  border-top: 1px solid var(--rule);
+}
+
+@utility rule-top-strong {
+  border-top: 2px solid var(--navy);
+}
+
+@utility hairline {
+  border-bottom: 1px solid var(--rule);
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility card-editorial {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+@utility media-frame {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--muted);
+  & img {
+    transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  &:hover img {
+    transform: scale(1.03);
+  }
+}
+
+@utility link-underline {
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition:
+    background-size 220ms ease,
+    color 160ms ease;
+  &:hover {
+    background-size: 100% 1px;
+    color: var(--accent);
+  }
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--navy);
+  color: var(--text-inverse);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.625rem 1.125rem;
+  transition: background 160ms ease;
+  &:hover {
+    background: var(--navy-soft);
+  }
+}
+
+@utility btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem 1.125rem;
+  transition: background 160ms ease;
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
+
+@utility btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--navy);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.625rem 1.125rem;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease;
+  &:hover {
+    border-color: var(--navy);
+  }
+}
+
+@utility tag-category {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@utility tag-opinion {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--maroon);
+}
+
+/* ==========================================================================
+   Motion — quiet and purposeful
+   ========================================================================== */
+
+@keyframes esh-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes esh-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-rise {
+  animation: esh-rise 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@utility animate-ticker {
+  animation: esh-ticker 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

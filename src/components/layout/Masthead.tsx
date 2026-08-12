@@ -1,17 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import React from "react";
+import { WhiteLogo } from "@/components/layout/whiteLogo";
 
 export function Masthead() {
   return (
-    <div className="bg-navy text-background">
-      <div className="container-eshspeaks flex items-center justify-center py-6">
-        <Link href="/" className="tracking-tight text-3xl md:text-4xl" style={{ fontFamily: "var(--font-bodoni)" }}>
-          <span className="not-italic">EshSpeaks</span>
-        </Link>
+    <div className="hidden bg-navy md:block">
+      <div className="container-eshspeaks flex flex-col items-center gap-2 pb-6 pt-3">
+        <WhiteLogo size="md" inverted />
+        {/* <p className="kicker-muted text-text-inverse/55">
+          Nigerian journalism · Interviews · Opinion
+        </p> */}
       </div>
-      <div className="border-t border-navy-soft" />
+      <div className="container-eshspeaks">
+        <div className="border-b border-text-inverse/15" />
+      </div>
     </div>
   );
 }

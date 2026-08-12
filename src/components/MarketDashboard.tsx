@@ -24,7 +24,7 @@ function Sparkline({ seed }: { seed: number }) {
 }
 
 export function MarketDashboard() {
-  const live = useLiveMarket(marketSeed, 2500);
+  const { items: live } = useLiveMarket(marketSeed, 2500);
   const articles = bySubsegment("business-economy", "the-market");
 
   return (

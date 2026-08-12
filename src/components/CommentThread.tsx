@@ -77,7 +77,7 @@ export function CommentThread({ count }: { count: number }) {
               Sign in
             </Link>{" "}
             or{" "}
-            <Link href="/register" className="text-accent hover:underline">
+            <Link href="/login?mode=register" className="text-accent hover:underline">
               create an account
             </Link>
             .

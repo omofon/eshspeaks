@@ -16,15 +16,35 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/page.js"
     ],
+    "/api/markets/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/markets/route.js"
+    ],
+    "/(auth)/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(auth)/layout.js"
+    ],
+    "/(auth)/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(auth)/login/page.js"
+    ],
     "/(public)/[section]/[subsegment]/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/[section]/[subsegment]/[slug]/page.js"
     ],
-    "/(public)/account/page": [
+    "/(public)/[section]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(public)/account/page.js"
+      "static/chunks/app/(public)/[section]/page.js"
+    ],
+    "/(public)/pricing/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(public)/pricing/page.js"
     ]
   }
 }

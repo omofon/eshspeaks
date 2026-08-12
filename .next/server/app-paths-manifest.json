@@ -1,5 +1,6 @@
 {
+  "/api/markets/route": "app/api/markets/route.js",
   "/(public)/page": "app/(public)/page.js",
-  "/(public)/[section]/[subsegment]/[slug]/page": "app/(public)/[section]/[subsegment]/[slug]/page.js",
-  "/(public)/account/page": "app/(public)/account/page.js"
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(public)/pricing/page": "app/(public)/pricing/page.js"
 }

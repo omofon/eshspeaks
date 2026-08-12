@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Newsreader, Inter, IBM_Plex_Mono, Bodoni_Moda } from "next/font/google";
+import { CookieBanner } from "@/components/CookieBanner";
+import { CookieSettingsModal } from "@/components/CookieSettingsModal";
+import { AuthProvider } from "@/lib/auth";
+import { TierProvider } from "@/lib/tier";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -40,8 +44,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable} ${bodoni.variable}`}>
-        {children}
+      <body
+        className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable} ${bodoni.variable}`}
+      >
+        <AuthProvider>
+          <TierProvider>{children}</TierProvider>
+          <CookieBanner />
+          <CookieSettingsModal />
+        </AuthProvider>
       </body>
     </html>
   );

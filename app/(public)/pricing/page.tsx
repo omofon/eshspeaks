@@ -43,7 +43,7 @@ export default function PricingPage() {
           <li>• Early access to premium features and interviews</li>
         </ul>
         <Link
-          href="/register"
+          href="/login?mode=register"
           className="mt-8 inline-flex rounded-md bg-brand-navy px-5 py-3 text-sm font-semibold text-white hover:bg-brand-navy/90"
         >
           Create account

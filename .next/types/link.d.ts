@@ -34,11 +34,14 @@ declare namespace __next_route_internal_types__ {
   type StaticRoutes = 
     | `/`
     | `/account`
+    | `/api/markets`
     | `/login`
+    | `/not-found.tsx`
     | `/pricing`
-    | `/register`
     | `/search`
     | `/the-seat`
+    | `/username`
+    | `/verify`
   type DynamicRoutes<T extends string = string> = 
     | `/${SafeSlug<T>}`
     | `/${SafeSlug<T>}/${SafeSlug<T>}`
