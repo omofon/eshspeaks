@@ -24,6 +24,25 @@ export interface Comment {
   replies?: Omit<Comment, "replies">[];
 }
 
+export interface ArticleImage {
+  /** Path under /public, e.g. /images/news/politics/zoning-decision.jpg */
+  src: string;
+  /** Meaningful description of the scene. Required for accessibility. */
+  alt: string;
+  credit?: string;
+}
+
+interface LegacyComment {
+  id: string;
+  articleSlug: string;
+  author: string;
+  initials: string;
+  time: string;
+  body: string;
+  replies?: unknown;
+}
+export type { LegacyComment };
+
 export interface Article {
   slug: string;
   title: string;
@@ -35,6 +54,7 @@ export interface Article {
   date: string;
   readMinutes: number;
   premium: boolean;
+  image: ArticleImage;
   curatedFrom?: string;
   curatedUrl?: string;
   likes: number;

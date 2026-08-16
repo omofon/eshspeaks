@@ -91,6 +91,26 @@ const curatedSources: [string, string][] = [
   ["The Cable", "https://www.thecable.ng"],
 ];
 
+const sceneBySection: Record<string, string> = {
+  politics: "Lawmakers and party officials in session at the National Assembly complex in Abuja",
+  "business-economy": "Trading floor screens and analysts tracking the naira and equities in Lagos",
+  "security-watch": "Security personnel at a checkpoint on a rural highway in northern Nigeria",
+  "state-of-play": "A state government secretariat building with officials arriving for a briefing",
+  "energy-power": "Transmission pylons and a gas processing facility at dusk in the Niger Delta",
+  "law-judiciary": "Lawyers in robes on the steps of a Nigerian courthouse",
+  "foreign-diaspora": "Diplomats seated at a bilateral meeting table with national flags",
+  "tech-innovation": "Engineers working at laptops in a Lagos technology hub",
+};
+
+/** Editorial imagery lives in the data layer, never in JSX. */
+function imageFor(sectionSlug: string, baseTitle: string, sectionName: string): Article["image"] {
+  return {
+    src: `/images/news/${sectionSlug}/${slugify(baseTitle)}.jpg`,
+    alt: `${sceneBySection[sectionSlug] ?? sectionName}: ${baseTitle.toLowerCase()}`,
+    credit: "HPix",
+  };
+}
+
 function slugify(s: string) {
   return s
     .toLowerCase()
@@ -124,6 +144,7 @@ for (const section of sections) {
         date: `2026-07-${String(day).padStart(2, "0")}`,
         readMinutes: 3 + (counter % 6),
         premium,
+        image: imageFor(section.slug, title, section.name),
         ...(curated ? { curatedFrom: srcName, curatedUrl: srcUrl } : {}),
         likes: 12 + ((counter * 17) % 240),
         commentCount: 2 + ((counter * 5) % 31),

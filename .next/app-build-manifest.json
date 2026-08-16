@@ -11,6 +11,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/layout.js"
     ],
+    "/(public)/[section]/[subsegment]/[slug]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(public)/[section]/[subsegment]/[slug]/page.js"
+    ],
     "/(public)/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,20 +36,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/login/page.js"
     ],
-    "/(public)/[section]/[subsegment]/[slug]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(public)/[section]/[subsegment]/[slug]/page.js"
-    ],
     "/(public)/[section]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(public)/[section]/page.js"
-    ],
-    "/(public)/pricing/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(public)/pricing/page.js"
     ]
   }
 }

@@ -72,6 +72,12 @@
   --tint-society: #7a5a16;
   --tint-interviews: #c9541f;
 
+  --tint-stateofplay: #2f4b8f;
+  --tint-energy: #1e6b4f;
+  --tint-law: #6e1f2a;
+  --tint-foreign: #1f6b6b;
+  --tint-tech: #1e6b4f;
+
   /* --- Radius (restrained editorial geometry) --- */
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -173,6 +179,12 @@
   --color-tint-society: var(--tint-society);
   --color-tint-interviews: var(--tint-interviews);
 
+  --color-tint-stateofplay: var(--tint-stateofplay);
+  --color-tint-energy: var(--tint-energy);
+  --color-tint-law: var(--tint-law);
+  --color-tint-foreign: var(--tint-foreign);
+  --color-tint-tech: var(--tint-tech);
+
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
@@ -185,6 +197,8 @@
 
   --shadow-card: var(--shadow-card);
   --shadow-raised: var(--shadow-raised);
+
+  
 }
 
 @layer base {

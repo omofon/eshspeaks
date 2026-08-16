@@ -35,7 +35,7 @@ export default async function LoginPage({
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="font-semibold text-navy underline underline-offset-2 hover:text-accent"
+                className="font-semibold text-white underline underline-offset-2 hover:text-accent"
               >
                 Sign in
               </Link>
