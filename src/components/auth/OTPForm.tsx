@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ClipboardEvent,
-  type KeyboardEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { authService, AuthError } from "@/lib/authService";
+import { authService, AuthError } from "@/lib/auth/authService";
 
 const LENGTH = 6;
-const RESEND_SECONDS = 45;
+const RESEND_SECONDS = 60; // API allows one resend per minute per address
 
 export function maskEmail(email: string) {
   const [local, domain] = email.split("@");
@@ -21,17 +14,7 @@ export function maskEmail(email: string) {
   return `${head}${"*".repeat(Math.max(local.length - 2, 1))}@${domain}`;
 }
 
-export function OTPForm({
-  email,
-  returnTo,
-  action,
-  mode,
-}: {
-  email: string;
-  returnTo?: string;
-  action?: string;
-  mode?: "login" | "register";
-}) {
+export function OTPForm({ email, returnTo, action }: { email: string; returnTo?: string; action?: string }) {
   const router = useRouter();
   const [digits, setDigits] = useState<string[]>(Array(LENGTH).fill(""));
   const [status, setStatus] = useState<"idle" | "verifying" | "success">("idle");
@@ -55,29 +38,24 @@ export function OTPForm({
       setStatus("verifying");
       setError(null);
       try {
-        await authService.verifyOTP(email, code);
-        const user = await authService.getCurrentUser();
+        const session = await authService.verifyEmailCode(email, code, { returnTo, action });
         setStatus("success");
-        const needsUsername = !user.username && action === "comment";
-        if (needsUsername) {
+        const safeReturn = returnTo && returnTo.startsWith("/") ? returnTo : "/account";
+        if (session.onboardingRequired) {
           const params = new URLSearchParams();
           if (returnTo) params.set("returnTo", returnTo);
           if (action) params.set("action", action);
-          router.replace(`/username${params.size ? `?${params.toString()}` : ""}`);
+          const qs = params.toString();
+          router.replace(`/username${qs ? `?${qs}` : ""}`);
         } else {
-          const destination = returnTo && returnTo.startsWith("/") ? returnTo : "/account";
-          router.replace(destination as `/${string}`);
+          router.replace(safeReturn);
         }
       } catch (e) {
         setStatus("idle");
         setDigits(Array(LENGTH).fill(""));
         refs.current[0]?.focus();
-        if (e instanceof AuthError) {
-          if (e.kind === "expired_code") setError("That code has expired. Request a new one.");
-          else if (e.kind === "invalid_code")
-            setError("That code isn't right. Check it and try again.");
-          else setError(e.message);
-        } else setError("Something went wrong. Please try again.");
+        if (e instanceof AuthError) setError(e.message);
+        else setError("Something went wrong. Please try again.");
       }
     },
     [action, email, returnTo, router],
@@ -120,10 +98,15 @@ export function OTPForm({
     setResending(true);
     setError(null);
     try {
-      await authService.resendOTP(email);
+      await authService.resendEmailCode(email, { returnTo, action });
       setCountdown(RESEND_SECONDS);
     } catch (e) {
-      setError(e instanceof AuthError ? e.message : "Couldn't resend the code.");
+      if (e instanceof AuthError && e.kind === "rate_limited") {
+        setCountdown(e.retryAfter ?? RESEND_SECONDS);
+        setError("You can only request one code a minute.");
+      } else {
+        setError(e instanceof AuthError ? e.message : "Couldn't resend the code.");
+      }
     } finally {
       setResending(false);
     }
@@ -159,11 +142,7 @@ export function OTPForm({
         {error}
       </p>
       <p aria-live="polite" className="text-[13px] leading-5 text-text-secondary">
-        {status === "verifying"
-          ? "Verifying your code\u2026"
-          : status === "success"
-            ? "Verified. Taking you through\u2026"
-            : ""}
+        {status === "verifying" ? "Verifying your code\u2026" : status === "success" ? "Verified. Taking you through\u2026" : ""}
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
@@ -179,10 +158,7 @@ export function OTPForm({
             {resending ? "Sending\u2026" : "Resend code"}
           </button>
         )}
-        <a
-          href={`/login${mode === "register" ? "?mode=register" : ""}`}
-          className="text-text-secondary underline underline-offset-2 hover:text-navy"
-        >
+        <a href="/register" className="text-text-secondary underline underline-offset-2 hover:text-navy">
           Use a different email
         </a>
       </div>

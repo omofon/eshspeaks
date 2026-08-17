@@ -1,7 +1,5 @@
 {
   "/api/markets/route": "app/api/markets/route.js",
-  "/_not-found/page": "app/_not-found/page.js",
   "/(public)/page": "app/(public)/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(public)/[section]/page": "app/(public)/[section]/page.js"
+  "/(auth)/login/page": "app/(auth)/login/page.js"
 }

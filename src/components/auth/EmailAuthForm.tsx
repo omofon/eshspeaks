@@ -2,19 +2,11 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { authService, AuthError, isValidEmail } from "@/lib/authService";
+import { authService, AuthError, isValidEmail } from "@/lib/auth/authService";
 
 type Mode = "register" | "login";
 
-export function EmailAuthForm({
-  mode,
-  returnTo,
-  action,
-}: {
-  mode: Mode;
-  returnTo?: string;
-  action?: string;
-}) {
+export function EmailAuthForm({ mode, returnTo, action }: { mode: Mode; returnTo?: string; action?: string }) {
   const router = useRouter();
   const inputId = useId();
   const errorId = `${inputId}-error`;
@@ -22,9 +14,7 @@ export function EmailAuthForm({
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");
-  const [error, setError] = useState<{ message: string; hint?: "sign-in" | "register" } | null>(
-    null,
-  );
+  const [error, setError] = useState<{ message: string; hint?: "sign-in" | "register" } | null>(null);
 
   const trimmed = email.trim();
   const showInvalid = touched && trimmed.length > 0 && !isValidEmail(trimmed);
@@ -38,22 +28,23 @@ export function EmailAuthForm({
     setError(null);
     setStatus("loading");
     try {
-      if (mode === "register") await authService.registerWithEmail(trimmed);
-      else await authService.loginWithEmail(trimmed);
+      // Enumeration-safe: the API returns 200 whether or not the account exists.
+      await authService.requestEmailCode(trimmed, { returnTo, action });
 
       setStatus("sent");
       const params = new URLSearchParams({ email: trimmed });
       if (returnTo) params.set("returnTo", returnTo);
       if (action) params.set("action", action);
-      if (mode) params.set("mode", mode);
       router.push(`/verify?${params.toString()}`);
     } catch (e) {
       setStatus("idle");
       if (e instanceof AuthError) {
-        if (e.kind === "already_registered") {
-          setError({ message: "An EshSpeaks account already uses this email.", hint: "sign-in" });
-        } else if (e.kind === "not_found") {
-          setError({ message: "We couldn't find an account for that email.", hint: "register" });
+        if (e.kind === "rate_limited") {
+          setError({
+            message: e.retryAfter
+              ? `Too many requests. Try again in ${e.retryAfter}s.`
+              : "Too many requests. Wait a minute and try again.",
+          });
         } else {
           setError({ message: e.message });
         }
@@ -66,10 +57,7 @@ export function EmailAuthForm({
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <div>
-        <label
-          htmlFor={inputId}
-          className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary"
-        >
+        <label htmlFor={inputId} className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary">
           Continue with email
         </label>
         <input
@@ -105,7 +93,7 @@ export function EmailAuthForm({
               </a>
             ) : null}
             {error.hint === "register" ? (
-              <a href="/login?mode=register" className="font-semibold underline underline-offset-2">
+              <a href="/register" className="font-semibold underline underline-offset-2">
                 Create an account
               </a>
             ) : null}

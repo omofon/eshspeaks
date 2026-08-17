@@ -2265,9 +2265,6 @@
   .text-primary-foreground {
     color: var(--text-inverse);
   }
-  .text-success {
-    color: var(--success);
-  }
   .text-text-inverse {
     color: var(--text-inverse);
   }
@@ -2809,6 +2806,9 @@
     .hover\:bg-accent:hover {
       background-color: var(--accent);
     }
+    .hover\:bg-background-soft:hover {
+      background-color: var(--background-soft);
+    }
     .hover\:bg-brand-navy\/90:hover {
       background-color: var(--navy);
     }
@@ -2836,9 +2836,6 @@
     }
     .hover\:bg-navy-soft:hover {
       background-color: var(--navy-soft);
-    }
-    .hover\:bg-navy-tint:hover {
-      background-color: var(--navy-tint);
     }
     .hover\:bg-primary\/80:hover {
       background-color: var(--navy);
@@ -2994,6 +2991,9 @@
   }
   .aria-disabled\:pointer-events-none[aria-disabled="true"] {
     pointer-events: none;
+  }
+  .aria-disabled\:cursor-not-allowed[aria-disabled="true"] {
+    cursor: not-allowed;
   }
   .aria-disabled\:opacity-50[aria-disabled="true"] {
     opacity: 50%;
