@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Newsreader, Inter, IBM_Plex_Mono, Bodoni_Moda } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
 import { CookieSettingsModal } from "@/components/CookieSettingsModal";
-import { AuthProvider } from "@/lib/auth";
 import { TierProvider } from "@/lib/tier";
 import "./globals.css";
+
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -47,11 +47,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable} ${bodoni.variable}`}
       >
-        <AuthProvider>
-          <TierProvider>{children}</TierProvider>
-          <CookieBanner />
-          <CookieSettingsModal />
-        </AuthProvider>
+        <TierProvider>{children}</TierProvider>
+        <CookieBanner />
+        <CookieSettingsModal />
       </body>
     </html>
   );

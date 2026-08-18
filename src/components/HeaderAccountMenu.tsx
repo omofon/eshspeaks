@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUserRound, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { CircleUserRound, LogOut, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/lib/auth";
+import { useSession } from "@/lib/auth/useSession";
 
 export function HeaderAccountMenu() {
-  const { user, isAuthenticated, signOut } = useAuth();
-
-  const label = user ? user.name.split(" ")[0] : "Account";
+  const { user, status, signOut } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const label = user?.displayName ?? user?.username ?? "Account";
 
   return (
     <DropdownMenu>
@@ -37,33 +37,15 @@ export function HeaderAccountMenu() {
           <>
             <DropdownMenuLabel className="px-2 pb-2 pt-1">
               <div className="space-y-1">
-                <p className="text-base font-semibold text-brand-navy">{user.name}</p>
+                <p className="text-base font-semibold text-brand-navy">{label}</p>
                 <p className="text-sm text-text-secondary">{user.email}</p>
-                {user.subscription === "premium" ? (
-                  <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-orange">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    Premium member
-                  </p>
-                ) : null}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/account" className="flex w-full cursor-pointer items-center gap-2">
                 <UserRound className="h-4 w-4" />
-                View profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/account" className="flex w-full cursor-pointer items-center gap-2">
-                <UserRound className="h-4 w-4" />
                 Manage account
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/pricing" className="flex w-full cursor-pointer items-center gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                Manage subscription
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -74,7 +56,7 @@ export function HeaderAccountMenu() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={signOut}
+              onClick={() => void signOut()}
               className="flex cursor-pointer items-center gap-2 text-brand-navy"
             >
               <LogOut className="h-4 w-4" />

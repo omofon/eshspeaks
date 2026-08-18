@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { authService, AuthError } from "@/lib/auth/authService";
 
 const LENGTH = 6;
-const RESEND_SECONDS = 60; // API allows one resend per minute per address
+const RESEND_SECONDS = 60;
 
 export function maskEmail(email: string) {
   const [local, domain] = email.split("@");
@@ -14,7 +14,18 @@ export function maskEmail(email: string) {
   return `${head}${"*".repeat(Math.max(local.length - 2, 1))}@${domain}`;
 }
 
-export function OTPForm({ email, returnTo, action }: { email: string; returnTo?: string; action?: string }) {
+export function OTPForm({
+  email,
+  returnTo,
+  action,
+  mode = "login",
+}: {
+  email: string;
+  returnTo?: string;
+  action?: string;
+  /** Determines where "Use a different email" sends the user back to. */
+  mode?: "login" | "register";
+}) {
   const router = useRouter();
   const [digits, setDigits] = useState<string[]>(Array(LENGTH).fill(""));
   const [status, setStatus] = useState<"idle" | "verifying" | "success">("idle");
@@ -114,6 +125,18 @@ export function OTPForm({ email, returnTo, action }: { email: string; returnTo?:
 
   const disabled = status !== "idle";
 
+  // "Use a different email" must return to /login (there is no /register
+  // route — registration is /login?mode=register), and should preserve
+  // returnTo/action so the user doesn't lose their original destination.
+  const differentEmailHref = (() => {
+    const params = new URLSearchParams();
+    if (mode === "register") params.set("mode", "register");
+    if (returnTo) params.set("returnTo", returnTo);
+    if (action) params.set("action", action);
+    const qs = params.toString();
+    return `/login${qs ? `?${qs}` : ""}`;
+  })();
+
   return (
     <div>
       <div className="flex justify-between gap-2" onPaste={onPaste}>
@@ -158,7 +181,7 @@ export function OTPForm({ email, returnTo, action }: { email: string; returnTo?:
             {resending ? "Sending\u2026" : "Resend code"}
           </button>
         )}
-        <a href="/register" className="text-text-secondary underline underline-offset-2 hover:text-navy">
+        <a href={differentEmailHref} className="text-text-secondary underline underline-offset-2 hover:text-navy">
           Use a different email
         </a>
       </div>
