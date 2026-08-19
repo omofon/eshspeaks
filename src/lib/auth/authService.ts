@@ -1,15 +1,3 @@
-/**
- * EshSpeaks auth client — wired to the live API (/api/v1).
- *
- * Endpoints used:
- *   POST /auth/email/request   -> always 200 (enumeration-safe), 429 when rate limited
- *   POST /auth/email/verify    -> session + { onboarding: { required } }
- *   GET  /auth/google          -> navigate (302), never fetch
- *   POST /auth/refresh         -> rotates the token pair
- *   POST /auth/logout          -> idempotent
- *   GET  /auth/me              -> fresh account read
- *   POST /users/me/username    -> completes onboarding
- */
 import { API_BASE_URL } from "./config";
 
 export type AuthErrorKind =

@@ -2,6 +2,10 @@ import Link from "next/link";
 import type { Article, Section } from "@/lib/data/types";
 import { getSection } from "@/lib/data/sections";
 
+export function articleHref(article: Article) {
+  return `/${article.section}/${article.subsegment}/${article.slug}`;
+}
+
 export function SectionBadge({ section }: { section: Section }) {
   return (
     <span className="inline-flex rounded-md border border-border bg-brand-orange-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
@@ -18,63 +22,179 @@ export function PremiumBadge() {
   );
 }
 
-function Meta({ article }: { article: Article }) {
+export function OpinionBadge() {
+  return (
+    <span className="inline-flex rounded-md border border-brand-navy/15 bg-background-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-navy">
+      Opinion
+    </span>
+  );
+}
+
+function Meta({ article, short = false }: { article: Article; short?: boolean }) {
   return (
     <p className="text-sm text-text-secondary">
-      {article.byline} · {article.location} · {article.readMinutes} min read
+      {short ? null : `${article.byline} · ${article.location} · `}
+      {article.readMinutes} min read
     </p>
   );
 }
 
-export function FeaturedCard({ article }: { article: Article }) {
+/** Shared media frame. Ratio is caller-controlled so hierarchy stays intentional. */
+export function ArticleMedia({
+  article,
+  ratio = "aspect-[16/9]",
+  priority = false,
+  showPremium = true,
+}: {
+  article: Article;
+  ratio?: string;
+  priority?: boolean;
+  showPremium?: boolean;
+}) {
+  if (!article.image) return null;
+  return (
+    <div className={`relative ${ratio} w-full overflow-hidden rounded-sm bg-muted`}>
+      <img
+        src={article.image.src}
+        alt={article.image.alt}
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading={priority ? "eager" : "lazy"}
+      />
+      {showPremium && article.premium ? (
+        <span className="absolute right-2 top-2">
+          <PremiumBadge />
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+export function FeaturedCard({
+  article,
+  ratio = "aspect-[16/9]",
+}: {
+  article: Article;
+  ratio?: string;
+}) {
   const section = getSection(article.section);
 
   return (
-    <article className="border-b border-border pb-8">
+    <article className="group flex flex-col gap-4 border-b border-border pb-8">
+      <Link href={articleHref(article)} className="block">
+        <ArticleMedia article={article} ratio={ratio} priority />
+      </Link>
       <div className="flex flex-wrap items-center gap-2">
         {section ? <SectionBadge section={section} /> : null}
-        {article.premium ? <PremiumBadge /> : null}
       </div>
-      <Link
-        href={`/${article.section}/${article.subsegment}/${article.slug}`}
-        className="group mt-4 block"
-      >
-        <h2 className="font-serif text-3xl leading-[1.04] text-brand-navy transition-colors group-hover:text-brand-orange sm:text-4xl">
+      <Link href={articleHref(article)} className="block">
+        <h2 className="font-serif text-3xl font-bold leading-[1.04] text-brand-navy transition-colors group-hover:text-brand-orange sm:text-4xl lg:text-5xl">
           {article.title}
         </h2>
       </Link>
-      <p className="mt-4 max-w-2xl text-base leading-7 text-text-secondary">{article.dek}</p>
-      <div className="mt-4">
-        <Meta article={article} />
-      </div>
+      <p className="line-clamp-3 max-w-2xl text-base leading-7 text-text-secondary">
+        {article.dek}
+      </p>
+      <Meta article={article} />
     </article>
   );
 }
 
-export function ListCard({ article, compact = false }: { article: Article; compact?: boolean }) {
+export function ListCard({
+  article,
+  compact = false,
+  withImage = true,
+  ratio = "aspect-[4/3]",
+}: {
+  article: Article;
+  compact?: boolean;
+  withImage?: boolean;
+  ratio?: string;
+}) {
   const section = getSection(article.section);
 
   return (
-    <article className="border-b border-border pb-5">
+    <article className="group flex flex-col gap-3 border-b border-border pb-5">
+      {withImage ? (
+        <Link href={articleHref(article)} className="block">
+          <ArticleMedia article={article} ratio={ratio} />
+        </Link>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         {section ? <SectionBadge section={section} /> : null}
-        {article.premium ? <PremiumBadge /> : null}
+        {!withImage && article.premium ? <PremiumBadge /> : null}
       </div>
-      <Link
-        href={`/${article.section}/${article.subsegment}/${article.slug}`}
-        className="group mt-3 block"
-      >
+      <Link href={articleHref(article)} className="block">
         <h3
-          className={`font-serif leading-[1.08] text-brand-navy transition-colors group-hover:text-brand-orange ${compact ? "text-xl" : "text-2xl"}`}
+          className={`font-serif font-bold leading-[1.1] text-brand-navy transition-colors group-hover:text-brand-orange ${
+            compact ? "text-lg" : "text-2xl"
+          }`}
         >
           {article.title}
         </h3>
       </Link>
       {!compact ? (
-        <p className="mt-3 text-sm leading-7 text-text-secondary">{article.dek}</p>
+        <p className="line-clamp-2 text-sm leading-6 text-text-secondary">{article.dek}</p>
       ) : null}
-      <div className="mt-3">
-        <Meta article={article} />
+      <Meta article={article} short={compact} />
+    </article>
+  );
+}
+
+/** Compact horizontal card: thumbnail beside the headline. */
+export function HorizontalCard({ article }: { article: Article }) {
+  const section = getSection(article.section);
+
+  return (
+    <article className="group grid grid-cols-[minmax(0,1fr)_96px] items-start gap-4 border-b border-border py-4 sm:grid-cols-[minmax(0,1fr)_140px]">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          {section ? <SectionBadge section={section} /> : null}
+          {article.premium ? <PremiumBadge /> : null}
+        </div>
+        <Link href={articleHref(article)} className="mt-2 block">
+          <h3 className="font-serif text-lg font-bold leading-[1.15] text-brand-navy transition-colors group-hover:text-brand-orange sm:text-xl">
+            {article.title}
+          </h3>
+        </Link>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-text-secondary">{article.dek}</p>
+        <div className="mt-2">
+          <Meta article={article} />
+        </div>
+      </div>
+      <Link href={articleHref(article)} className="block shrink-0">
+        <ArticleMedia article={article} ratio="aspect-square" showPremium={false} />
+      </Link>
+    </article>
+  );
+}
+
+/** Opinion rail entry: author avatar plus an italic excerpt. */
+export function OpinionCard({ article }: { article: Article }) {
+  const initials = article.byline
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <article className="group border-b border-border pb-4 last:border-0">
+      <OpinionBadge />
+      <Link href={articleHref(article)} className="mt-3 block">
+        <h3 className="font-serif text-lg font-bold leading-[1.15] text-brand-navy transition-colors group-hover:text-brand-orange">
+          {article.title}
+        </h3>
+      </Link>
+      <p className="mt-2 line-clamp-2 font-serif text-sm italic leading-6 text-text-secondary">
+        “{article.pullQuote ?? article.dek}”
+      </p>
+      <div className="mt-3 flex items-center gap-2">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-navy text-[10px] font-semibold tracking-wide text-white">
+          {initials}
+        </span>
+        <span className="min-w-0 truncate text-xs uppercase tracking-[0.18em] text-text-secondary">
+          {article.byline}
+        </span>
       </div>
     </article>
   );
@@ -84,25 +204,25 @@ export function CuratedCard({ article }: { article: Article }) {
   const section = getSection(article.section);
 
   return (
-    <article className="rounded-lg border border-border bg-background-soft p-5">
+    <article className="group flex flex-col gap-3 rounded-lg border border-border bg-background-soft p-5">
+      <Link href={articleHref(article)} className="block">
+        <ArticleMedia article={article} ratio="aspect-[16/9]" />
+      </Link>
       <div className="flex flex-wrap items-center gap-2">
         {section ? <SectionBadge section={section} /> : null}
       </div>
-      <Link
-        href={`/${article.section}/${article.subsegment}/${article.slug}`}
-        className="group mt-4 block"
-      >
-        <h3 className="font-serif text-xl leading-[1.1] text-brand-navy transition-colors group-hover:text-brand-orange">
+      <Link href={articleHref(article)} className="block">
+        <h3 className="font-serif text-xl font-bold leading-[1.1] text-brand-navy transition-colors group-hover:text-brand-orange">
           {article.title}
         </h3>
       </Link>
-      <p className="mt-3 text-sm leading-7 text-text-secondary">{article.dek}</p>
+      <p className="line-clamp-2 text-sm leading-6 text-text-secondary">{article.dek}</p>
       {article.curatedFrom ? (
         <a
           href={article.curatedUrl ?? "#"}
           target="_blank"
           rel="noreferrer"
-          className="mt-4 inline-flex text-sm font-semibold text-brand-orange hover:underline"
+          className="inline-flex text-sm font-semibold text-brand-orange hover:underline"
         >
           {article.curatedFrom}
         </a>

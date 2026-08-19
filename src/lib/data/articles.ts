@@ -187,3 +187,54 @@ export function searchArticles(query: string, section?: string) {
     );
   });
 }
+
+/* ------------------------------------------------------------------ *
+ * Homepage editorial selections (Sprint 2)
+ * ------------------------------------------------------------------ */
+
+/** "The Seat" — executive desk of the Chief Administrator. */
+export const theSeat: Article = {
+  slug: "the-seat-what-the-desk-is-watching-this-week",
+  title: "What this desk is watching as the fiscal year turns",
+  dek: "The Chief Administrator on the three decisions that will shape Nigerian public life before December, and why the paperwork rarely tells you which one matters.",
+  section: "politics",
+  subsegment: "party-politics",
+  byline: "Esh, Chief Administrator",
+  location: "Abuja",
+  date: "2026-08-18",
+  readMinutes: 6,
+  premium: true,
+  image: {
+    src: "/images/news/the-seat/executive-desk.jpg",
+    alt: "The Chief Administrator at the editorial desk in the EshSpeaks newsroom",
+    credit: "EshSpeaks",
+  },
+  likes: 412,
+  commentCount: 38,
+  body: bodyA("the executive agenda"),
+  pullQuote: "Institutions do not fail loudly. They fail on schedule.",
+};
+
+/** Two stories that sit directly under the lead. */
+export const topNews = allArticles.filter((a) => a.slug !== leadStory.slug).slice(0, 2);
+
+/** Opinion / editor's pick rail. */
+export const editorsPicks = allArticles
+  .filter((a) => a.slug !== leadStory.slug && !topNews.some((t) => t.slug === a.slug))
+  .slice(2, 6);
+
+/** Horizontal spotlight strip. */
+export const spotlight = allArticles
+  .filter((a) => a.premium && a.slug !== leadStory.slug)
+  .slice(0, 4);
+
+/** General news feed for the two-column middle block. */
+export const generalNews = allArticles
+  .filter((a) => a.slug !== leadStory.slug)
+  .slice(8, 14);
+
+/** Most read, five entries with interaction metrics. */
+export const mostRead = allArticles
+  .slice()
+  .sort((a, b) => b.likes + b.commentCount * 3 - (a.likes + a.commentCount * 3))
+  .slice(0, 5);
