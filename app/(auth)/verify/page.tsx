@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
-import OTPForm, { maskEmail } from "@/components/auth/OTPForm";
+import { maskEmail } from "@/lib/auth/maskEmail";
+import OTPForm from "@/components/auth/OTPForm";
 
 export const metadata = {
   title: "Check your email",

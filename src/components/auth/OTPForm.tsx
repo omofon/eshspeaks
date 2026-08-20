@@ -3,16 +3,10 @@
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authService, AuthError } from "@/lib/auth/authService";
+export { maskEmail } from "@/lib/auth/maskEmail";
 
 const LENGTH = 6;
 const RESEND_SECONDS = 60;
-
-export function maskEmail(email: string) {
-  const [local, domain] = email.split("@");
-  if (!local || !domain) return email;
-  const head = local.slice(0, 2);
-  return `${head}${"*".repeat(Math.max(local.length - 2, 1))}@${domain}`;
-}
 
 export function OTPForm({
   email,
