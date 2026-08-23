@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authService, AuthError } from "@/lib/auth/authService";
+import { getSafeReturnTo } from "@/lib/auth/returnTo";
 export { maskEmail } from "@/lib/auth/maskEmail";
 
 const LENGTH = 6;
@@ -42,18 +43,23 @@ export function OTPForm({
     async (code: string) => {
       setStatus("verifying");
       setError(null);
+      // SECURITY: this used to be `returnTo && returnTo.startsWith("/") ? returnTo : "/account"`,
+      // which treats "//evil.com" as a valid internal path (it does start
+      // with "/") and would redirect an authenticated user off-domain.
+      // getSafeReturnTo closes that and — per spec — falls back to "/",
+      // not "/account".
+      const safeReturnTo = getSafeReturnTo(returnTo);
       try {
-        const session = await authService.verifyEmailCode(email, code, { returnTo, action });
+        const session = await authService.verifyEmailCode(email, code, { returnTo: safeReturnTo, action });
         setStatus("success");
-        const safeReturn = returnTo && returnTo.startsWith("/") ? returnTo : "/account";
         if (session.onboardingRequired) {
           const params = new URLSearchParams();
-          if (returnTo) params.set("returnTo", returnTo);
+          if (safeReturnTo !== "/") params.set("returnTo", safeReturnTo);
           if (action) params.set("action", action);
           const qs = params.toString();
           router.replace(`/username${qs ? `?${qs}` : ""}`);
         } else {
-          router.replace(safeReturn);
+          router.replace(safeReturnTo);
         }
       } catch (e) {
         setStatus("idle");
@@ -103,7 +109,7 @@ export function OTPForm({
     setResending(true);
     setError(null);
     try {
-      await authService.resendEmailCode(email, { returnTo, action });
+      await authService.resendEmailCode(email, { returnTo: getSafeReturnTo(returnTo), action });
       setCountdown(RESEND_SECONDS);
     } catch (e) {
       if (e instanceof AuthError && e.kind === "rate_limited") {
@@ -125,7 +131,8 @@ export function OTPForm({
   const differentEmailHref = (() => {
     const params = new URLSearchParams();
     if (mode === "register") params.set("mode", "register");
-    if (returnTo) params.set("returnTo", returnTo);
+    const safeReturnTo = getSafeReturnTo(returnTo);
+    if (safeReturnTo !== "/") params.set("returnTo", safeReturnTo);
     if (action) params.set("action", action);
     const qs = params.toString();
     return `/login${qs ? `?${qs}` : ""}`;

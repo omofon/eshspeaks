@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
 import { maskEmail } from "@/lib/auth/maskEmail";
 import OTPForm from "@/components/auth/OTPForm";
+import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
 export const metadata = {
   title: "Check your email",
@@ -16,14 +17,28 @@ export default async function VerifyPage({
   searchParams: Promise<{ email?: string; returnTo?: string; action?: string; mode?: string }>;
 }) {
   const params = await searchParams;
-  const { email, returnTo, action, mode } = params;
+  const { email, action, mode } = params;
   const authMode = mode === "register" ? "register" : "login";
   if (!email) redirect(`/login${authMode === "register" ? "?mode=register" : ""}`);
+
+  // /verify is directly reachable by URL, so we can't trust that returnTo
+  // arrived here via the login page's validation — normalize again.
+  const safeReturnTo = getSafeReturnTo(params.returnTo);
+
   const otpProps = {
-    ...(returnTo !== undefined ? { returnTo } : {}),
+    returnTo: safeReturnTo,
     ...(action !== undefined ? { action } : {}),
     mode: authMode,
-  } satisfies { returnTo?: string; action?: string; mode: "login" | "register" };
+  } satisfies { returnTo: string; action?: string; mode: "login" | "register" };
+
+  const startOverHref = (() => {
+    const qs = new URLSearchParams();
+    if (authMode === "register") qs.set("mode", "register");
+    if (safeReturnTo !== "/") qs.set("returnTo", safeReturnTo);
+    if (action) qs.set("action", action);
+    const s = qs.toString();
+    return `/login${s ? `?${s}` : ""}`;
+  })();
 
   return (
     <AuthShell
@@ -39,7 +54,7 @@ export default async function VerifyPage({
         <p className="text-center text-[13px] text-text-secondary">
           Wrong address?{" "}
           <Link
-            href={`/login${authMode === "register" ? "?mode=register" : ""}`}
+            href={startOverHref}
             className="font-semibold text-navy underline underline-offset-2 hover:text-accent"
           >
             Start over

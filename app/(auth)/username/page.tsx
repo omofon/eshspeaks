@@ -1,5 +1,6 @@
 import AuthShell from "@/components/auth/AuthShell";
 import UsernameForm from "@/components/auth/UsernameForm";
+import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
 export const metadata = {
   title: "Choose your username",
@@ -12,7 +13,10 @@ export default async function UsernamePage({
   searchParams: Promise<{ returnTo?: string; action?: string }>;
 }) {
   const params = await searchParams;
-  const { returnTo } = params;
+
+  // Also directly reachable by URL — normalize here too rather than trust
+  // that it was already validated upstream.
+  const safeReturnTo = getSafeReturnTo(params.returnTo);
 
   return (
     <AuthShell
@@ -20,7 +24,7 @@ export default async function UsernamePage({
       title="Choose your username"
       description="This is the name other readers will see when you comment on EshSpeaks."
     >
-      {returnTo ? <UsernameForm returnTo={returnTo} /> : <UsernameForm />}
+      <UsernameForm returnTo={safeReturnTo} />
     </AuthShell>
   );
 }

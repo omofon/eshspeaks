@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "./config";
+import { getSafeReturnTo } from "./returnTo";
 
 export type AuthErrorKind =
   | "network"
@@ -181,11 +182,18 @@ async function tryRefresh(): Promise<boolean> {
 }
 
 /* ------------------------------------------------------------------- OAuth */
-/** Google sign-in is a full-page navigation — never fetch this endpoint. */
+/**
+ * Google sign-in is a full-page navigation — never fetch this endpoint.
+ *
+ * SECURITY: returnTo is validated here too (not just by the caller). This
+ * function builds the URL the browser actually navigates the user's
+ * cookies/session to, so it's the last line of defense — it always emits a
+ * safe, non-empty returnTo, never the raw query param.
+ */
 export function googleAuthUrl(returnTo?: string, action?: string) {
   if (!API_BASE_URL) throw new AuthError("server", "Authentication service is not configured.");
   const url = new URL(`${API_BASE_URL}${API_PREFIX}/auth/google`);
-  if (returnTo) url.searchParams.set("returnTo", returnTo);
+  url.searchParams.set("returnTo", getSafeReturnTo(returnTo));
   if (action) url.searchParams.set("action", action);
   return url.toString();
 }

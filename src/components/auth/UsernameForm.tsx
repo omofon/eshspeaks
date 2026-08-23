@@ -3,6 +3,7 @@
 import { useId, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authService, AuthError, validateUsername } from "@/lib/auth/authService";
+import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
 /**
  * The API has no availability probe — POST /users/me/username is the single
@@ -30,7 +31,10 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
     setServerError(null);
     try {
       await authService.setUsername(value);
-      router.replace(returnTo && returnTo.startsWith("/") ? returnTo : "/account");
+      // SECURITY: this used to fall back to "/account" via a naive
+      // `startsWith("/")` check that let "//evil.com" through. Per spec the
+      // fallback is always "/", enforced centrally by getSafeReturnTo.
+      router.replace(getSafeReturnTo(returnTo));
     } catch (e) {
       setSaving(false);
       if (e instanceof AuthError) {

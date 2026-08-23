@@ -4,6 +4,7 @@ import AuthShell from "@/components/auth/AuthShell";
 import AuthDivider from "@/components/auth/AuthDivider";
 import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
 import EmailAuthForm from "@/components/auth/EmailAuthForm";
+import { getSafeReturnTo, buildContinuationQuery } from "@/lib/auth/returnTo";
 
 export const metadata = {
   title: "Sign in to EshSpeaks",
@@ -16,12 +17,23 @@ export default async function LoginPage({
   searchParams: Promise<{ returnTo?: string; action?: string; mode?: string }>;
 }) {
   const params = await searchParams;
-  const { returnTo, action, mode } = params;
+  const { action, mode } = params;
+
+  // Normalize once, at the entry point, and use safeReturnTo for
+  // everything from here down — never the raw searchParams value.
+  const safeReturnTo = getSafeReturnTo(params.returnTo);
   const isRegister = mode === "register";
-  const emailProps = {
-    ...(returnTo !== undefined ? { returnTo } : {}),
+
+  const continuation = {
+    returnTo: safeReturnTo,
     ...(action !== undefined ? { action } : {}),
-  } satisfies { returnTo?: string; action?: string };
+  } satisfies { returnTo: string; action?: string };
+
+  // Preserve returnTo/action when the user toggles between sign-in and
+  // create-account — previously these links dropped the destination.
+  const toggleModeHref = isRegister
+    ? `/login${buildContinuationQuery({ returnTo: safeReturnTo, action })}`
+    : `/login?mode=register${buildContinuationQuery({ returnTo: safeReturnTo, action }).replace("?", "&")}`;
 
   return (
     <AuthShell
@@ -34,7 +46,7 @@ export default async function LoginPage({
             <>
               Already have an account?{" "}
               <Link
-                href="/login"
+                href={toggleModeHref}
                 className="font-semibold text-white underline underline-offset-2 hover:text-accent"
               >
                 Sign in
@@ -44,7 +56,7 @@ export default async function LoginPage({
             <>
               New to EshSpeaks?{" "}
               <Link
-                href="/login?mode=register"
+                href={toggleModeHref}
                 className="font-semibold text-white underline underline-offset-2 hover:text-accent"
               >
                 Create an account
@@ -54,10 +66,12 @@ export default async function LoginPage({
         </p>
       }
     >
-      {returnTo ? <SocialAuthButtons returnTo={returnTo} /> : <SocialAuthButtons />}
+      {/* Previously only returnTo was forwarded here, silently dropping
+          `action` for Google sign-in. Both are always passed now. */}
+      <SocialAuthButtons {...continuation} />
       <AuthDivider />
       <Suspense>
-        <EmailAuthForm mode={isRegister ? "register" : "login"} {...emailProps} />
+        <EmailAuthForm mode={isRegister ? "register" : "login"} {...continuation} />
       </Suspense>
 
       <p className="mt-6 text-[12px] leading-5 text-text-muted">

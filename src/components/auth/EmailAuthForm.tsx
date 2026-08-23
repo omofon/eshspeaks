@@ -3,6 +3,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authService, AuthError, isValidEmail } from "@/lib/auth/authService";
+import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
 type Mode = "register" | "login";
 
@@ -28,12 +29,15 @@ export function EmailAuthForm({ mode, returnTo, action }: { mode: Mode; returnTo
     setError(null);
     setStatus("loading");
     try {
+      // Normalize once, use everywhere below — never forward the raw prop.
+      const safeReturnTo = getSafeReturnTo(returnTo);
+
       // Enumeration-safe: the API returns 200 whether or not the account exists.
-      await authService.requestEmailCode(trimmed, { returnTo, action });
+      await authService.requestEmailCode(trimmed, { returnTo: safeReturnTo, action });
 
       setStatus("sent");
       const params = new URLSearchParams({ email: trimmed });
-      if (returnTo) params.set("returnTo", returnTo);
+      if (safeReturnTo !== "/") params.set("returnTo", safeReturnTo);
       if (action) params.set("action", action);
       router.push(`/verify?${params.toString()}`);
     } catch (e) {

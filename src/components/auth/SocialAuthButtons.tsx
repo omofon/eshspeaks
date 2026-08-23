@@ -5,6 +5,11 @@ import { authService } from "@/lib/auth/authService";
 /**
  * Google sign-in is a full-page navigation to GET /api/v1/auth/google.
  * It must never be fetched — the endpoint 302s to Google.
+ *
+ * returnTo is validated inside authService.googleAuthUrl (which always
+ * emits a safe value, defaulting to "/"), so this component never needs to
+ * sanitize it itself — but it also never passes the raw prop straight to
+ * window.location without going through that function.
  */
 export function SocialAuthButtons({ returnTo, action }: { returnTo?: string; action?: string }) {
   const href = (() => {
