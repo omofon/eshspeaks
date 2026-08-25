@@ -1,5 +1,7 @@
 import { API_BASE_URL } from "./config";
 import { getSafeReturnTo } from "./returnTo";
+import { tokenStore } from "./tokenStore";
+import type { CurrentUser, VerifyResult } from "./types";
 
 export type AuthErrorKind =
   | "network"
@@ -19,7 +21,6 @@ export class AuthError extends Error {
   kind: AuthErrorKind;
   status?: number;
   code?: string;
-  /** seconds to wait, when the API supplies Retry-After */
   retryAfter?: number;
   constructor(kind: AuthErrorKind, message: string, opts: { status?: number; code?: string; retryAfter?: number } = {}) {
     super(message);
@@ -31,47 +32,25 @@ export class AuthError extends Error {
   }
 }
 
-export type CurrentUser = {
-  id: string;
-  email: string;
-  username: string | null;
-  displayName?: string | null;
-  avatarUrl?: string | null;
-  createdAt?: string;
-};
+export type { CurrentUser };
 
 export type AuthSession = {
   user: CurrentUser;
-  accessToken?: string;
-  refreshToken?: string;
-  /** true when the account still needs to pick a username */
+  accessToken: string;
+  refreshToken: string;
   onboardingRequired: boolean;
+  onboardingStep?: string;
 };
 
 const API_PREFIX = "/api/v1";
-const ACCESS_KEY = "esh.accessToken";
-const REFRESH_KEY = "esh.refreshToken";
 
-/* ------------------------------------------------------------------ tokens */
-/**
- * The API sets HttpOnly session cookies for browsers; tokens are only kept
- * here as a fallback for clients that receive them in the JSON body
- * (e.g. cross-origin API host without cookie support).
- */
-export const tokenStore = {
-  access: () => (typeof window === "undefined" ? null : window.localStorage.getItem(ACCESS_KEY)),
-  refresh: () => (typeof window === "undefined" ? null : window.localStorage.getItem(REFRESH_KEY)),
-  set(tokens: { accessToken?: string | null; refreshToken?: string | null }) {
-    if (typeof window === "undefined") return;
-    if (tokens.accessToken) window.localStorage.setItem(ACCESS_KEY, tokens.accessToken);
-    if (tokens.refreshToken) window.localStorage.setItem(REFRESH_KEY, tokens.refreshToken);
-  },
-  clear() {
-    if (typeof window === "undefined") return;
-    window.localStorage.removeItem(ACCESS_KEY);
-    window.localStorage.removeItem(REFRESH_KEY);
-  },
-};
+/** The real response envelope, confirmed live. Branch on errorCode, never message. */
+interface Envelope<T> {
+  success: boolean;
+  data: T;
+  message: string;
+  errorCode?: string;
+}
 
 /* ------------------------------------------------------------------ errors */
 const MESSAGES: Record<string, [AuthErrorKind, string]> = {
@@ -122,58 +101,70 @@ async function rawRequest(path: string, { auth, ...init }: RequestOptions = {}):
   if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
+    // CONFIRMED: the API does set cookies (esh_at / esh_rt) on
+    // /auth/email/verify, but they're scoped to the backend's own domain
+    // (SameSite=Lax, not Secure) and frontend/backend are different
+    // origins — the browser will never attach them to a request this app
+    // makes, and a Next.js server here can't read them either (see the
+    // removed getServerSession.ts). They are not a usable session
+    // mechanism for this frontend. credentials:"include" is kept because
+    // it's harmless, not because anything here relies on it — the
+    // Authorization: Bearer header above is the only real auth mechanism.
     return await fetch(`${API_BASE_URL}${API_PREFIX}${path}`, { ...init, headers, credentials: "include" });
   } catch {
     throw new AuthError("network", "We couldn't reach EshSpeaks. Check your connection and try again.");
   }
 }
 
+/** Unwraps {success,data,message,errorCode} and returns `data` typed as T. */
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   let res = await rawRequest(path, options);
 
-  // One transparent refresh attempt for authenticated calls.
   if (res.status === 401 && options.auth && options.retryOn401 !== false) {
     const refreshed = await tryRefresh();
     if (refreshed) res = await rawRequest(path, { ...options, retryOn401: false });
   }
 
   const text = await res.text();
-  const body = text ? safeJson(text) : null;
+  const body = text ? (safeJson(text) as Envelope<T> | null) : null;
 
-  if (!res.ok) {
+  if (!res.ok || body?.success === false) {
     const retryHeader = res.headers.get("Retry-After");
     throw mapError(
       res.status,
-      body?.code ?? body?.error?.code ?? body?.error,
-      body?.message ?? body?.error?.message,
-      retryHeader ? Number(retryHeader) : body?.retryAfter,
+      body?.errorCode,
+      body?.message,
+      retryHeader ? Number(retryHeader) : undefined,
     );
   }
-  return (body ?? {}) as T;
+  return body!.data;
 }
 
 /* ---------------------------------------------------------------- sessions */
-function normalizeSession(body: any): AuthSession {
-  const user: CurrentUser = body?.user ?? body?.data?.user ?? body;
-  const tokens = body?.tokens ?? body;
-  tokenStore.set({ accessToken: tokens?.accessToken, refreshToken: tokens?.refreshToken });
+function normalizeSession(data: VerifyResult): AuthSession {
+  tokenStore.set({
+    accessToken: data.session.accessToken,
+    refreshToken: data.session.refreshToken,
+    expiresIn: data.session.expiresIn,
+  });
   return {
-    user,
-    accessToken: tokens?.accessToken,
-    refreshToken: tokens?.refreshToken,
-    onboardingRequired: Boolean(body?.onboarding?.required ?? !user?.username),
+    user: data.user,
+    accessToken: data.session.accessToken,
+    refreshToken: data.session.refreshToken,
+    onboardingRequired: data.onboarding.required,
+    onboardingStep: data.onboarding.step,
   };
 }
 
 async function tryRefresh(): Promise<boolean> {
   try {
     const stored = tokenStore.refresh();
-    const body = await request<any>("/auth/refresh", {
-      method: "POST",
-      body: JSON.stringify(stored ? { refreshToken: stored } : {}),
-      retryOn401: false,
-    });
-    tokenStore.set({ accessToken: body?.accessToken ?? body?.tokens?.accessToken, refreshToken: body?.refreshToken ?? body?.tokens?.refreshToken });
+    if (!stored) return false; // nothing to refresh with — this API has no refresh cookie fallback
+    const data = await request<{ accessToken: string; refreshToken: string; expiresIn: number }>(
+      "/auth/refresh",
+      { method: "POST", body: JSON.stringify({ refreshToken: stored }), retryOn401: false },
+    );
+    tokenStore.set(data);
     return true;
   } catch {
     tokenStore.clear();
@@ -182,14 +173,6 @@ async function tryRefresh(): Promise<boolean> {
 }
 
 /* ------------------------------------------------------------------- OAuth */
-/**
- * Google sign-in is a full-page navigation — never fetch this endpoint.
- *
- * SECURITY: returnTo is validated here too (not just by the caller). This
- * function builds the URL the browser actually navigates the user's
- * cookies/session to, so it's the last line of defense — it always emits a
- * safe, non-empty returnTo, never the raw query param.
- */
 export function googleAuthUrl(returnTo?: string, action?: string) {
   if (!API_BASE_URL) throw new AuthError("server", "Authentication service is not configured.");
   const url = new URL(`${API_BASE_URL}${API_PREFIX}/auth/google`);
@@ -200,43 +183,33 @@ export function googleAuthUrl(returnTo?: string, action?: string) {
 
 /* ----------------------------------------------------------------- service */
 export const authService = {
-  /**
-   * Request a 6-digit email code. Always resolves on 200 — the API is
-   * deliberately enumeration-safe, so never branch on "account exists".
-   */
   requestEmailCode: (email: string, opts: { returnTo?: string; action?: string } = {}) =>
     request<Record<string, never>>("/auth/email/request", {
       method: "POST",
       body: JSON.stringify({ email: email.trim().toLowerCase(), ...opts }),
     }),
 
-  /** Resend uses the same endpoint; the API enforces one send per minute. */
   resendEmailCode: (email: string, opts: { returnTo?: string; action?: string } = {}) =>
     authService.requestEmailCode(email, opts),
 
   verifyEmailCode: async (email: string, code: string, opts: { returnTo?: string; action?: string } = {}) =>
     normalizeSession(
-      await request<any>("/auth/email/verify", {
+      await request<VerifyResult>("/auth/email/verify", {
         method: "POST",
         body: JSON.stringify({ email: email.trim().toLowerCase(), code, ...opts }),
       }),
     ),
 
-  getCurrentUser: async () => {
-    const body = await request<any>("/auth/me", { method: "GET", auth: true });
-    return (body?.user ?? body) as CurrentUser;
-  },
+  getCurrentUser: () => request<CurrentUser>("/auth/me", { method: "GET", auth: true }),
 
   refresh: tryRefresh,
 
-  setUsername: async (username: string) => {
-    const body = await request<any>("/users/me/username", {
+  setUsername: (username: string) =>
+    request<CurrentUser>("/users/me/username", {
       method: "POST",
       auth: true,
       body: JSON.stringify({ username: username.trim().toLowerCase() }),
-    });
-    return (body?.user ?? body) as CurrentUser;
-  },
+    }),
 
   logout: async () => {
     try {
@@ -258,7 +231,6 @@ export const authService = {
 
 export const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
 
-/** Mirrors the server rule: 3–30 chars, lower-case, digits, single interior underscores. */
 export const USERNAME_PATTERN = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
 export function validateUsername(raw: string): string | null {
   const value = raw.trim();

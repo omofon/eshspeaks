@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { mockComments } from "@/lib/data/comments";
-import { useTier } from "@/lib/tier";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 interface LocalComment {
   id: string;
@@ -22,7 +22,7 @@ function Avatar({ initials }: { initials: string }) {
 }
 
 export function CommentThread({ count }: { count: number }) {
-  const { isLoggedIn } = useTier();
+  const { isAuthenticated } = useAuth();
   const [posted, setPosted] = useState<LocalComment[]>([]);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
@@ -51,7 +51,7 @@ export function CommentThread({ count }: { count: number }) {
     <section id="comments" className="mt-12">
       <h2 className="font-serif text-2xl text-navy">Comments ({count + posted.length})</h2>
 
-      {isLoggedIn ? (
+      {isAuthenticated ? (
         <form onSubmit={submit} className="mt-4">
           <textarea
             value={draft}

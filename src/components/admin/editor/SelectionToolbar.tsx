@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bold, Italic, Link2, Quote, Code2, MessageSquare } from "lucide-react";
+import { Bold, Italic, Underline, Strikethrough, Link2, Quote, Code2, MessageSquare } from "lucide-react";
 import { InlinePopover } from "./InlinePopover";
 
 export interface SelectionToolbarProps {
@@ -9,8 +9,10 @@ export interface SelectionToolbarProps {
   left: number;
   onBold: () => void;
   onItalic: () => void;
+  onUnderline: () => void;
+  onStrikethrough: () => void;
   onLink: (url: string) => void;
-  onHeading: (level: "h1" | "h2" | "h3") => void;
+  onHeading: (level: "h1" | "h2" | "h3" | "h4") => void;
   onQuote: () => void;
   onCode: () => void;
   onNote: (note: string) => void;
@@ -23,6 +25,8 @@ export function SelectionToolbar({
   left,
   onBold,
   onItalic,
+  onUnderline,
+  onStrikethrough,
   onLink,
   onHeading,
   onQuote,
@@ -63,6 +67,12 @@ export function SelectionToolbar({
         <ToolbarButton label="Italic" onClick={onItalic}>
           <Italic size={ICON_SIZE} />
         </ToolbarButton>
+        <ToolbarButton label="Underline" onClick={onUnderline}>
+          <Underline size={ICON_SIZE} />
+        </ToolbarButton>
+        <ToolbarButton label="Strikethrough" onClick={onStrikethrough}>
+          <Strikethrough size={ICON_SIZE} />
+        </ToolbarButton>
         <ToolbarButton label="Link" onClick={() => setOpenField("link")}>
           <Link2 size={ICON_SIZE} />
         </ToolbarButton>
@@ -75,6 +85,9 @@ export function SelectionToolbar({
         </ToolbarButton>
         <ToolbarButton label="Small heading (H3)" onClick={() => onHeading("h3")}>
           <span className="font-serif text-[12px] leading-none">H3</span>
+        </ToolbarButton>
+        <ToolbarButton label="Minor heading (H4)" onClick={() => onHeading("h4")}>
+          <span className="font-serif text-[11px] leading-none">H4</span>
         </ToolbarButton>
         <ToolbarButton label="Pull quote" onClick={onQuote}>
           <Quote size={ICON_SIZE} />

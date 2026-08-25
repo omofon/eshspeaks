@@ -44,13 +44,24 @@ export async function fetchSections(): Promise<ApiSection[]> {
   const body = await res.json().catch(() => null);
   if (!Array.isArray(body)) throw new SectionsApiError("Unexpected /sections response shape.");
 
-  return body.map((s: any) => ({
-    id: s?.id ?? "",
-    name: s?.name ?? "",
-    slug: s?.slug ?? "",
-    isSponsored: Boolean(s?.isSponsored),
-    subsegments: Array.isArray(s?.subsegments)
-      ? s.subsegments.map((sub: any) => ({ id: sub?.id ?? "", name: sub?.name ?? "", slug: sub?.slug ?? "" }))
-      : [],
-  }));
+  return (body as unknown[]).map((raw): ApiSection => {
+    const s = raw as Partial<ApiSection> | null;
+    const rawSubsegments = s?.subsegments as unknown;
+    return {
+      id: s?.id ?? "",
+      name: s?.name ?? "",
+      slug: s?.slug ?? "",
+      isSponsored: Boolean((s as { isSponsored?: unknown } | null)?.isSponsored),
+      subsegments: Array.isArray(rawSubsegments)
+        ? rawSubsegments.map((subRaw): ApiSubsegment => {
+            const sub = subRaw as Partial<ApiSubsegment> | null;
+            return {
+              id: sub?.id ?? "",
+              name: sub?.name ?? "",
+              slug: sub?.slug ?? "",
+            };
+          })
+        : [],
+    };
+  });
 }

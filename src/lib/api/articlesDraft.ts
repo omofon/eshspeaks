@@ -1,7 +1,5 @@
-import { API_BASE_URL } from "@/lib/auth/config";
+import { loadDraftLocal } from "@/lib/storage/draftStorage";
 import type { DraftState } from "@/lib/cms/types";
-
-const API_PREFIX = "/api/v1";
 
 export class DraftApiError extends Error {
   status?: number;
@@ -12,84 +10,33 @@ export class DraftApiError extends Error {
   }
 }
 
-function toDraftBody(draft: DraftState) {
-  return {
-    title: draft.title,
-    dek: draft.dek,
-    bodyHtml: draft.bodyHtml,
-    section: draft.section,
-    subsegment: draft.subsegment,
-    sectorTags: draft.sectorTags,
-    contentTier: draft.contentTier,
-    featuredImage: draft.featuredImage,
-  };
-}
-
-function fromResponse(body: any, fallbackId: string | null): DraftState {
-  return {
-    id: body?.id ?? fallbackId,
-    title: body?.title ?? "",
-    dek: body?.dek ?? "",
-    bodyHtml: body?.bodyHtml ?? "",
-    section: body?.section ?? "",
-    subsegment: body?.subsegment ?? "",
-    sectorTags: body?.sectorTags ?? [],
-    contentTier: body?.contentTier ?? "free",
-    featuredImage: body?.featuredImage ?? null,
-  };
-}
-
 /**
- * POST/PUT /api/v1/articles — per CMS-ARTICLES-CONTRACT.md §2. Not
- * confirmed live yet; a failed request degrades to a local-only draft so
- * autosave never blocks writing, but the id won't persist across a reload
- * until the endpoint is real.
- */
-export async function persistDraft(draft: DraftState): Promise<{ id: string }> {
-  if (!API_BASE_URL) return { id: draft.id ?? `local-${Date.now()}` };
-
-  const path = draft.id ? `${API_PREFIX}/articles/${draft.id}` : `${API_PREFIX}/articles`;
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE_URL}${path}`, {
-      method: draft.id ? "PUT" : "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(toDraftBody(draft)),
-    });
-  } catch {
-    throw new DraftApiError("We couldn't reach EshSpeaks. Your draft is still here — we'll retry.");
-  }
-
-  if (!res.ok) throw new DraftApiError(`Autosave failed with ${res.status}`, res.status);
-  const body = await res.json().catch(() => null);
-  return { id: body?.id ?? draft.id ?? `local-${Date.now()}` };
-}
-
-/**
- * GET /api/v1/articles/:id — reopen an existing draft (edit route). Per
- * CMS-ARTICLES-CONTRACT.md §2 this is scoped to the owner, an assigned
- * reviewer, or the chief editor — distinct from the public
- * GET /articles/:slug, which only ever returns published content.
+ * This file previously called PUT/GET /api/v1/articles/:id — endpoints
+ * that articles.ts's own comment confirms don't exist ("no update
+ * endpoint yet... POST is the only confirmed-live write"), and it was
+ * built against a pre-contract-confirmation DraftState shape
+ * (title/bodyHtml/section instead of headline/body/sectionId) that no
+ * longer matches cms/types.ts at all — it would not compile.
+ *
+ * draftStorage.ts documents the real architecture: drafts live in
+ * localStorage until a real draft-update endpoint exists. useAutosave.ts
+ * already calls saveDraftLocal() directly, so this file's old
+ * persistDraft() was dead code nobody called — removed entirely rather
+ * than fixed, since keeping an unused function around that implies a
+ * network draft-save exists is itself misleading. fetchDraft() IS called
+ * (by useDraftLoader.ts, for the /admin/articles/editor/[id] route), so
+ * it's kept here, reading from the same local store autosave writes to.
+ *
+ * NOTE ON RECURRENCE: this exact file reverted to its pre-fix version
+ * twice across two review rounds. If this keeps happening, check whether
+ * this fix is actually being committed/merged before the next review
+ * pass — re-reviewing the same regression wastes both the review and the
+ * fix.
  */
 export async function fetchDraft(id: string): Promise<DraftState> {
-  if (!API_BASE_URL) throw new DraftApiError("Authentication service is not configured.");
-
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE_URL}${API_PREFIX}/articles/${id}`, {
-      method: "GET",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-  } catch {
-    throw new DraftApiError("We couldn't reach EshSpeaks. Check your connection and try again.");
+  const draft = loadDraftLocal(id);
+  if (!draft) {
+    throw new DraftApiError("That draft doesn't exist in this browser, or it was cleared.", 404);
   }
-
-  if (!res.ok) {
-    if (res.status === 404) throw new DraftApiError("That draft doesn't exist, or you don't have access to it.", 404);
-    throw new DraftApiError(`Couldn't load that draft (${res.status}).`, res.status);
-  }
-  const body = await res.json().catch(() => null);
-  return fromResponse(body, id);
+  return draft;
 }

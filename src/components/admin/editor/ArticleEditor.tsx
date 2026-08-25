@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ChevronDown, MoreHorizontal, Share2, ImagePlus, Tags, SlidersHorizontal, History } from "lucide-react";
 
-import { useAuth } from "@/lib/auth/auth";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { usePreview } from "@/lib/dev/previewTier";
 import { useAutosave } from "@/hooks/useAutosave";
 import { useDraftLoader } from "@/hooks/useDraftLoader";
 import { useEditorRole } from "@/hooks/useEditorRole";
@@ -27,7 +28,7 @@ import { HelperBar } from "./HelperBar";
 import { MentionMenu } from "./MentionMenu";
 import { StorySettingsDrawer, type SettingsSection } from "./StorySettingsDrawer";
 
-const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "BLOCKQUOTE", "LI"]);
+const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "BLOCKQUOTE", "LI"]);
 
 export interface ArticleEditorProps {
   /** Present on /admin/articles/editor/[id]; absent on the "new story" route. */
@@ -36,7 +37,12 @@ export interface ArticleEditorProps {
 
 export function ArticleEditor({ draftId }: ArticleEditorProps) {
   const { user } = useAuth();
-  const [role, setRole] = useEditorRole();
+  // FIXED: useEditorRole() now returns a single value, not [role, setRole].
+  // The dev-only "preview as a role" control writes to PreviewProvider
+  // instead (see RoleSwitcher below) — useEditorRole reads that override
+  // internally, so this component doesn't manage role state itself at all.
+  const role = useEditorRole();
+  const { setRoleOverride, enabled: previewEnabled } = usePreview();
   const { draft, setDraft, loading: loadingDraft, error: loadError } = useDraftLoader(draftId ?? null);
   const { sections, loading: loadingSections, error: sectionsError, usingMock } = useSectionsCatalog();
   const [revisions, setRevisions] = useState<RevisionEntry[]>([]);
@@ -65,6 +71,11 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     [setDraft],
   );
 
+  // FIXED: user.name doesn't exist on CurrentUser (fields are displayName /
+  // username / email). Derive a display name the same way the account page
+  // does, so this doesn't silently render "undefined" in the avatar/title.
+  const displayName = user?.displayName ?? user?.username ?? user?.email?.split("@")[0] ?? "You";
+
   // Assign a local id (and take over the URL) the moment the story has
   // real content — that's what autosave and "reopen this draft" key off,
   // since the server has nowhere to persist an in-progress edit yet.
@@ -72,14 +83,9 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   // Uses window.history.replaceState directly, NOT next/navigation's
   // router.replace(). router.replace() here crosses from
   // app/admin/articles/editor/page.tsx to .../[id]/page.tsx — a real
-  // route change — which remounts the editor mid-keystroke: the
-  // contentEditable body is torn down and recreated, focus/caret is
-  // lost, and both InsertMenu and MentionMenu (which only render while
-  // there's a live caret position from the `selectionchange` listener)
-  // silently stop appearing until you click back into the editor. A
-  // plain history update changes the URL bar without triggering Next's
-  // router at all, so the component instance — and your cursor — never
-  // moves.
+  // route change — which remounts the editor mid-keystroke. A plain
+  // history update changes the URL bar without triggering Next's router
+  // at all, so the component instance — and your cursor — never moves.
   useEffect(() => {
     if (draft.id || loadingDraft) return;
     if (!draft.headline.trim() && !draft.body.trim()) return;
@@ -120,7 +126,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
             id: `rev-${Date.now()}`,
             savedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             summary: draft.headline.trim() ? draft.headline : "Untitled draft",
-            author: user?.name ?? "You",
+            author: displayName,
           },
           ...prev,
         ].slice(0, 8),
@@ -136,8 +142,9 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     bodyLength > 0 &&
     Boolean(draft.sectionId) &&
     Boolean(draft.subsegmentId) &&
+    Boolean(role) &&
     submitState.status !== "submitting";
-  const actionLabel = canPublishDirectly(role) ? "Publish" : "Submit for review";
+  const actionLabel = role && canPublishDirectly(role) ? "Publish" : "Submit for review";
 
   const handleSubmit = async () => {
     setSubmitState({ status: "submitting" });
@@ -286,7 +293,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   }, []);
 
   const applyBlockFormat = useCallback(
-    (tag: "h1" | "h2" | "h3" | "blockquote", className: string) => {
+    (tag: "h1" | "h2" | "h3" | "h4" | "blockquote", className: string) => {
       document.execCommand("formatBlock", false, tag);
       const sel = window.getSelection();
       const block = closestBlock(sel?.anchorNode ?? null);
@@ -325,12 +332,28 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
       document.execCommand("italic");
       syncBody();
     },
+    // ADDED — SelectionToolbar now requires these; execCommand names are
+    // "underline" and "strikeThrough" (capital T), not guesses.
+    underline: () => {
+      document.execCommand("underline");
+      syncBody();
+    },
+    strikethrough: () => {
+      document.execCommand("strikeThrough");
+      syncBody();
+    },
     link: (url: string) => {
       document.execCommand("createLink", false, url);
       syncBody();
     },
-    heading: (level: "h1" | "h2" | "h3") => {
-      const className = level === "h1" ? "headline-lg" : level === "h2" ? "headline-md" : "headline-sm";
+    // ADDED h4. There's no dedicated "headline-xs" utility in globals.css
+    // for a fourth tier — reusing headline-sm's class means H3 and H4 will
+    // look visually identical for now. That's a design-system gap, not a
+    // logic bug; flagging it rather than inventing a new CSS utility you
+    // haven't reviewed.
+    heading: (level: "h1" | "h2" | "h3" | "h4") => {
+      const className =
+        level === "h1" ? "headline-lg" : level === "h2" ? "headline-md" : "headline-sm";
       applyBlockFormat(level, className);
       syncBody();
     },
@@ -357,9 +380,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   const insertCommands = {
     imageFile: (file: File) => {
       // TODO(sprint-2-media): no upload endpoint is confirmed live yet —
-      // this is a local object URL for in-editor preview only. It won't
-      // survive a reload and can't be sent as `featuredImageUrl`/body
-      // image src until BE ships one. See CMS-BACKEND-REQUESTS.md.
+      // this is a local object URL for in-editor preview only.
       const src = URL.createObjectURL(file);
       insertAtActiveBlock(
         `<figure class="editor-figure"><img src="${src}" alt="${escapeHtml(file.name)}" /><figcaption class="meta">Add a caption &middot; not yet uploadable, see backend requests</figcaption></figure><p><br></p>`,
@@ -386,9 +407,6 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
             `<div class="editor-embed-social">${facebookEmbedMarkup(url)}<p class="meta">Facebook post &middot; renders once the Facebook SDK script is added to the app, see CMS-BACKEND-REQUESTS.md</p></div><p><br></p>`,
           );
         } else {
-          // TODO(backend): no link-preview/oEmbed proxy exists for
-          // arbitrary URLs (most sites block cross-origin metadata
-          // fetches) — this is a plain link card until one does.
           insertAtActiveBlock(
             `<a class="editor-link-card" href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a><p><br></p>`,
           );
@@ -413,10 +431,10 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   };
 
   const statusLabel = useMemo(() => {
-    if (loadingDraft) return "Loading…";
-    if (submitState.status === "submitting") return "Submitting…";
+    if (loadingDraft) return "Loading\u2026";
+    if (submitState.status === "submitting") return "Submitting\u2026";
     if (submitState.status === "done") return "Submitted";
-    if (autosaveStatus === "saving") return "Saving…";
+    if (autosaveStatus === "saving") return "Saving\u2026";
     if (autosaveStatus === "saved") return "Saved in this browser";
     return "Draft";
   }, [loadingDraft, submitState.status, autosaveStatus]);
@@ -440,6 +458,19 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     setMoreOpen(false);
   };
 
+  // GUARD: role is null while the session is still loading, or if this
+  // somehow renders for a non-editor role (shouldn't happen — the parent
+  // layout already gates it server-side — but a client-side render can
+  // beat the SSR check on fast client-side navigations, so this is a real
+  // guard, not decoration).
+  if (!role) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-[var(--text-muted)]">Checking your newsroom access\u2026</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--background)" }}>
       {/* ------------------------------------------------------------- top bar */}
@@ -457,7 +488,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            {process.env.NODE_ENV !== "production" ? <RoleSwitcher role={role} onChange={setRole} /> : null}
+            {previewEnabled ? <RoleSwitcher role={role} onChange={setRoleOverride} /> : null}
 
             <button
               type="button"
@@ -465,7 +496,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
               onClick={handleSubmit}
               className="btn-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {submitState.status === "submitting" ? "Submitting…" : actionLabel}
+              {submitState.status === "submitting" ? "Submitting\u2026" : actionLabel}
             </button>
 
             <div ref={moreRef} className="relative">
@@ -516,19 +547,17 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
             </button>
 
             <div
-              title={`${user?.name ?? "You"} · ${roleLabel(role)}`}
+              title={`${displayName} \u00b7 ${roleLabel(role)}`}
               className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold"
               style={{ background: "var(--navy)", color: "var(--text-inverse)" }}
             >
-              {initials(user?.name ?? "You")}
+              {initials(displayName)}
             </div>
           </div>
         </div>
       </header>
 
-      {loadError ? (
-        <Banner tone="error">{loadError}</Banner>
-      ) : null}
+      {loadError ? <Banner tone="error">{loadError}</Banner> : null}
       {sectionsError && !usingMock ? (
         <Banner tone="error">Couldn't load sections/subsegments: {sectionsError}</Banner>
       ) : null}
@@ -557,7 +586,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
                 ref={bodyRef}
                 contentEditable
                 suppressContentEditableWarning
-                data-placeholder="Tell your story…"
+                data-placeholder="Tell your story\u2026"
                 className="editor-body body-editorial mt-6 min-h-[50vh] outline-none"
                 onInput={syncBody}
                 onBlur={syncBody}
@@ -573,6 +602,8 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
           left={selectionToolbar.left}
           onBold={editorCommands.bold}
           onItalic={editorCommands.italic}
+          onUnderline={editorCommands.underline}
+          onStrikethrough={editorCommands.strikethrough}
           onLink={editorCommands.link}
           onHeading={editorCommands.heading}
           onQuote={editorCommands.quote}
@@ -611,9 +642,6 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
 
       <HelperBar />
 
-      {/* Editor-scoped typography for content that execCommand inserts raw,
-          layered on top of the shared design tokens rather than duplicating them.
-          Plain <style> (not styled-jsx) so this has no extra build dependency. */}
       <style>{`
         .editor-body:empty:before,
         .editor-body p:empty:before {
@@ -625,6 +653,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
         .editor-body h1 { margin: 2.5rem 0 1rem; }
         .editor-body h2 { margin: 2rem 0 0.75rem; }
         .editor-body h3 { margin: 1.5rem 0 0.5rem; }
+        .editor-body h4 { margin: 1.25rem 0 0.5rem; }
         .editor-body blockquote.pull-quote { margin: 2rem 0; }
         .editor-body p { margin: 0 0 1.25rem; }
         .editor-body a {
@@ -795,7 +824,11 @@ function MenuItem({
   );
 }
 
-function RoleSwitcher({ role, onChange }: { role: EditorRole; onChange: (r: EditorRole) => void }) {
+// FIXED: role values are underscore-cased to match the real backend enum
+// (state_correspondent / section_lead / chief_editor), and onChange now
+// writes to the dev PreviewProvider override instead of nonexistent local
+// state.
+function RoleSwitcher({ role, onChange }: { role: EditorRole; onChange: (r: EditorRole | null) => void }) {
   return (
     <div className="relative">
       <select
@@ -806,9 +839,9 @@ function RoleSwitcher({ role, onChange }: { role: EditorRole; onChange: (r: Edit
         style={{ borderColor: "var(--border)" }}
       >
         <option value="contributor">Contributor</option>
-        <option value="state-correspondent">State correspondent</option>
-        <option value="section-lead">Section lead</option>
-        <option value="chief-editor">Chief editor</option>
+        <option value="state_correspondent">State correspondent</option>
+        <option value="section_lead">Section lead</option>
+        <option value="chief_editor">Chief editor</option>
       </select>
       <ChevronDown size={11} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
     </div>
@@ -817,12 +850,13 @@ function RoleSwitcher({ role, onChange }: { role: EditorRole; onChange: (r: Edit
 
 /* ----------------------------------------------------------------- utils */
 
+// FIXED: underscore keys to match EditorRole.
 function roleLabel(role: EditorRole) {
   return {
     contributor: "Contributor",
-    "state-correspondent": "State correspondent",
-    "section-lead": "Section lead",
-    "chief-editor": "Chief editor",
+    state_correspondent: "State correspondent",
+    section_lead: "Section lead",
+    chief_editor: "Chief editor",
   }[role];
 }
 
@@ -838,5 +872,3 @@ function initials(name: string) {
 function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
-
-// toEmbedUrl removed — use toVideoEmbedUrl from @/lib/api/oembed instead.

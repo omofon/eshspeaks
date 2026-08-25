@@ -1,6 +1,6 @@
 "use client";
 
-import { useTier } from "@/lib/tier";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 type Variant = "leaderboard" | "in-feed" | "sidebar";
 
@@ -11,8 +11,8 @@ const sizes: Record<Variant, string> = {
 };
 
 export function AdSlot({ variant = "in-feed" }: { variant?: Variant }) {
-  const { isPremium } = useTier();
-  if (isPremium) return null;
+  const { isSubscriber } = useAuth();
+  if (isSubscriber) return null;
   return (
     <div
       className={`flex w-full items-center justify-center rounded-sm border border-dashed border-rule bg-muted ${sizes[variant]}`}

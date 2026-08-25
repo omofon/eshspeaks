@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Check, Link2, MessageSquare, Share2, ThumbsUp } from "lucide-react";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { WhiteLogo } from "@/components/layout/whiteLogo";
 

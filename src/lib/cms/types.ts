@@ -1,23 +1,37 @@
 import type { ArticleImage } from "@/lib/data/types";
+import type { UserRole } from "@/lib/auth/types";
 
 /**
- * Newsroom roles that can reach the editor. Contributors and State
- * Correspondents file copy for review; Section Leads and the Chief Editor
- * can publish directly.
- *
- * TODO(sprint-2-backend): `CurrentUser` / `AccountUser` don't carry a role
- * yet. Once the API returns one on `/auth/me`, replace `useEditorRole()`
- * in `src/hooks/useEditorRole.ts` with the real value instead of the
- * local fallback. See CMS-ARTICLES-CONTRACT.md §0.
+ * FIXED: EditorRole used to be its own hyphenated union
+ * ("state-correspondent", "section-lead", "chief-editor") that did NOT
+ * match the real backend values confirmed on /auth/me
+ * ("state_correspondent", "section_lead", "chief_editor" — underscores).
+ * That mismatch meant canPublishDirectly() would never match a real
+ * section lead or chief editor — a silent, total loss of publish rights
+ * for exactly the roles that need it in production. EditorRole is now a
+ * derived subset of the real UserRole, so it can't drift out of sync again.
  */
-export type EditorRole =
-  | "contributor"
-  | "state-correspondent"
-  | "section-lead"
-  | "chief-editor";
+export type EditorRole = Extract<
+  UserRole,
+  "contributor" | "state_correspondent" | "section_lead" | "chief_editor"
+>;
+
+const EDITOR_ROLES: readonly EditorRole[] = [
+  "contributor",
+  "state_correspondent",
+  "section_lead",
+  "chief_editor",
+];
+
+export function isEditorRole(role: UserRole): role is EditorRole {
+  return (EDITOR_ROLES as readonly UserRole[]).includes(role);
+}
 
 export const canPublishDirectly = (role: EditorRole) =>
-  role === "section-lead" || role === "chief-editor";
+  role === "section_lead" || role === "chief_editor";
+
+/** Inverse of canPublishDirectly, named for the "submit" call sites. */
+export const mustSubmitForReview = (role: EditorRole) => !canPublishDirectly(role);
 
 export type DraftStatus = "idle" | "loading" | "saving" | "saved" | "error";
 
@@ -25,33 +39,46 @@ export type DraftStatus = "idle" | "loading" | "saving" | "saved" | "error";
 export type ContentTier = "FREE" | "PREMIUM";
 
 /**
- * Confirmed live value: "ORIGINAL". The rest of the enum isn't documented
- * in Swagger (only one example value shown) — treat "CURATED" as a guess
- * pending confirmation. See CMS-BACKEND-REQUESTS.md.
+ * Confirmed live value: "ORIGINAL". "CURATED" is an unconfirmed guess —
+ * see CMS-BACKEND-REQUESTS.md.
  */
 export type SourceType = "ORIGINAL" | "CURATED";
 
 /**
+ * BLOCKING GAP, not yet resolved: the confirmed live contract
+ * (POST /api/v1/articles) has NO status/review field at all — no
+ * draft/submitted/approved/published pipeline exists server-side yet.
+ * That means the actual "contributor submits, section lead
+ * reviews/edits/publishes" workflow cannot be built end-to-end until the
+ * backend adds:
+ *   1. a status field on the article resource
+ *   2. an endpoint to list "articles awaiting my review" (scoped by
+ *      section for section leads; unscoped for chief editor)
+ *   3. an approve/publish action distinct from create
+ *
+ * This type exists now so the frontend has a stable shape to build
+ * against, but `reviewStatus` is CLIENT-SIDE ONLY until confirmed — do
+ * not assume the backend persists or returns it. Confirm this contract
+ * before building a real review-queue UI; guessing it risks the same
+ * drift bug EditorRole just had.
+ */
+export type ReviewStatus = "draft" | "submitted" | "approved" | "published";
+
+/**
  * Everything the editor route reads and writes for one story. Field names
- * here intentionally mirror the confirmed `POST /api/v1/articles` request
- * body — the previous version used `title`/`bodyHtml`/slug-based
- * `section`, which the real contract doesn't accept. Kept as one flat
- * shape (rather than remapping in the API layer) because several fields
- * — `sectionId`/`subsegmentId` in particular — are themselves the actual
- * selection value the taxonomy dropdowns need, not just a wire-format
- * detail to hide.
+ * mirror the confirmed POST /api/v1/articles request body.
  */
 export interface DraftState {
-  /** Local-only id (see src/lib/storage/draftStorage.ts) — not a server id; see CMS-BACKEND-REQUESTS.md re: no GET/PATCH by id yet. */
+  /** Local-only id (see src/lib/storage/draftStorage.ts) — not a server id. */
   id: string | null;
-  /** Server id returned on a successful POST, once/if the API includes one — response schema is currently undocumented ("{}"). */
+  /** Server id returned on a successful POST, if the API includes one — response schema currently undocumented. */
   remoteId: string | null;
+  /** Client-side only — see ReviewStatus note above. */
+  reviewStatus: ReviewStatus;
   headline: string;
-  /** Auto-derived from `headline` via slugify() until the user edits it directly. */
   slug: string;
   slugEdited: boolean;
   dek: string;
-  /** Raw HTML from the contentEditable canvas — see CMS-BACKEND-REQUESTS.md re: confirming BE expects HTML vs. Markdown/plain text for `body`. */
   body: string;
   featuredImageUrl: string;
   featuredImageAlt: string;
@@ -78,6 +105,7 @@ export interface RevisionEntry {
 export const emptyDraft = (): DraftState => ({
   id: null,
   remoteId: null,
+  reviewStatus: "draft",
   headline: "",
   slug: "",
   slugEdited: false,
@@ -98,7 +126,6 @@ export const emptyDraft = (): DraftState => ({
   ogImage: "",
 });
 
-/** Plain-text length of the body, used for the empty/disabled checks. */
 export function bodyTextLength(bodyHtml: string): number {
   if (typeof window === "undefined") return bodyHtml.replace(/<[^>]*>/g, "").trim().length;
   const div = document.createElement("div");
@@ -106,7 +133,6 @@ export function bodyTextLength(bodyHtml: string): number {
   return (div.textContent ?? "").trim().length;
 }
 
-/** Kept for callers that still want an ArticleImage view of the featured image fields. */
 export function draftFeaturedImage(draft: DraftState): ArticleImage | null {
   if (!draft.featuredImageUrl) return null;
   return { src: draft.featuredImageUrl, alt: draft.featuredImageAlt };

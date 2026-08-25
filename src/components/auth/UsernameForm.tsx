@@ -3,17 +3,12 @@
 import { useId, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authService, AuthError, validateUsername } from "@/lib/auth/authService";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
-/**
- * The API has no availability probe — POST /users/me/username is the single
- * source of truth (409 USERNAME_TAKEN, 400 INVALID_USERNAME, reserved names
- * rejected server-side). We validate the shape locally and surface the
- * server's verdict on submit. Re-sending your own username succeeds, so the
- * call is safe to retry.
- */
 export function UsernameForm({ returnTo }: { returnTo?: string }) {
   const router = useRouter();
+  const { refresh: refreshAuth } = useAuth();
   const inputId = useId();
   const statusId = `${inputId}-status`;
   const [username, setUsername] = useState("");
@@ -31,9 +26,7 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
     setServerError(null);
     try {
       await authService.setUsername(value);
-      // SECURITY: this used to fall back to "/account" via a naive
-      // `startsWith("/")` check that let "//evil.com" through. Per spec the
-      // fallback is always "/", enforced centrally by getSafeReturnTo.
+      void refreshAuth(); // push updated user (now has a username) into AuthProvider
       router.replace(getSafeReturnTo(returnTo));
     } catch (e) {
       setSaving(false);

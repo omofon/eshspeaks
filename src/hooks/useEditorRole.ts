@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/lib/auth";
-import type { EditorRole } from "@/lib/cms/types";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { usePreview } from "@/lib/dev/previewTier";
+import { isEditorRole, type EditorRole } from "@/lib/cms/types";
 
 /**
- * TODO(sprint-2-backend): `CurrentUser` doesn't carry a newsroom role yet.
- * Until `/auth/me` returns one (CMS-ARTICLES-CONTRACT.md §0), fall back to
- * the lowest-privilege role and expose the dev-only switcher so reviewers
- * can see both button states without a backend change.
+ * Read-only view over the real session role, narrowed to editor-capable
+ * roles, with a dev-only preview override layered on top (see
+ * lib/dev/previewTier.tsx). Returns null for reader/premium (or while the
+ * session is still loading) — callers should treat null as "not ready /
+ * not permitted to render the editor", not as a role to pass around.
  */
-export function useEditorRole(): [EditorRole, (role: EditorRole) => void] {
-  const { user } = useAuth();
-  const backendRole = (user as unknown as { role?: EditorRole } | null)?.role;
-  const [role, setRole] = useState<EditorRole>(backendRole ?? "contributor");
-  return [role, setRole];
+export function useEditorRole(): EditorRole | null {
+  const { role } = useAuth();
+  const { roleOverride, enabled } = usePreview();
+  if (enabled && roleOverride) return roleOverride;
+  return isEditorRole(role) ? role : null;
 }

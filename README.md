@@ -6,8 +6,8 @@ Styled as a modern editorial newsroom — not a blog theme, not a SaaS dashboard
 
 The original brief called for Next.js App Router with static export. This is
 now implemented as a conventional Next.js App Router project with the active
-routes under `app/`. The legacy TanStack route files were removed after the
-migration.
+routes under `src/app/`. The legacy TanStack route files were removed after
+the migration.
 
 ## Stack
 
@@ -15,8 +15,12 @@ migration.
 - Tailwind CSS v4
 - TypeScript (strict)
 - Vercel-ready deployment
-- Mock data only. No backend, no real auth. Logged-out / free / premium states
-  are driven client-side by `src/lib/tier.tsx` and a small dev toggle.
+- Real backend for auth and article creation (bearer-token session via
+  `src/lib/auth/AuthProvider.tsx`, calling `NEXT_PUBLIC_API_BASE_URL`).
+  Public article _content_ is still static mock data under `src/lib/data/`
+  — there is no live CMS read path yet. A dev-only "preview as" tier/role
+  toggle (`src/lib/dev/previewTier.tsx`) lets you preview logged-out/free/
+  premium and editorial-role UI states without a second backend account.
 
 ## Getting started
 
@@ -31,7 +35,7 @@ npm run dev
 | ------------------- | ---------------------------------------------------------- |
 | `npm run dev`       | Dev server with HMR                                        |
 | `npm run build`     | Production build                                           |
-| `npm run preview`   | Serve the production build locally                         |
+| `npm run start`     | Serve the production build locally (run `build` first)     |
 | `npm run lint`      | ESLint                                                     |
 | `npm run typecheck` | `tsc --noEmit`                                             |
 | `npm run favicon`   | Regenerate icon assets from `scripts/generate-favicon.cjs` |
@@ -44,7 +48,9 @@ The repo is ready to import as-is. Vercel uses the Next.js build directly.
 - Install command: `npm install`
 - Output: default Next.js output
 
-No environment variables are required.
+Set `NEXT_PUBLIC_API_BASE_URL` to the backend's base URL — auth and article
+creation fail closed without it. Public article content itself needs no
+environment variables, since it's still served from static mock data.
 
 ## Design rules
 

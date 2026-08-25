@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authService, AuthError } from "@/lib/auth/authService";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { getSafeReturnTo } from "@/lib/auth/returnTo";
 export { maskEmail } from "@/lib/auth/maskEmail";
 
@@ -18,10 +19,10 @@ export function OTPForm({
   email: string;
   returnTo?: string;
   action?: string;
-  /** Determines where "Use a different email" sends the user back to. */
   mode?: "login" | "register";
 }) {
   const router = useRouter();
+  const { refresh: refreshAuth } = useAuth();
   const [digits, setDigits] = useState<string[]>(Array(LENGTH).fill(""));
   const [status, setStatus] = useState<"idle" | "verifying" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -43,16 +44,23 @@ export function OTPForm({
     async (code: string) => {
       setStatus("verifying");
       setError(null);
-      // SECURITY: this used to be `returnTo && returnTo.startsWith("/") ? returnTo : "/account"`,
-      // which treats "//evil.com" as a valid internal path (it does start
-      // with "/") and would redirect an authenticated user off-domain.
-      // getSafeReturnTo closes that and — per spec — falls back to "/",
-      // not "/account".
       const safeReturnTo = getSafeReturnTo(returnTo);
       try {
         const session = await authService.verifyEmailCode(email, code, { returnTo: safeReturnTo, action });
         setStatus("success");
-        if (session.onboardingRequired) {
+
+        // Push the new session into AuthProvider immediately so header/nav
+        // reflect signed-in state without waiting for the next navigation
+        // to remount the provider.
+        void refreshAuth();
+
+        // Decide by the actual data, not the server's onboarding.required
+        // flag alone: a RETURNING user (username already set) should go to
+        // their original destination, never back through /username. This
+        // matters if onboarding.required and user.username ever drift —
+        // username is the ground truth here, not the flag that was
+        // computed from it server-side at signup time.
+        if (!session.user.username) {
           const params = new URLSearchParams();
           if (safeReturnTo !== "/") params.set("returnTo", safeReturnTo);
           if (action) params.set("action", action);
@@ -69,7 +77,7 @@ export function OTPForm({
         else setError("Something went wrong. Please try again.");
       }
     },
-    [action, email, returnTo, router],
+    [action, email, returnTo, router, refreshAuth],
   );
 
   function setDigit(index: number, value: string) {
@@ -125,9 +133,6 @@ export function OTPForm({
 
   const disabled = status !== "idle";
 
-  // "Use a different email" must return to /login (there is no /register
-  // route — registration is /login?mode=register), and should preserve
-  // returnTo/action so the user doesn't lose their original destination.
   const differentEmailHref = (() => {
     const params = new URLSearchParams();
     if (mode === "register") params.set("mode", "register");

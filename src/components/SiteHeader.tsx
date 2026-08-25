@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import UtilityBar from "./layout/UtilityBar";
 import SectionNavigation from "./layout/SectionNavigation";

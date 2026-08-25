@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUserRound, LogOut, UserRound } from "lucide-react";
+import { CircleUserRound, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "@/lib/auth/useSession";
+import { useAuth } from "@/lib/auth/AuthProvider";
+
+/** Anything above plain reader gets a link into the newsroom admin area. */
+const EDITORIAL_ROLES = ["contributor", "state_correspondent", "section_lead", "chief_editor"] as const;
 
 export function HeaderAccountMenu() {
-  const { user, status, signOut } = useSession();
-  const isAuthenticated = status === "authenticated";
+  const { user, isAuthenticated, isSubscriber, hasRole, signOut } = useAuth();
   const label = user?.displayName ?? user?.username ?? "Account";
 
   return (
@@ -37,7 +39,14 @@ export function HeaderAccountMenu() {
           <>
             <DropdownMenuLabel className="px-2 pb-2 pt-1">
               <div className="space-y-1">
-                <p className="text-base font-semibold text-brand-navy">{label}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-base font-semibold text-brand-navy">{label}</p>
+                  {isSubscriber ? (
+                    <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                      Premium
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-sm text-text-secondary">{user.email}</p>
               </div>
             </DropdownMenuLabel>
@@ -49,11 +58,19 @@ export function HeaderAccountMenu() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/account" className="flex w-full cursor-pointer items-center gap-2">
+              <Link href="/account/saved" className="flex w-full cursor-pointer items-center gap-2">
                 <CircleUserRound className="h-4 w-4" />
                 Saved articles
               </Link>
             </DropdownMenuItem>
+            {hasRole(EDITORIAL_ROLES) ? (
+              <DropdownMenuItem asChild>
+                <Link href="/admin" className="flex w-full cursor-pointer items-center gap-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  Newsroom admin
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => void signOut()}

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { formatValue, marketSeed } from "@/lib/data/market";
 import { useLiveMarket } from "@/components/TickerStrip";
-import { ListCard } from "@/components/ArticleCard";
+import { ListCard } from "@/components/editorial";
 import { bySubsegment } from "@/lib/data/articles";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
@@ -69,7 +69,7 @@ export function MarketDashboard() {
         </div>
         <div className="mt-2 grid gap-x-8 sm:grid-cols-2">
           {articles.map((a) => (
-            <ListCard key={a.slug} a={a} />
+            <ListCard key={a.slug} article={a} />
           ))}
         </div>
       </section>

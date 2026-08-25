@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Article, Section } from "@/lib/data/types";
 import { getSection } from "@/lib/data/sections";
 
@@ -54,11 +55,14 @@ export function ArticleMedia({
   if (!article.image) return null;
   return (
     <div className={`relative ${ratio} w-full overflow-hidden rounded-sm bg-muted`}>
-      <img
+      <Image
         src={article.image.src}
         alt={article.image.alt}
-        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        fill
+        sizes="100vw"
+        priority={priority}
         loading={priority ? "eager" : "lazy"}
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
       />
       {showPremium && article.premium ? (
         <span className="absolute right-2 top-2">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Article } from "@/lib/data/types";
 
 /** The Seat — executive desk panel. Navy elevation, deliberately quiet. */
@@ -22,7 +23,13 @@ export function TheSeatCard({ article }: { article: Article }) {
       <div className="flex min-w-0 items-center gap-3 border-y border-white/10 py-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-white/10 text-xs font-semibold">
           {article.image ? (
-            <img src={article.image.src} alt={article.image.alt} className="h-full w-full object-cover" loading="lazy" />
+            <Image
+              src={article.image.src}
+              alt={article.image.alt}
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+            />
           ) : (
             initials
           )}
