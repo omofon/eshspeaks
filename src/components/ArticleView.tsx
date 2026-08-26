@@ -9,6 +9,7 @@ import { toUiArticle } from "@/lib/api/adapters";
 import { isArticleUnlocked } from "@/lib/api/types";
 import type { ApiArticleSummary } from "@/lib/api/types";
 import { AdSlot } from "@/components/AdSlot";
+import { ArticleBody } from "@/components/ArticleBody";
 import { EngagementBar } from "@/components/EngagementBar";
 import { CommentThread } from "@/components/CommentThread";
 import { ArticleFeedback } from "@/components/ArticleFeedback";
@@ -74,23 +75,27 @@ export function ArticleView({
   const subsegmentName = article.subsegment?.name ?? subsegment;
   const byline =
     article.author?.displayName ??
-    (article.author?.username ? `@${article.author.username}` : "EshSpeaks Newsroom");
+    (article.author?.username
+      ? `@${article.author.username}`
+      : (article.author?.name ?? "EshSpeaks Newsroom"));
   const publishedAt = article.publishedAt ?? article.createdAt;
   const dateLabel = new Date(publishedAt).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-  const paragraphs = unlocked
-    ? article.body
-        .split(/\n{2,}/)
-        .map((p) => p.trim())
-        .filter(Boolean)
-    : (article.preview ?? article.dek)
-        .split(/\n{2,}/)
-        .map((p) => p.trim())
-        .filter(Boolean);
-  const canonicalPath = `/${sectionSlug}/${subsegmentSlug}/${article.slug}`;
+  /**
+   * When `access === "preview"`, the backend has already truncated `body` to the permitted
+   * preview text (confirmed shape: `{contentTier, access: "preview", previewWordCount, body}`)
+   * — this renders that truncated body as-is rather than re-deriving a shorter preview
+   * client-side. `article.preview` (a distinct, separate field some gating implementations send)
+   * is the fallback for a response shaped differently; `dek` is the last resort so a locked
+   * article is never rendered with nothing at all.
+   */
+  const bodyText = unlocked ? article.body : article.body || article.preview || article.dek;
+  const canonicalPath = subsegmentSlug
+    ? `/${sectionSlug}/${subsegmentSlug}/${article.slug}`
+    : `/${sectionSlug}/${article.slug}`;
   const shareUrl =
     typeof window !== "undefined" ? `${window.location.origin}${canonicalPath}` : canonicalPath;
 
@@ -138,13 +143,18 @@ export function ArticleView({
             />
           ) : null}
 
-          <div className="mt-8 max-w-3xl space-y-6 text-lg leading-8 text-text-primary">
-            {paragraphs.map((paragraph, index) => (
-              <p key={`${paragraph.slice(0, 12)}-${index}`}>{paragraph}</p>
-            ))}
+          <div className="mt-8 max-w-3xl text-lg leading-8 text-text-primary">
+            <ArticleBody body={bodyText} />
           </div>
 
-          {!unlocked ? <PaywallPanel signedIn={isAuthenticated} /> : null}
+          {!unlocked ? (
+            <PaywallPanel
+              signedIn={isAuthenticated}
+              previewWordCount={
+                article.access === "preview" ? (article.previewWordCount ?? null) : null
+              }
+            />
+          ) : null}
 
           {unlocked ? (
             <>
@@ -169,7 +179,11 @@ export function ArticleView({
         </article>
 
         <aside className="space-y-6">
-          <RelatedStories sectionSlug={sectionSlug} excludeSlug={article.slug} />
+          <ReadNext
+            relatedArticles={article.relatedArticles}
+            sectionSlug={sectionSlug}
+            excludeSlug={article.slug}
+          />
           <AdSlot variant="sidebar" />
         </aside>
       </div>
@@ -177,34 +191,47 @@ export function ArticleView({
   );
 }
 
-function RelatedStories({
+/**
+ * Prefers the detail response's own `relatedArticles` (the backend's picks, confirmed live —
+ * see the API response example in the article-content spec) over inventing a client-side
+ * "same section" query. Only falls back to fetching by section when the response doesn't
+ * include `relatedArticles` at all, so older/differently-shaped responses keep working.
+ */
+function ReadNext({
+  relatedArticles,
   sectionSlug,
   excludeSlug,
 }: {
+  relatedArticles: ApiArticleSummary[] | null | undefined;
   sectionSlug: string;
   excludeSlug: string;
 }) {
-  const [items, setItems] = useState<ApiArticleSummary[] | null>(null);
+  const hasRelated = relatedArticles !== undefined && relatedArticles !== null;
+  const [fallbackItems, setFallbackItems] = useState<ApiArticleSummary[] | null>(null);
 
   useEffect(() => {
-    if (!sectionSlug) return;
+    if (hasRelated || !sectionSlug) return;
     let cancelled = false;
     fetchArticlesBySection(sectionSlug, { limit: 6 })
       .then(({ items: fetched }) => {
-        if (!cancelled) setItems(fetched.filter((a) => a.slug !== excludeSlug).slice(0, 4));
+        if (!cancelled) setFallbackItems(fetched.filter((a) => a.slug !== excludeSlug).slice(0, 4));
       })
       .catch(() => {
-        if (!cancelled) setItems([]);
+        if (!cancelled) setFallbackItems([]);
       });
     return () => {
       cancelled = true;
     };
-  }, [sectionSlug, excludeSlug]);
+  }, [hasRelated, sectionSlug, excludeSlug]);
+
+  const items = hasRelated
+    ? relatedArticles.filter((a) => a.slug !== excludeSlug).slice(0, 4)
+    : fallbackItems;
 
   if (items === null) {
     return (
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-brand-navy">Related stories</h2>
+        <h2 className="font-serif text-2xl text-brand-navy">Read next</h2>
         <div className="mt-4 space-y-3">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
@@ -217,7 +244,7 @@ function RelatedStories({
 
   return (
     <section className="rounded-lg border border-border bg-card p-6">
-      <h2 className="font-serif text-2xl text-brand-navy">Related stories</h2>
+      <h2 className="font-serif text-2xl text-brand-navy">Read next</h2>
       <div className="mt-4 space-y-3">
         {items.map((item) => (
           <ListCard key={item.slug} article={toUiArticle(item, { sectionSlug })} compact />

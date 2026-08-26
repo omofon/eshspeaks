@@ -17,17 +17,27 @@ import { Check, Lock } from "lucide-react";
  * upsell once that decision has already been made; it has no gating logic
  * of its own to keep in sync with the backend.
  */
-export function PaywallPanel({ signedIn = false }: { signedIn?: boolean }) {
+export function PaywallPanel({
+  signedIn = false,
+  previewWordCount = null,
+}: {
+  signedIn?: boolean;
+  /** From the article response's `previewWordCount` when `access === "preview"` — a display
+   *  hint only ("you've read the preview"), not something used to decide how much to show;
+   *  the backend already sent exactly the permitted preview text. */
+  previewWordCount?: number | null;
+}) {
   return (
     <section className="relative mt-8 rounded-md border border-gold bg-card p-6 shadow-card">
       <div className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-gold-foreground">
         <Lock className="h-3 w-3" strokeWidth={2} />
         Premium reporting
       </div>
-      <h2 className="mt-2 font-serif text-2xl text-navy">
-        The rest of this story is for subscribers
-      </h2>
+      <h2 className="mt-2 font-serif text-2xl text-navy">Continue reading — for subscribers</h2>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        {previewWordCount
+          ? `You've read the first ${previewWordCount.toLocaleString()} words. `
+          : ""}
         This piece is built on documents and first-hand briefings. Premium keeps that reporting
         funded, removes advertising, and unlocks the full archive across all eight sections.
       </p>

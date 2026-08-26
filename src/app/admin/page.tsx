@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { FileText, PenSquare, Shield, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useEditorRole } from "@/hooks/useEditorRole";
@@ -26,49 +26,51 @@ const STATUS_FILTERS: { status: ArticleStatus | undefined; label: string }[] = [
  * work only (backend-enforced via the `mine` semantics on
  * /articles/editorial/mine); Section Lead/Chief Editor see the newsroom
  * scope the backend grants them.
+ *
+ * Each status count is its own React Query entry (key includes the status),
+ * not one big Promise.all fired straight from an effect. That used to mean
+ * 4 concurrent, uncached `GET /articles/editorial/mine?status=...&limit=1`
+ * requests on every mount — doubled again by React StrictMode in dev —
+ * which was enough to trip the backend's rate limiter on its own. React
+ * Query dedupes concurrent identical requests and, via `staleTime`, skips
+ * refetching entirely on a remount within that window (e.g. navigating
+ * away from /admin and back), cutting a real request-count problem down to
+ * "one request per distinct status, once per minute" instead of a burst.
  */
+const COUNTS_STALE_TIME = 60_000;
+
 export default function AdminOverviewPage() {
   const { user } = useAuth();
   const role = useEditorRole();
-  const [counts, setCounts] = useState<Record<string, number> | null>(null);
-  const [editorialUserCount, setEditorialUserCount] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!role) return;
-    let cancelled = false;
+  const countQueries = useQueries({
+    queries: STATUS_FILTERS.map(({ status, label }) => ({
+      queryKey: ["editorial-articles-count", status ?? "all"] as const,
+      queryFn: () => fetchEditorialArticles({ status, limit: 1 }).then(({ meta }) => meta.total),
+      enabled: Boolean(role),
+      staleTime: COUNTS_STALE_TIME,
+      meta: { label },
+    })),
+  });
 
-    Promise.all(
-      STATUS_FILTERS.map(({ status }) =>
-        fetchEditorialArticles({ status, limit: 1 }).then(({ meta }) => meta.total),
-      ),
-    )
-      .then((totals) => {
-        if (cancelled) return;
-        const next: Record<string, number> = {};
-        STATUS_FILTERS.forEach((f, i) => {
-          next[f.label] = totals[i]!;
-        });
-        setCounts(next);
-      })
-      .catch((e: unknown) => {
-        if (!cancelled) setError(e instanceof ApiError ? e.message : "Couldn't load counts.");
-      });
+  const editorialUsersQuery = useQuery({
+    queryKey: ["editorial-users"],
+    queryFn: fetchEditorialUsers,
+    enabled: role === "chief_editor",
+    staleTime: COUNTS_STALE_TIME,
+  });
 
-    if (role === "chief_editor") {
-      fetchEditorialUsers()
-        .then((users) => {
-          if (!cancelled) setEditorialUserCount(users.length);
-        })
-        .catch(() => {
-          if (!cancelled) setEditorialUserCount(null);
-        });
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [role]);
+  const countsLoading = countQueries.some((q) => q.isLoading);
+  const countsError = countQueries.find((q) => q.error)?.error;
+  const counts: Record<string, number> | null = countsLoading
+    ? null
+    : Object.fromEntries(STATUS_FILTERS.map((f, i) => [f.label, countQueries[i]?.data ?? 0]));
+  const editorialUserCount = editorialUsersQuery.data?.length ?? null;
+  const error = countsError
+    ? countsError instanceof ApiError
+      ? countsError.message
+      : "Couldn't load counts."
+    : null;
 
   if (!role) {
     return (

@@ -221,9 +221,9 @@ export function StorySettingsDrawer({
 
             <label className="mb-1 mt-3 block text-xs text-[var(--text-muted)]">
               Source type{" "}
-              <span className="text-[var(--text-muted)]">
+              {/* <span className="text-[var(--text-muted)]">
                 (only "ORIGINAL" is confirmed live — see CMS-BACKEND-REQUESTS.md)
-              </span>
+              </span> */}
             </label>
             <select
               value={draft.sourceType}
@@ -294,11 +294,11 @@ export function StorySettingsDrawer({
           <section ref={refs.history} className="mb-4">
             <p className="kicker-muted mb-3">Revision history</p>
             <p className="mb-2 text-xs text-[var(--text-muted)]">
-              Saved in this browser only — there's no server-side revision endpoint yet.
+              Saved in this browser only, there's no server-side revision endpoint yet.
             </p>
             {revisions.length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">
-                Nothing saved yet — revisions appear here once autosave runs.
+                Nothing saved yet, revisions appear here once autosave runs.
               </p>
             ) : (
               <ul className="space-y-3">

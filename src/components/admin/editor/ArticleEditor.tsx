@@ -554,6 +554,14 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
       wrapSelection("code", "editor-inline-code");
       syncBody();
     },
+    bulletList: () => {
+      document.execCommand("insertUnorderedList");
+      syncBody();
+    },
+    numberedList: () => {
+      document.execCommand("insertOrderedList");
+      syncBody();
+    },
     note: (note: string) => {
       const sel = window.getSelection();
       if (sel && !sel.isCollapsed) {
@@ -905,6 +913,8 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
           onHeading={editorCommands.heading}
           onQuote={editorCommands.quote}
           onCode={editorCommands.code}
+          onBulletList={editorCommands.bulletList}
+          onNumberedList={editorCommands.numberedList}
           onNote={editorCommands.note}
         />
       ) : null}

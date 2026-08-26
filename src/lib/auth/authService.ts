@@ -212,19 +212,44 @@ function normalizeSession(data: VerifyResult): AuthSession {
   };
 }
 
+/**
+ * Single-flight guard. Every 401 on an authenticated request calls
+ * `authService.refresh()` independently (see `request()` above and
+ * `client.ts`'s own retry-once logic), and `AuthProvider` also calls it
+ * proactively ~60s before expiry — without this, a burst of requests that
+ * all go stale at once (e.g. several editor calls firing together) would
+ * each start their own `POST /auth/refresh` with the SAME refresh token.
+ * If the backend rotates refresh tokens on use (single-use tokens are the
+ * standard, safer pattern), only the first of those concurrent calls
+ * succeeds — the rest arrive with an already-spent token and fail, logging
+ * a still-valid session out. Every caller during the window instead awaits
+ * this one in-flight promise.
+ */
+let inFlightRefresh: Promise<boolean> | null = null;
+
 async function tryRefresh(): Promise<boolean> {
+  if (inFlightRefresh) return inFlightRefresh;
+
+  inFlightRefresh = (async () => {
+    try {
+      const stored = tokenStore.refresh();
+      if (!stored) return false; // nothing to refresh with — this API has no refresh cookie fallback
+      const data = await request<{ accessToken: string; refreshToken: string; expiresIn: number }>(
+        "/auth/refresh",
+        { method: "POST", body: JSON.stringify({ refreshToken: stored }), retryOn401: false },
+      );
+      tokenStore.set(data);
+      return true;
+    } catch {
+      tokenStore.clear();
+      return false;
+    }
+  })();
+
   try {
-    const stored = tokenStore.refresh();
-    if (!stored) return false; // nothing to refresh with — this API has no refresh cookie fallback
-    const data = await request<{ accessToken: string; refreshToken: string; expiresIn: number }>(
-      "/auth/refresh",
-      { method: "POST", body: JSON.stringify({ refreshToken: stored }), retryOn401: false },
-    );
-    tokenStore.set(data);
-    return true;
-  } catch {
-    tokenStore.clear();
-    return false;
+    return await inFlightRefresh;
+  } finally {
+    inFlightRefresh = null;
   }
 }
 

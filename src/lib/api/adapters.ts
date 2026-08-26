@@ -1,6 +1,7 @@
 import type { Article, ArticleImage, Section } from "@/lib/data/types";
 import type { ApiArticleDetail, ApiArticleSummary, ApiSection } from "@/lib/api/types";
-import type { DraftState } from "@/lib/cms/types";
+import type { Paginated } from "@/lib/api/client";
+import type { ContentTier, DraftState, SourceType, ArticleStatus } from "@/lib/cms/types";
 
 /**
  * The backend has no color/"tint" concept for a section — that's purely a
@@ -20,6 +21,87 @@ const TINT_ROTATION = [
   "foreign",
   "tech",
 ];
+
+/**
+ * Enum casing normalization — confirmed live: the public `GET /articles/:slug` response sends
+ * lowercase (`"contentTier": "premium"`, `"sourceType": "original"`), while editorial endpoints
+ * (`/articles/editorial/mine`, create/update responses) send the DTO's uppercase
+ * (`"PREMIUM"`/`"ORIGINAL"`). `ArticleStatus` is lowercase-canonical everywhere else in this
+ * codebase, so a `"PUBLISHED"` from an editorial endpoint needs lowercasing instead. Normalizing
+ * once here — right where raw API JSON becomes a typed article — means every component
+ * downstream (including ones that read the raw `ApiArticleDetail` directly, like ArticleView,
+ * not just ones that go through toUiArticle) only ever sees one canonical casing, instead of a
+ * `.toUpperCase()` scattered at every comparison site.
+ */
+const CONTENT_TIERS: readonly ContentTier[] = ["FREE", "PREMIUM"];
+const SOURCE_TYPES: readonly SourceType[] = ["ORIGINAL", "CURATED", "PARTNER"];
+const ARTICLE_STATUSES: readonly ArticleStatus[] = ["draft", "in_review", "published", "archived"];
+
+function normalizeContentTier(value: unknown): ContentTier {
+  const upper = typeof value === "string" ? value.toUpperCase() : "";
+  return (CONTENT_TIERS as readonly string[]).includes(upper) ? (upper as ContentTier) : "FREE";
+}
+
+function normalizeSourceType(value: unknown): SourceType {
+  const upper = typeof value === "string" ? value.toUpperCase() : "";
+  return (SOURCE_TYPES as readonly string[]).includes(upper) ? (upper as SourceType) : "ORIGINAL";
+}
+
+function normalizeArticleStatus(value: unknown): ArticleStatus {
+  const lower = typeof value === "string" ? value.toLowerCase() : "";
+  return (ARTICLE_STATUSES as readonly string[]).includes(lower)
+    ? (lower as ArticleStatus)
+    : "draft";
+}
+
+/** Some responses nest the featured image (`{url,alt,width,height}`) instead of sending the
+ *  flat `featuredImageUrl`/... fields the confirmed CreateArticleDto uses — read whichever is
+ *  present rather than assuming one specific response shape. */
+function resolveFeaturedImage(raw: ApiArticleSummary) {
+  if (raw.featuredImageUrl) {
+    return {
+      url: raw.featuredImageUrl,
+      alt: raw.featuredImageAlt,
+      width: raw.featuredImageWidth,
+      height: raw.featuredImageHeight,
+    };
+  }
+  const nested = raw.featuredImage;
+  return {
+    url: nested?.url ?? null,
+    alt: nested?.alt ?? null,
+    width: nested?.width ?? null,
+    height: nested?.height ?? null,
+  };
+}
+
+function normalizeArticleFields<T extends ApiArticleSummary>(raw: T): T {
+  const img = resolveFeaturedImage(raw);
+  return {
+    ...raw,
+    contentTier: normalizeContentTier(raw.contentTier),
+    sourceType: normalizeSourceType(raw.sourceType),
+    status: normalizeArticleStatus(raw.status),
+    featuredImageUrl: img.url,
+    featuredImageAlt: img.alt,
+    featuredImageWidth: img.width,
+    featuredImageHeight: img.height,
+  };
+}
+
+/** Apply to every single-article response (`GET /articles/:slug`, create/update responses). */
+export function normalizeApiArticle<T extends ApiArticleSummary>(raw: T): T {
+  return normalizeArticleFields(raw);
+}
+
+/** Apply to every list-article response (section/subsegment/all/editorial-mine feeds), including
+ *  the `relatedArticles` the detail response embeds — those are ApiArticleSummary shapes too and
+ *  need the same casing/image normalization before anything renders a card from them. */
+export function normalizePaginatedArticles<T extends ApiArticleSummary>(
+  result: Paginated<T>,
+): Paginated<T> {
+  return { ...result, items: result.items.map(normalizeArticleFields) };
+}
 
 export function toUiSection(api: ApiSection, index = 0): Section {
   return {
@@ -49,7 +131,7 @@ export function toUiArticle(
 ): Article {
   const byline =
     api.author?.displayName ??
-    (api.author?.username ? `@${api.author.username}` : "EshSpeaks Newsroom");
+    (api.author?.username ? `@${api.author.username}` : (api.author?.name ?? "EshSpeaks Newsroom"));
   const bodyText = "body" in api && typeof api.body === "string" ? api.body : "";
   const publishedAt = api.publishedAt ?? api.createdAt;
 

@@ -27,13 +27,13 @@ export default function Error({
     <div className="container-eshspeaks py-20">
       <div className="mx-auto max-w-2xl text-center">
         <div className="flex justify-center">
-          <WhiteLogo size="md" inverted={false} asLink={false} />
+          <WhiteLogo size="md" inverted={false} asLink={false} className="hover:cursor-default" />
         </div>
 
         <p className="kicker mt-10">Something went wrong</p>
         <h1 className="headline-lg mt-3 text-navy">This page hit a snag.</h1>
         <p className="mt-4 text-[17px] leading-8 text-text-secondary">
-          Nothing was lost — try again, or head back to the front page. If this keeps happening, let
+          Nothing was lost - try again, or head back to the front page. If this keeps happening, let
           us know what you were doing when it broke.
         </p>
         {error.digest ? (

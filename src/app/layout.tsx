@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader, Inter, IBM_Plex_Mono, Bodoni_Moda } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
 import { CookieSettingsModal } from "@/components/CookieSettingsModal";
+import { CookieConsentProvider } from "@/lib/cookieConsent";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { PreviewProvider } from "@/lib/dev/previewTier";
 import { QueryProvider } from "@/lib/query/QueryProvider";
@@ -50,11 +51,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <QueryProvider>
           <PreviewProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <CookieConsentProvider>
+                {children}
+                <CookieBanner />
+                <CookieSettingsModal />
+              </CookieConsentProvider>
+            </AuthProvider>
           </PreviewProvider>
         </QueryProvider>
-        <CookieBanner />
-        <CookieSettingsModal />
       </body>
     </html>
   );

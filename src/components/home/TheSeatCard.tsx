@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Article } from "@/lib/data/types";
+import { articleHref } from "./primitives";
 
 /** The Seat — executive desk panel. Navy elevation, deliberately quiet. */
 export function TheSeatCard({ article }: { article: Article }) {
@@ -42,10 +43,7 @@ export function TheSeatCard({ article }: { article: Article }) {
         </span>
       </div>
 
-      <Link
-        href={`/${article.section}/${article.subsegment}/${article.slug}`}
-        className="group block"
-      >
+      <Link href={articleHref(article)} className="group block">
         <h2 className="font-serif text-2xl font-bold leading-[1.1] transition-colors group-hover:text-brand-orange">
           {article.title}
         </h2>

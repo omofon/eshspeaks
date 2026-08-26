@@ -12,6 +12,7 @@ import type {
   ApiLikeResult,
   ApiFeedbackResult,
 } from "@/lib/api/types";
+import { normalizeApiArticle, normalizePaginatedArticles } from "@/lib/api/adapters";
 import type { ArticleStatus, ContentTier, DraftState, SourceType } from "@/lib/cms/types";
 
 /** Re-exported so existing call sites (`ArticleApiError`) don't need to change. */
@@ -132,11 +133,16 @@ export function deleteArticle(id: string): Promise<void> {
  * succeeds for anonymous visitors since apiRequest only *attaches* a
  * token when one exists.
  */
-export function fetchArticleBySlug(slug: string): Promise<ApiArticleDetail> {
-  return apiRequest<ApiArticleDetail>(`/articles/${encodeURIComponent(slug)}`, {
+export async function fetchArticleBySlug(slug: string): Promise<ApiArticleDetail> {
+  const article = await apiRequest<ApiArticleDetail>(`/articles/${encodeURIComponent(slug)}`, {
     method: "GET",
     auth: true,
   });
+  const normalized = normalizeApiArticle(article);
+  return {
+    ...normalized,
+    relatedArticles: normalized.relatedArticles?.map(normalizeApiArticle) ?? null,
+  };
 }
 
 /**
@@ -147,45 +153,51 @@ export function fetchArticleBySlug(slug: string): Promise<ApiArticleDetail> {
  * endpoints. Nothing here is gated per-user (unlike the slug detail
  * endpoint), so it's safe to sit behind Next's shared fetch cache.
  */
-export function fetchAllArticles(params: ListParams = {}): Promise<Paginated<ApiArticleSummary>> {
-  return apiRequestPaginated<ApiArticleSummary>(`/articles${toQueryString(params)}`, {
+export async function fetchAllArticles(
+  params: ListParams = {},
+): Promise<Paginated<ApiArticleSummary>> {
+  const result = await apiRequestPaginated<ApiArticleSummary>(`/articles${toQueryString(params)}`, {
     method: "GET",
     next: { revalidate: 60 },
   });
+  return normalizePaginatedArticles(result);
 }
 
-export function fetchArticlesBySection(
+export async function fetchArticlesBySection(
   sectionSlug: string,
   params: ListParams = {},
 ): Promise<Paginated<ApiArticleSummary>> {
-  return apiRequestPaginated<ApiArticleSummary>(
+  const result = await apiRequestPaginated<ApiArticleSummary>(
     `/articles/sections/${encodeURIComponent(sectionSlug)}${toQueryString(params)}`,
     {
       method: "GET",
       next: { revalidate: 60 },
     },
   );
+  return normalizePaginatedArticles(result);
 }
 
-export function fetchArticlesBySubsegment(
+export async function fetchArticlesBySubsegment(
   sectionSlug: string,
   subsegmentSlug: string,
   params: ListParams = {},
 ): Promise<Paginated<ApiArticleSummary>> {
-  return apiRequestPaginated<ApiArticleSummary>(
+  const result = await apiRequestPaginated<ApiArticleSummary>(
     `/articles/sections/${encodeURIComponent(sectionSlug)}/${encodeURIComponent(subsegmentSlug)}${toQueryString(params)}`,
     { method: "GET", next: { revalidate: 60 } },
   );
+  return normalizePaginatedArticles(result);
 }
 
 /** GET /api/v1/articles/editorial/mine — powers the CMS dashboard. A Contributor always sees only their own work. */
-export function fetchEditorialArticles(
+export async function fetchEditorialArticles(
   params: EditorialMineParams = {},
 ): Promise<Paginated<ApiArticleSummary>> {
-  return apiRequestPaginated<ApiArticleSummary>(
+  const result = await apiRequestPaginated<ApiArticleSummary>(
     `/articles/editorial/mine${toQueryString(params)}`,
     { method: "GET", auth: true },
   );
+  return normalizePaginatedArticles(result);
 }
 
 /** POST /api/v1/articles/images — multipart. Returns the CDN url + publicId to store on the draft. */

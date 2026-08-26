@@ -1,5 +1,5 @@
 import type { Article, Section } from "@/lib/data/types";
-import { SectionHeader } from "./primitives";
+import { SectionHeader, articleHref } from "./primitives";
 import { CompactStoryCard, StoryCard } from "./cards";
 
 /** Layout A — lead + two supports. Used for the heavyweight sections. */
@@ -71,7 +71,7 @@ export function OpinionBlock({ articles }: { articles: Article[] }) {
       <div className="grid gap-8 md:grid-cols-3">
         {articles.slice(0, 3).map((article) => (
           <article key={article.slug} className="group">
-            <a href={`/${article.section}/${article.subsegment}/${article.slug}`} className="block">
+            <a href={articleHref(article)} className="block">
               <h3 className="font-serif text-[21px] leading-7 text-navy transition-colors group-hover:text-maroon">
                 {article.title}
               </h3>

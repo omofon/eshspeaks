@@ -10,6 +10,8 @@ import {
   Quote,
   Code2,
   MessageSquare,
+  List,
+  ListOrdered,
 } from "lucide-react";
 import { InlinePopover } from "./InlinePopover";
 
@@ -24,6 +26,8 @@ export interface SelectionToolbarProps {
   onHeading: (level: "h1" | "h2" | "h3" | "h4") => void;
   onQuote: () => void;
   onCode: () => void;
+  onBulletList: () => void;
+  onNumberedList: () => void;
   onNote: (note: string) => void;
 }
 
@@ -40,6 +44,8 @@ export function SelectionToolbar({
   onHeading,
   onQuote,
   onCode,
+  onBulletList,
+  onNumberedList,
   onNote,
 }: SelectionToolbarProps) {
   const [openField, setOpenField] = useState<"link" | "note" | null>(null);
@@ -103,6 +109,13 @@ export function SelectionToolbar({
         </ToolbarButton>
         <ToolbarButton label="Inline code" onClick={onCode}>
           <Code2 size={ICON_SIZE} />
+        </ToolbarButton>
+        <Divider />
+        <ToolbarButton label="Bulleted list" onClick={onBulletList}>
+          <List size={ICON_SIZE} />
+        </ToolbarButton>
+        <ToolbarButton label="Numbered list" onClick={onNumberedList}>
+          <ListOrdered size={ICON_SIZE} />
         </ToolbarButton>
         <Divider />
         <ToolbarButton label="Private note" onClick={() => setOpenField("note")}>

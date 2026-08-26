@@ -5,7 +5,9 @@ import { getSection } from "@/lib/data/sections";
 
 /** Canonical article href — one place, so cards never drift apart. */
 export const articleHref = (a: Article) =>
-  `/${a.section}/${a.subsegment}/${a.slug}` as `/${string}`;
+  (a.subsegment
+    ? `/${a.section}/${a.subsegment}/${a.slug}`
+    : `/${a.section}/${a.slug}`) as `/${string}`;
 
 /** Section tint tokens registered in globals.css (--color-tint-*). */
 export function sectionTintClass(tint?: string) {

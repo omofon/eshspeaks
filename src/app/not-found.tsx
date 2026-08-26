@@ -13,14 +13,14 @@ export default function NotFound() {
     <div className="container-eshspeaks py-20">
       <div className="mx-auto max-w-2xl text-center">
         <div className="flex justify-center">
-          <WhiteLogo size="md" inverted={false} asLink={false} />
+          <WhiteLogo size="md" inverted={false} asLink={false} className="hover:cursor-default" />
         </div>
 
         <p className="kicker mt-10">Error 404</p>
         <h1 className="headline-lg mt-3 text-navy">This page has gone to press without us.</h1>
         <p className="mt-4 text-[17px] leading-8 text-text-secondary">
           The story you were looking for may have been moved, renamed, or never existed. The
-          newsroom is still here — start again from the front page or pick a section below.
+          newsroom is still here - start again from the front page or pick a section below.
         </p>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">

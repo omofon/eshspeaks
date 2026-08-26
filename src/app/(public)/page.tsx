@@ -7,11 +7,11 @@ import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { AdSlot } from "@/components/AdSlot";
 
 export const metadata = {
-  title: "EshSpeaks — Nigerian journalism, interviews and opinion",
+  title: "EshSpeaks - Nigerian journalism, interviews and opinion",
   description:
     "Reporting, interviews and opinion from Nigeria: politics, business, security, culture and public life, edited for people who need the whole picture.",
   openGraph: {
-    title: "EshSpeaks — Nigerian journalism, interviews and opinion",
+    title: "EshSpeaks - Nigerian journalism, interviews and opinion",
     description:
       "Reporting, interviews and opinion from Nigeria: politics, business, security, culture and public life.",
     type: "website",
@@ -101,7 +101,7 @@ export default async function HomePage() {
           The newsroom is just getting started.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-text-secondary">
-          Sections are set up — stories will appear here as soon as the editorial team publishes
+          Sections are set up - stories will appear here as soon as the editorial team publishes
           them.
         </p>
       </div>
@@ -116,7 +116,7 @@ export default async function HomePage() {
 
   return (
     <div className="container-eshspeaks py-6 sm:py-8">
-      <h1 className="sr-only">EshSpeaks — today&rsquo;s front page</h1>
+      <h1 className="sr-only">EshSpeaks - today&rsquo;s front page</h1>
 
       {lead ? <SectionLeadGrid section={lead} articles={leadArticles} /> : null}
 

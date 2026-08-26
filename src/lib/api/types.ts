@@ -40,6 +40,20 @@ export interface ApiAuthorRef {
   username: string | null;
   displayName: string | null;
   avatarUrl: string | null;
+  /** Some responses (confirmed in a public-article example) send `{name}` instead of the
+   *  `username`/`displayName` split above — kept here so normalizeApiArticle() can fall back
+   *  to it rather than the frontend inventing a shape neither response actually sends. */
+  name?: string | null;
+}
+
+/** Some responses nest the featured image (`{url, alt, width, height}`) instead of the flat
+ *  `featuredImageUrl`/`featuredImageAlt`/... fields the confirmed CreateArticleDto uses.
+ *  normalizeApiArticle() reads whichever shape is present. */
+export interface ApiFeaturedImageRef {
+  url: string | null;
+  alt?: string | null;
+  width?: number | null;
+  height?: number | null;
 }
 
 /**
@@ -69,6 +83,8 @@ export interface ApiArticleSummary {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Nested alternative to the flat featuredImage* fields above — see ApiFeaturedImageRef. */
+  featuredImage?: ApiFeaturedImageRef | null;
 }
 
 /**
@@ -93,9 +109,28 @@ export interface ApiArticleDetail extends ApiArticleSummary {
   /** Explicit access flag, used first when a backend implementation happens to send one. */
   hasAccess?: boolean;
   locked?: boolean;
+  /**
+   * Confirmed live on a gated public article: `"preview"` when the caller may only read the
+   * (already server-truncated) `body`, present alongside `previewWordCount`. Only "preview" is
+   * confirmed — an unrecognized or absent value falls through to hasAccess/locked/body-presence
+   * below rather than assuming a specific "full access" spelling.
+   */
+  access?: string | null;
+  /** How many words of `body` the preview response contains — a display hint ("you've read the
+   *  first 66 words"), not something the frontend needs to enforce: the backend is the one that
+   *  truncated `body` for a preview response, so `body` itself is already the right length. */
+  previewWordCount?: number | null;
+  /** The backend's own "read next" picks. Rendered as-is — no separate related-stories query
+   *  invented when this is present. */
+  relatedArticles?: ApiArticleSummary[] | null;
 }
 
+/** `"preview"` is the one confirmed access value that means "gated" — checked first so it wins
+ *  over an older hasAccess/locked flag a differently-shaped response might also send. Anything
+ *  else (a different access string, or no access field at all) falls back to the prior
+ *  heuristics, so responses from before this field existed keep working unchanged. */
 export function isArticleUnlocked(article: ApiArticleDetail): boolean {
+  if (article.access === "preview") return false;
   if (typeof article.hasAccess === "boolean") return article.hasAccess;
   if (typeof article.locked === "boolean") return !article.locked;
   return Boolean(article.body && article.body.trim().length > 0);

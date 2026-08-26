@@ -15,8 +15,14 @@ function sectionDisplayName(article: Article): string {
  * the API or mock fixtures), not statically known literals, so typedRoutes
  * can't verify this path at compile time.
  */
+/** Matches `[section]/[...rest]/page.tsx`'s resolution: articles without a subsegment (a real,
+ *  supported case — `subsegmentId` is optional) route as `/section/slug`, not `/section//slug`. */
 export function articleHref(article: Article): Route {
-  return `/${article.section}/${article.subsegment}/${article.slug}` as Route;
+  return (
+    article.subsegment
+      ? `/${article.section}/${article.subsegment}/${article.slug}`
+      : `/${article.section}/${article.slug}`
+  ) as Route;
 }
 
 export function SectionBadge({ name }: { name: string }) {

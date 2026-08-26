@@ -120,7 +120,9 @@ export function SearchOverlay({ inverted = true }: { inverted?: boolean }) {
                       <li key={article.id}>
                         <Link
                           href={
-                            `/${article.section?.slug ?? ""}/${article.subsegment?.slug ?? ""}/${article.slug}` as `/${string}`
+                            (article.subsegment?.slug
+                              ? `/${article.section?.slug ?? ""}/${article.subsegment.slug}/${article.slug}`
+                              : `/${article.section?.slug ?? ""}/${article.slug}`) as `/${string}`
                           }
                           onClick={() => setOpen(false)}
                           className="block cursor-pointer py-3 hover:bg-muted/40"
