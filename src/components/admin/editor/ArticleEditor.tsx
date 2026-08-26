@@ -1,7 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Bell, ChevronDown, MoreHorizontal, Share2, ImagePlus, Tags, SlidersHorizontal, History } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Bell,
+  ChevronDown,
+  MoreHorizontal,
+  Share2,
+  ImagePlus,
+  Tags,
+  SlidersHorizontal,
+  History,
+  Trash2,
+} from "lucide-react";
 
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { usePreview } from "@/lib/dev/previewTier";
@@ -10,13 +21,26 @@ import { useDraftLoader } from "@/hooks/useDraftLoader";
 import { useEditorRole } from "@/hooks/useEditorRole";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 import { useSectionsCatalog } from "@/hooks/useSectionsCatalog";
-import { newLocalDraftId, saveDraftLocal, markDraftSubmitted } from "@/lib/storage/draftStorage";
-import { submitArticle, ArticleApiError } from "@/lib/api/articles";
-import { detectEmbedKind, toVideoEmbedUrl, fetchTwitterEmbedHtml, facebookEmbedMarkup } from "@/lib/api/oembed";
+import { newLocalDraftId, deleteDraftLocal, markDraftSubmitted } from "@/lib/storage/draftStorage";
+import {
+  submitArticle,
+  updateArticle,
+  changeArticleStatus,
+  deleteArticle,
+  uploadArticleImage,
+  ArticleApiError,
+} from "@/lib/api/articles";
+import {
+  detectEmbedKind,
+  toVideoEmbedUrl,
+  fetchTwitterEmbedHtml,
+  facebookEmbedMarkup,
+} from "@/lib/api/oembed";
 import { slugify } from "@/lib/cms/slugify";
 import {
   bodyTextLength,
   canPublishDirectly,
+  type ArticleStatus,
   type DraftState,
   type EditorRole,
   type RevisionEntry,
@@ -27,6 +51,54 @@ import { InsertMenu } from "./InsertMenu";
 import { HelperBar } from "./HelperBar";
 import { MentionMenu } from "./MentionMenu";
 import { StorySettingsDrawer, type SettingsSection } from "./StorySettingsDrawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+/**
+ * Legal status transitions, confirmed via the live ChangeArticleStatusDto
+ * OpenAPI schema. Only a Section Lead or Chief Editor may reach `published`
+ * or `archived` — the backend enforces that with a 403; this table is used
+ * only to decide which actions to *offer*, not to authorize anything.
+ */
+const STATUS_TRANSITIONS: Record<
+  ArticleStatus,
+  { status: ArticleStatus; label: string; requiresPublishRight: boolean }[]
+> = {
+  draft: [
+    { status: "in_review", label: "Submit for review", requiresPublishRight: false },
+    { status: "published", label: "Publish", requiresPublishRight: true },
+  ],
+  in_review: [
+    { status: "draft", label: "Return to draft", requiresPublishRight: false },
+    { status: "published", label: "Publish", requiresPublishRight: true },
+  ],
+  published: [{ status: "archived", label: "Archive", requiresPublishRight: true }],
+  archived: [
+    { status: "published", label: "Republish", requiresPublishRight: true },
+    { status: "draft", label: "Move back to draft", requiresPublishRight: true },
+  ],
+};
+
+function availableTransitions(status: ArticleStatus, role: EditorRole) {
+  return STATUS_TRANSITIONS[status].filter(
+    (t) => !t.requiresPublishRight || canPublishDirectly(role),
+  );
+}
+
+function articleStatusLabel(status: ArticleStatus): string {
+  return { draft: "Draft", in_review: "In review", published: "Published", archived: "Archived" }[
+    status
+  ];
+}
 
 const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "BLOCKQUOTE", "LI"]);
 
@@ -43,12 +115,25 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   // internally, so this component doesn't manage role state itself at all.
   const role = useEditorRole();
   const { setRoleOverride, enabled: previewEnabled } = usePreview();
-  const { draft, setDraft, loading: loadingDraft, error: loadError } = useDraftLoader(draftId ?? null);
-  const { sections, loading: loadingSections, error: sectionsError, usingMock } = useSectionsCatalog();
+  const {
+    draft,
+    setDraft,
+    loading: loadingDraft,
+    error: loadError,
+  } = useDraftLoader(draftId ?? null);
+  const {
+    sections,
+    loading: loadingSections,
+    error: sectionsError,
+    usingMock,
+  } = useSectionsCatalog();
   const [revisions, setRevisions] = useState<RevisionEntry[]>([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
-  const [submitState, setSubmitState] = useState<{ status: "idle" | "submitting" | "done" | "error"; message?: string }>({
+  const [submitState, setSubmitState] = useState<{
+    status: "idle" | "submitting" | "done" | "error";
+    message?: string;
+  }>({
     status: "idle",
   });
   const [drawer, setDrawer] = useState<{ open: boolean; focus: SettingsSection }>({
@@ -59,9 +144,15 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const activeInsertBlock = useRef<HTMLElement | null>(null);
 
-  const [selectionToolbar, setSelectionToolbar] = useState<{ top: number; left: number } | null>(null);
+  const [selectionToolbar, setSelectionToolbar] = useState<{ top: number; left: number } | null>(
+    null,
+  );
   const [insertMenu, setInsertMenu] = useState<{ top: number; left: number } | null>(null);
-  const [mentionMenu, setMentionMenu] = useState<{ top: number; left: number; query: string } | null>(null);
+  const [mentionMenu, setMentionMenu] = useState<{
+    top: number;
+    left: number;
+    query: string;
+  } | null>(null);
   const mentionAnchor = useRef<{ node: Text; start: number; end: number } | null>(null);
 
   const patchDraft = useCallback(
@@ -104,7 +195,16 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.headline, draft.slugEdited]);
 
-  const { status: autosaveStatus, lastSavedAt } = useAutosave(draft, !loadingDraft);
+  // Autosave-to-localStorage only applies to a not-yet-created draft. Once
+  // remoteId is set (freshly created, or reopened from the server via
+  // useDraftLoader), the server is the source of truth and "Save changes"
+  // (PATCH) is the real persistence path — writing a local copy here too
+  // would let a stale localStorage entry shadow the fresh server copy the
+  // next time this same slug is opened.
+  const { status: autosaveStatus, lastSavedAt } = useAutosave(
+    draft,
+    !loadingDraft && !draft.remoteId,
+  );
 
   // Once the draft finishes loading into the DOM, seed the contentEditable
   // body from `body` — a deliberate one-time sync, not a controlled
@@ -136,37 +236,122 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autosaveStatus]);
 
+  const router = useRouter();
   const bodyLength = bodyTextLength(draft.body);
   const canSubmit =
     draft.headline.trim().length > 0 &&
     bodyLength > 0 &&
     Boolean(draft.sectionId) &&
-    Boolean(draft.subsegmentId) &&
     Boolean(role) &&
     submitState.status !== "submitting";
-  const actionLabel = role && canPublishDirectly(role) ? "Publish" : "Submit for review";
+  const targetStatus: ArticleStatus = role && canPublishDirectly(role) ? "published" : "in_review";
+  const actionLabel = targetStatus === "published" ? "Publish" : "Submit for review";
 
-  const handleSubmit = async () => {
+  const [saveState, setSaveState] = useState<{
+    status: "idle" | "saving" | "done" | "error";
+    message?: string;
+  }>({ status: "idle" });
+  const [statusChange, setStatusChange] = useState<{
+    status: "idle" | "changing" | "error";
+    message?: string;
+  }>({ status: "idle" });
+  const [deleteState, setDeleteState] = useState<{
+    status: "idle" | "deleting" | "error";
+    message?: string;
+  }>({ status: "idle" });
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  /** First-time create + immediately move to the caller's reachable target status. */
+  const handleCreate = async () => {
     setSubmitState({ status: "submitting" });
     try {
       const { id: remoteId } = await submitArticle(draft);
-      const next = { ...draft, remoteId };
+      if (!remoteId) {
+        setSubmitState({
+          status: "error",
+          message:
+            "The story was created, but the server didn't return an id — refresh and check the CMS list.",
+        });
+        return;
+      }
+      await changeArticleStatus(remoteId, targetStatus);
+      const next: DraftState = { ...draft, remoteId, status: targetStatus };
       setDraft(next);
       if (draft.id) {
-        saveDraftLocal(next);
         markDraftSubmitted({
           localId: draft.id,
           remoteId,
           headline: draft.headline,
           submittedAt: new Date().toISOString(),
         });
+        deleteDraftLocal(draft.id);
       }
       setSubmitState({ status: "done" });
     } catch (e) {
-      const message = e instanceof ArticleApiError ? e.message : "Something went wrong submitting this story.";
+      const message =
+        e instanceof ArticleApiError ? e.message : "Something went wrong submitting this story.";
       setSubmitState({ status: "error", message });
     }
   };
+
+  /** PATCH content only — never touches status (the backend rejects status on this endpoint by design). */
+  const handleSaveChanges = async () => {
+    if (!draft.remoteId) return;
+    setSaveState({ status: "saving" });
+    try {
+      await updateArticle(draft.remoteId, draft);
+      setSaveState({ status: "done" });
+      window.setTimeout(
+        () => setSaveState((s) => (s.status === "done" ? { status: "idle" } : s)),
+        2500,
+      );
+    } catch (e) {
+      setSaveState({
+        status: "error",
+        message: e instanceof ArticleApiError ? e.message : "Couldn't save your changes.",
+      });
+    }
+  };
+
+  const handleStatusChange = async (next: ArticleStatus) => {
+    if (!draft.remoteId) return;
+    setStatusChange({ status: "changing" });
+    try {
+      await changeArticleStatus(draft.remoteId, next);
+      patchDraft({ status: next });
+      setStatusChange({ status: "idle" });
+    } catch (e) {
+      setStatusChange({
+        status: "error",
+        message: e instanceof ArticleApiError ? e.message : "Couldn't change this story's status.",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!draft.remoteId) return;
+    setDeleteState({ status: "deleting" });
+    try {
+      await deleteArticle(draft.remoteId);
+      if (draft.id) deleteDraftLocal(draft.id);
+      router.push("/admin/articles");
+    } catch (e) {
+      setDeleteState({
+        status: "error",
+        message: e instanceof ArticleApiError ? e.message : "Couldn't delete this story.",
+      });
+    }
+  };
+
+  async function uploadImage(file: File, alt: string) {
+    setUploadError(null);
+    try {
+      return await uploadArticleImage(file, alt);
+    } catch (e) {
+      setUploadError(e instanceof ArticleApiError ? e.message : "Couldn't upload that image.");
+      return null;
+    }
+  }
 
   /* ------------------------------------------------------------ selection */
 
@@ -209,7 +394,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   );
 
   const closestBlock = useCallback((node: Node | null): HTMLElement | null => {
-    let el: HTMLElement | null = node instanceof HTMLElement ? node : node?.parentElement ?? null;
+    let el: HTMLElement | null = node instanceof HTMLElement ? node : (node?.parentElement ?? null);
     while (el && el !== bodyRef.current) {
       if (BLOCK_TAGS.has(el.tagName)) return el;
       el = el.parentElement;
@@ -244,9 +429,13 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
         const text = (anchorNode as Text).data.slice(0, anchorOffset);
         const match = text.match(/@([a-zA-Z]{0,20}(?: [a-zA-Z]{0,20})?)$/);
         if (match) {
-          mentionAnchor.current = { node: anchorNode as Text, start: anchorOffset - match[0].length, end: anchorOffset };
+          mentionAnchor.current = {
+            node: anchorNode as Text,
+            start: anchorOffset - match[0].length,
+            end: anchorOffset,
+          };
           const rect = range.getBoundingClientRect();
-          setMentionMenu({ top: rect.bottom + 6, left: rect.left, query: match[1] });
+          setMentionMenu({ top: rect.bottom + 6, left: rect.left, query: match[1] ?? "" });
         } else {
           setMentionMenu(null);
           mentionAnchor.current = null;
@@ -378,13 +567,31 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   };
 
   const insertCommands = {
-    imageFile: (file: File) => {
-      // TODO(sprint-2-media): no upload endpoint is confirmed live yet —
-      // this is a local object URL for in-editor preview only.
-      const src = URL.createObjectURL(file);
+    imageFile: async (file: File) => {
+      const placeholderId = `upload-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const previewSrc = URL.createObjectURL(file);
       insertAtActiveBlock(
-        `<figure class="editor-figure"><img src="${src}" alt="${escapeHtml(file.name)}" /><figcaption class="meta">Add a caption &middot; not yet uploadable, see backend requests</figcaption></figure><p><br></p>`,
+        `<figure class="editor-figure" data-upload-id="${placeholderId}"><img src="${previewSrc}" alt="${escapeHtml(file.name)}" style="opacity:0.55" /><figcaption class="meta">Uploading&hellip;</figcaption></figure><p><br></p>`,
       );
+
+      const uploaded = await uploadImage(file, file.name);
+      const figure = bodyRef.current?.querySelector<HTMLElement>(
+        `[data-upload-id="${placeholderId}"]`,
+      );
+      URL.revokeObjectURL(previewSrc);
+
+      if (!figure) return; // block was removed/edited away before the upload finished
+      if (!uploaded) {
+        figure.querySelector("figcaption")!.textContent =
+          "Upload failed — remove this image and try again.";
+        figure.querySelector("img")?.setAttribute("style", "opacity:0.3");
+      } else {
+        figure.querySelector("img")?.setAttribute("src", uploaded.url);
+        figure.querySelector("img")?.removeAttribute("style");
+        figure.querySelector("figcaption")!.textContent = "Add a caption";
+      }
+      figure.removeAttribute("data-upload-id");
+      syncBody();
     },
     imageFromLibrary: (query: string) => {
       const src = `https://picsum.photos/seed/${encodeURIComponent(query)}/1600/900`;
@@ -418,7 +625,9 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
       }
     },
     codeBlock: () => {
-      insertAtActiveBlock(`<pre class="editor-code-block"><code contenteditable="true">// code</code></pre><p><br></p>`);
+      insertAtActiveBlock(
+        `<pre class="editor-code-block"><code contenteditable="true">// code</code></pre><p><br></p>`,
+      );
     },
     embed: (code: string) => {
       insertAtActiveBlock(
@@ -482,7 +691,9 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
             </span>
             <StatusPill
               label={statusLabel}
-              saving={autosaveStatus === "saving" || loadingDraft || submitState.status === "submitting"}
+              saving={
+                autosaveStatus === "saving" || loadingDraft || submitState.status === "submitting"
+              }
               lastSavedAt={lastSavedAt}
             />
           </div>
@@ -490,14 +701,48 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
           <div className="flex items-center gap-2">
             {previewEnabled ? <RoleSwitcher role={role} onChange={setRoleOverride} /> : null}
 
-            <button
-              type="button"
-              disabled={!canSubmit}
-              onClick={handleSubmit}
-              className="btn-accent disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {submitState.status === "submitting" ? "Submitting\u2026" : actionLabel}
-            </button>
+            {draft.remoteId ? (
+              <>
+                <span
+                  className="rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide"
+                  style={{ background: "var(--navy-tint)", color: "var(--navy)" }}
+                >
+                  {articleStatusLabel(draft.status)}
+                </span>
+                <button
+                  type="button"
+                  disabled={saveState.status === "saving"}
+                  onClick={handleSaveChanges}
+                  className="btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {saveState.status === "saving"
+                    ? "Saving\u2026"
+                    : saveState.status === "done"
+                      ? "Saved"
+                      : "Save changes"}
+                </button>
+                {availableTransitions(draft.status, role).map((t) => (
+                  <button
+                    key={t.status}
+                    type="button"
+                    disabled={statusChange.status === "changing"}
+                    onClick={() => handleStatusChange(t.status)}
+                    className="btn-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {statusChange.status === "changing" ? "Working\u2026" : t.label}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled={!canSubmit}
+                onClick={handleCreate}
+                className="btn-accent disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {submitState.status === "submitting" ? "Submitting\u2026" : actionLabel}
+              </button>
+            )}
 
             <div ref={moreRef} className="relative">
               <button
@@ -519,7 +764,10 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
                   <MenuItem icon={<ImagePlus size={15} />} onClick={() => openDrawer("image")}>
                     Change featured image
                   </MenuItem>
-                  <MenuItem icon={<SlidersHorizontal size={15} />} onClick={() => openDrawer("title")}>
+                  <MenuItem
+                    icon={<SlidersHorizontal size={15} />}
+                    onClick={() => openDrawer("title")}
+                  >
                     Change display title / subtitle / slug
                   </MenuItem>
                   <MenuItem icon={<Tags size={15} />} onClick={() => openDrawer("taxonomy")}>
@@ -529,9 +777,48 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
                     See revision history
                   </MenuItem>
                   <div className="hairline my-1" />
-                  <MenuItem icon={<span className="text-xs font-semibold">$</span>} onClick={() => openDrawer("tier")}>
+                  <MenuItem
+                    icon={<span className="text-xs font-semibold">$</span>}
+                    onClick={() => openDrawer("tier")}
+                  >
                     Content tier: {draft.contentTier === "PREMIUM" ? "Premium" : "Free"}
                   </MenuItem>
+                  {draft.remoteId && role === "chief_editor" ? (
+                    <>
+                      <div className="hairline my-1" />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => setMoreOpen(false)}
+                            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm hover:bg-[var(--muted)]"
+                            style={{ color: "var(--error)" }}
+                          >
+                            <Trash2 size={15} />
+                            Delete story
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete this story?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This permanently deletes &ldquo;{draft.headline || "this story"}
+                              &rdquo; along with its likes and comments. This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDelete}
+                              style={{ background: "var(--error)" }}
+                            >
+                              Delete permanently
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -563,15 +850,22 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
       ) : null}
       {usingMock ? (
         <Banner tone="warning">
-          Using local mock sections (NEXT_PUBLIC_USE_MOCK_DATA=true) — these don't have real ids, so submitting will fail against the live API.
+          Using local mock sections (NEXT_PUBLIC_USE_MOCK_DATA=true) — these don't have real ids, so
+          submitting will fail against the live API.
         </Banner>
       ) : null}
       {submitState.status === "error" ? <Banner tone="error">{submitState.message}</Banner> : null}
       {submitState.status === "done" ? (
         <Banner tone="success">
-          Submitted. There's no review/publish workflow endpoint yet (see CMS-BACKEND-REQUESTS.md) — this created the article record directly.
+          {targetStatus === "published" ? "Published." : "Submitted for review."}
         </Banner>
       ) : null}
+      {saveState.status === "error" ? <Banner tone="error">{saveState.message}</Banner> : null}
+      {statusChange.status === "error" ? (
+        <Banner tone="error">{statusChange.message}</Banner>
+      ) : null}
+      {deleteState.status === "error" ? <Banner tone="error">{deleteState.message}</Banner> : null}
+      {uploadError ? <Banner tone="error">{uploadError}</Banner> : null}
 
       {/* ------------------------------------------------------------- canvas */}
       <main className="container-eshspeaks">
@@ -580,7 +874,10 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
             <EditorSkeleton />
           ) : (
             <>
-              <AutoResizeTitle value={draft.headline} onChange={(headline) => patchDraft({ headline })} />
+              <AutoResizeTitle
+                value={draft.headline}
+                onChange={(headline) => patchDraft({ headline })}
+              />
 
               <div
                 ref={bodyRef}
@@ -626,7 +923,12 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
       ) : null}
 
       {mentionMenu ? (
-        <MentionMenu top={mentionMenu.top} left={mentionMenu.left} query={mentionMenu.query} onPick={pickMention} />
+        <MentionMenu
+          top={mentionMenu.top}
+          left={mentionMenu.left}
+          query={mentionMenu.query}
+          onPick={pickMention}
+        />
       ) : null}
 
       <StorySettingsDrawer
@@ -638,6 +940,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
         revisions={revisions}
         onClose={() => setDrawer((d) => ({ ...d, open: false }))}
         onChange={patchDraft}
+        onUploadImage={uploadImage}
       />
 
       <HelperBar />
@@ -761,18 +1064,36 @@ function EditorSkeleton() {
       <div className="mb-6 h-11 w-3/4 rounded" style={{ background: "var(--muted)" }} />
       <div className="space-y-3">
         {[100, 100, 80, 100, 60].map((w, i) => (
-          <div key={i} className="h-4 rounded" style={{ background: "var(--muted)", width: `${w}%` }} />
+          <div
+            key={i}
+            className="h-4 rounded"
+            style={{ background: "var(--muted)", width: `${w}%` }}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function Banner({ tone, children }: { tone: "error" | "warning" | "success"; children: React.ReactNode }) {
+function Banner({
+  tone,
+  children,
+}: {
+  tone: "error" | "warning" | "success";
+  children: React.ReactNode;
+}) {
   const styles = {
     error: { background: "var(--error-soft)", borderColor: "var(--error)", color: "var(--error)" },
-    warning: { background: "var(--warning-soft)", borderColor: "var(--warning)", color: "var(--warning)" },
-    success: { background: "var(--success-soft)", borderColor: "var(--success)", color: "var(--success)" },
+    warning: {
+      background: "var(--warning-soft)",
+      borderColor: "var(--warning)",
+      color: "var(--warning)",
+    },
+    success: {
+      background: "var(--success-soft)",
+      borderColor: "var(--success)",
+      color: "var(--success)",
+    },
   }[tone];
   return (
     <div className="container-eshspeaks pt-4">
@@ -793,7 +1114,10 @@ function StatusPill({
   lastSavedAt: Date | null;
 }) {
   return (
-    <div className="meta flex items-center gap-1.5" title={lastSavedAt ? `Last saved ${lastSavedAt.toLocaleTimeString()}` : undefined}>
+    <div
+      className="meta flex items-center gap-1.5"
+      title={lastSavedAt ? `Last saved ${lastSavedAt.toLocaleTimeString()}` : undefined}
+    >
       <span
         className={`h-1.5 w-1.5 rounded-full ${saving ? "animate-pulse" : ""}`}
         style={{ background: saving ? "var(--accent)" : "var(--success)" }}
@@ -828,7 +1152,13 @@ function MenuItem({
 // (state_correspondent / section_lead / chief_editor), and onChange now
 // writes to the dev PreviewProvider override instead of nonexistent local
 // state.
-function RoleSwitcher({ role, onChange }: { role: EditorRole; onChange: (r: EditorRole | null) => void }) {
+function RoleSwitcher({
+  role,
+  onChange,
+}: {
+  role: EditorRole;
+  onChange: (r: EditorRole | null) => void;
+}) {
   return (
     <div className="relative">
       <select
@@ -843,7 +1173,10 @@ function RoleSwitcher({ role, onChange }: { role: EditorRole; onChange: (r: Edit
         <option value="section_lead">Section lead</option>
         <option value="chief_editor">Chief editor</option>
       </select>
-      <ChevronDown size={11} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+      <ChevronDown
+        size={11}
+        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+      />
     </div>
   );
 }
@@ -870,5 +1203,8 @@ function initials(name: string) {
 }
 
 function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 }

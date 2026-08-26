@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { buildLoginHref, getSafeReturnTo } from "./returnTo";
@@ -19,8 +20,10 @@ export function useAuthGatedAction(action: string) {
       run();
       return;
     }
-    const currentPath = getSafeReturnTo(`${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`);
-    router.push(buildLoginHref(currentPath, action));
+    const currentPath = getSafeReturnTo(
+      `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+    );
+    router.push(buildLoginHref(currentPath, action) as Route);
   };
 }
 
@@ -36,7 +39,7 @@ export function useSubscriberGatedAction() {
       return;
     }
     const safePath = getSafeReturnTo(pathname);
-    router.push(isAuthenticated ? "/subscribe" : buildLoginHref(safePath, "subscribe"));
+    router.push(isAuthenticated ? "/pricing" : (buildLoginHref(safePath, "subscribe") as Route));
   };
 }
 

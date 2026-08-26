@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { PremiumBadge } from "@/components/editorial";
+import { ProfileSettings } from "@/components/account/ProfileSettings";
 
 const EDITORIAL_ROLES = [
   "contributor",
@@ -61,6 +62,8 @@ export default function AccountPage() {
           ) : null}
         </p>
 
+        <ProfileSettings />
+
         {/* Subscription */}
         <div className="mt-8 border-t border-border pt-6">
           <h2 className="font-serif text-2xl text-brand-navy">Subscription</h2>
@@ -110,11 +113,6 @@ export default function AccountPage() {
       <aside className="rounded-lg border border-border bg-background-soft p-6">
         <h2 className="font-serif text-2xl text-brand-navy">Quick links</h2>
         <ul className="mt-4 space-y-3 text-sm text-text-secondary">
-          <li>
-            <Link href="/account/saved" className="font-medium text-brand-orange hover:underline">
-              Saved articles
-            </Link>
-          </li>
           <li>
             <Link href="/pricing" className="font-medium text-brand-orange hover:underline">
               Pricing

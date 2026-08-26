@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
+import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { buildLoginHref } from "@/lib/auth/returnTo";
@@ -25,17 +27,17 @@ import { isEditorRole } from "@/lib/cms/types";
  * authorized by the backend's own RolesGuard — that's the real boundary.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { status, isAuthenticated, role } = useAuth();
+  const { status, isAuthenticated, role, hasRole } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const permitted = isAuthenticated && isEditorRole(role);
 
   useEffect(() => {
     if (status === "loading") return;
-    // typedRoutes flags this as non-literal (same pre-existing friction as
-    // useAuthGatedAction.ts's router.push(buildLoginHref(...)) elsewhere in
-    // this repo) — not fixed here, see the audit report's remaining-issues list.
-    if (!permitted) router.replace(buildLoginHref(pathname));
+    // buildLoginHref composes a dynamic query string typedRoutes can't
+    // verify statically; the cast is safe because /login is a real route
+    // and buildLoginHref only ever appends validated query params.
+    if (!permitted) router.replace(buildLoginHref(pathname) as Route);
   }, [status, permitted, pathname, router]);
 
   if (status === "loading") {
@@ -48,5 +50,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!permitted) return null;
 
-  return <>{children}</>;
+  return (
+    <>
+      <nav
+        aria-label="Newsroom admin sections"
+        className="hairline flex items-center gap-5 px-4 py-2 text-xs font-medium"
+        style={{ background: "var(--background-soft)", color: "var(--text-secondary)" }}
+      >
+        <Link href="/admin" className="hover:text-[var(--navy)]">
+          Overview
+        </Link>
+        <Link href="/admin/articles" className="hover:text-[var(--navy)]">
+          Articles
+        </Link>
+        {hasRole(["section_lead"]) ? (
+          <Link href="/admin/moderation" className="hover:text-[var(--navy)]">
+            Moderation
+          </Link>
+        ) : null}
+        {role === "chief_editor" ? (
+          <Link href="/admin/roles" className="hover:text-[var(--navy)]">
+            Roles
+          </Link>
+        ) : null}
+        {role === "chief_editor" ? (
+          <Link href="/admin/sections" className="hover:text-[var(--navy)]">
+            Sections
+          </Link>
+        ) : null}
+      </nav>
+      {children}
+    </>
+  );
 }

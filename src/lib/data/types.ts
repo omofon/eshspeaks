@@ -48,13 +48,18 @@ export interface Article {
   title: string;
   dek: string;
   section: string;
+  /** Display name for `section`, when known. Real API articles carry this straight from the
+   *  response's embedded section ref, so cards never need to re-resolve a slug through a
+   *  separate section lookup (which only ever matches mock fixture slugs, not live backend ones). */
+  sectionName?: string | undefined;
   subsegment: string;
   byline: string;
   location: string;
   date: string;
   readMinutes: number;
   premium: boolean;
-  image: ArticleImage;
+  /** Nullable so real API articles without a featured image render cleanly — every card component already null-checks before rendering. */
+  image: ArticleImage | null;
   curatedFrom?: string;
   curatedUrl?: string;
   likes: number;

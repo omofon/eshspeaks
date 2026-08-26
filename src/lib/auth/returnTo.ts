@@ -27,8 +27,8 @@ export function getSafeReturnTo(returnTo?: string | null): string {
 }
 
 export interface ContinuationParams {
-  returnTo?: string | null;
-  action?: string | null;
+  returnTo?: string | null | undefined;
+  action?: string | null | undefined;
 }
 
 export function buildContinuationQuery(params: ContinuationParams): string {

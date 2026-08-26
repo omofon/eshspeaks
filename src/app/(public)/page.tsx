@@ -1,34 +1,17 @@
 import Link from "next/link";
-import {
-  allArticles,
-  editorsPicks,
-  generalNews,
-  leadStory,
-  mostRead,
-  spotlight,
-  theSeat,
-  topNews,
-} from "@/lib/data/articles";
-import { getSection, sections } from "@/lib/data/sections";
-import {
-  ArticleMedia,
-  FeaturedCard,
-  HorizontalCard,
-  ListCard,
-  OpinionCard,
-  SectionBadge,
-  articleHref,
-} from "@/components/editorial";
-import { TheSeatCard } from "@/components/home/TheSeatCard";
+import { fetchSections } from "@/lib/api/sections";
+import { fetchAllArticles } from "@/lib/api/articles";
+import { toUiArticle, toUiSection } from "@/lib/api/adapters";
+import { SectionLeadGrid, SectionStoryGrid } from "@/components/home";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { AdSlot } from "@/components/AdSlot";
 
 export const metadata = {
-  title: "EshSpeaks - Nigerian journalism, interviews and opinion",
+  title: "EshSpeaks — Nigerian journalism, interviews and opinion",
   description:
     "Reporting, interviews and opinion from Nigeria: politics, business, security, culture and public life, edited for people who need the whole picture.",
   openGraph: {
-    title: "EshSpeaks - Nigerian journalism, interviews and opinion",
+    title: "EshSpeaks — Nigerian journalism, interviews and opinion",
     description:
       "Reporting, interviews and opinion from Nigeria: politics, business, security, culture and public life.",
     type: "website",
@@ -36,157 +19,138 @@ export const metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-function SectionRule({ title, href }: { title: string; href?: string }) {
-  return (
-    <div className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-t-2 border-brand-navy pt-3">
-      <h2 className="truncate text-[12px] font-semibold uppercase tracking-[0.22em] text-brand-navy">
-        {title}
-      </h2>
-      {href ? (
-        <Link
-          href={href as `/${string}`}
-          className="shrink-0 text-[12px] font-semibold text-brand-orange hover:underline"
-        >
-          View all {title} <span aria-hidden>→</span>
-        </Link>
-      ) : null}
-    </div>
-  );
+/**
+ * GET /api/v1/articles now exists and is the real cross-section feed —
+ * one call, real data, ranked however the backend ranks it (no frontend
+ * scoring invented). Sections are fetched once too (shared cache — see
+ * fetchSections()) purely to (a) know editorial ordering / which section
+ * gets the lead slot and (b) render the "Sections" index below; the
+ * actual articles come entirely from the single /articles response,
+ * grouped by section client-side. This replaced a previous version that
+ * called GET /articles/sections/:slug once per section (an N+1 fan-out
+ * that fired 1+N uncached backend requests on every single page load and
+ * was the direct cause of the 429s this page was throwing) — see
+ * PRESENTATION_ORDER below for how section order is now decided.
+ */
+const PRESENTATION_ORDER = [
+  "politics-governance",
+  "business-economy",
+  "metro-security",
+  "news",
+  "entertainment-culture",
+  "features-ideas",
+  "sports",
+  "world",
+];
+
+function sortSectionsForDisplay<T extends { slug: string }>(sections: T[]): T[] {
+  return [...sections].sort((a, b) => {
+    const ai = PRESENTATION_ORDER.indexOf(a.slug);
+    const bi = PRESENTATION_ORDER.indexOf(b.slug);
+    if (ai === -1 && bi === -1) return 0;
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
 }
 
-/** Compact media card used in the spotlight strip and section hubs. */
-function MediaCard({ article }: { article: (typeof allArticles)[number] }) {
-  const section = getSection(article.section);
-  return (
-    <article className="group flex flex-col gap-3">
-      <Link href={articleHref(article)} className="block">
-        <ArticleMedia article={article} ratio="aspect-[4/3]" />
-      </Link>
-      {section ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <SectionBadge section={section} />
-        </div>
-      ) : null}
-      <Link href={articleHref(article)} className="block">
-        <h3 className="font-serif text-lg font-bold leading-[1.15] text-brand-navy transition-colors group-hover:text-brand-orange">
-          {article.title}
-        </h3>
-      </Link>
-      <p className="text-xs uppercase tracking-[0.16em] text-text-secondary">
-        {article.byline} · {article.readMinutes} min read
-      </p>
-    </article>
-  );
-}
+export default async function HomePage() {
+  const [sections, articlesResult] = await Promise.all([
+    fetchSections(),
+    fetchAllArticles({ limit: 60, sortBy: "publishedAt", sortOrder: "desc" }),
+  ]);
 
-export default function HomePage() {
-  const hubs = sections.filter((s) =>
-    ["politics", "business-economy", "energy-power", "tech-innovation"].includes(s.slug),
-  );
-
-  return (
-    <div className="container-eshspeaks py-8">
-      {/* ------------------------------------------------ Above the fold */}
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] lg:gap-10">
-        {/* The Seat */}
-        <div className="order-2 lg:order-1 lg:border-r lg:border-border lg:pr-10">
-          <TheSeatCard article={theSeat} />
-        </div>
-
-        {/* Lead + top news */}
-        <div className="order-1 lg:order-2">
-          <FeaturedCard article={leadStory} ratio="aspect-video" />
-          <div className="mt-8 grid gap-8 sm:grid-cols-2">
-            {topNews.map((article) => (
-              <ListCard key={article.slug} article={article} ratio="aspect-[4/3]" compact />
-            ))}
-          </div>
-        </div>
-
-        {/* Editor's pick & opinion */}
-        <aside className="order-3 lg:border-l lg:border-border lg:pl-10">
-          <SectionRule title="Editor's pick" />
-          <div className="space-y-5">
-            {editorsPicks.map((article) => (
-              <OpinionCard key={article.slug} article={article} />
-            ))}
-          </div>
-        </aside>
+  if (sections.length === 0) {
+    return (
+      <div className="container-eshspeaks py-24 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
+          EshSpeaks
+        </p>
+        <h1 className="mt-4 font-serif text-4xl text-brand-navy sm:text-5xl">
+          The newsroom is just getting started.
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-text-secondary">
+          Sections and stories will appear here as soon as the editorial team publishes them.
+        </p>
       </div>
+    );
+  }
 
-      <div className="my-12">
+  const uiSections = sortSectionsForDisplay(sections.map(toUiSection));
+
+  const articlesBySection = new Map<string, ReturnType<typeof toUiArticle>[]>();
+  for (const article of articlesResult.items) {
+    const sectionSlug = article.section?.slug ?? "";
+    if (!sectionSlug) continue;
+    const list = articlesBySection.get(sectionSlug) ?? [];
+    list.push(toUiArticle(article, { sectionSlug }));
+    articlesBySection.set(sectionSlug, list);
+  }
+
+  const sectionsWithArticles = uiSections
+    .map((section) => ({ section, articles: articlesBySection.get(section.slug) ?? [] }))
+    .filter((entry) => entry.articles.length > 0);
+
+  if (sectionsWithArticles.length === 0) {
+    return (
+      <div className="container-eshspeaks py-24 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
+          EshSpeaks
+        </p>
+        <h1 className="mt-4 font-serif text-4xl text-brand-navy sm:text-5xl">
+          The newsroom is just getting started.
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-text-secondary">
+          Sections are set up — stories will appear here as soon as the editorial team publishes
+          them.
+        </p>
+      </div>
+    );
+  }
+
+  const [{ section: lead, articles: leadArticles }, ...rest] = sectionsWithArticles as [
+    { section: (typeof uiSections)[number]; articles: ReturnType<typeof toUiArticle>[] },
+    ...{ section: (typeof uiSections)[number]; articles: ReturnType<typeof toUiArticle>[] }[],
+  ];
+  const restEntries = rest;
+
+  return (
+    <div className="container-eshspeaks py-6 sm:py-8">
+      <h1 className="sr-only">EshSpeaks — today&rsquo;s front page</h1>
+
+      {lead ? <SectionLeadGrid section={lead} articles={leadArticles} /> : null}
+
+      <div className="mt-14">
         <AdSlot variant="leaderboard" />
       </div>
 
-      {/* ------------------------------------------------ Spotlight strip */}
-      <section>
-        <SectionRule title="Top stories & spotlight" />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {spotlight.map((article) => (
-            <MediaCard key={article.slug} article={article} />
-          ))}
-        </div>
-      </section>
+      {restEntries.map(({ section, articles }, i) => (
+        <SectionStoryGrid
+          key={section.slug}
+          section={section}
+          articles={articles}
+          columns={i % 2 === 0 ? 3 : 4}
+        />
+      ))}
 
-      {/* ------------------------------------------------ General news + most read */}
-      <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)]">
+      <div className="mt-14 grid gap-10 border-t border-rule pt-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section>
-          <SectionRule title="General news" />
-          <div>
-            {generalNews.map((article) => (
-              <HorizontalCard key={article.slug} article={article} />
-            ))}
-          </div>
-        </section>
-
-        <aside className="space-y-8">
-          <section>
-            <SectionRule title="Most read" />
-            <ol className="space-y-4">
-              {mostRead.map((article, index) => (
-                <li
-                  key={article.slug}
-                  className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 border-b border-border pb-4 last:border-0"
+          <h2 className="kicker mb-4">Sections</h2>
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+            {uiSections.map((section) => (
+              <li key={section.slug}>
+                <Link
+                  href={`/${section.slug}` as `/${string}`}
+                  className="text-sm text-navy hover:text-accent"
                 >
-                  <span className="font-mono text-sm font-semibold text-brand-orange">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <div className="min-w-0">
-                    <Link
-                      href={articleHref(article)}
-                      className="font-serif text-[15px] font-semibold leading-6 text-brand-navy hover:text-brand-orange"
-                    >
-                      {article.title}
-                    </Link>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-text-secondary">
-                      {article.likes} reactions · {article.commentCount} comments
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          <NewsletterSignup variant="compact" />
-          <AdSlot variant="sidebar" />
-        </aside>
+                  {section.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <NewsletterSignup variant="large" />
       </div>
-
-      {/* ------------------------------------------------ Section hubs */}
-      {hubs.map((section) => {
-        const items = allArticles.filter((a) => a.section === section.slug).slice(0, 3);
-        if (!items.length) return null;
-        return (
-          <section key={section.slug} className="mt-14">
-            <SectionRule title={section.name} href={`/${section.slug}`} />
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((article) => (
-                <MediaCard key={article.slug} article={article} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
     </div>
   );
 }

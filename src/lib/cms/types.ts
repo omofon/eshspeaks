@@ -38,31 +38,27 @@ export type DraftStatus = "idle" | "loading" | "saving" | "saved" | "error";
 /** Confirmed live on POST /api/v1/articles: uppercase enum. */
 export type ContentTier = "FREE" | "PREMIUM";
 
-/**
- * Confirmed live value: "ORIGINAL". "CURATED" is an unconfirmed guess —
- * see CMS-BACKEND-REQUESTS.md.
- */
-export type SourceType = "ORIGINAL" | "CURATED";
+/** Confirmed live via the OpenAPI schema for CreateArticleDto/UpdateArticleDto. */
+export type SourceType = "ORIGINAL" | "CURATED" | "PARTNER";
 
 /**
- * BLOCKING GAP, not yet resolved: the confirmed live contract
- * (POST /api/v1/articles) has NO status/review field at all — no
- * draft/submitted/approved/published pipeline exists server-side yet.
- * That means the actual "contributor submits, section lead
- * reviews/edits/publishes" workflow cannot be built end-to-end until the
- * backend adds:
- *   1. a status field on the article resource
- *   2. an endpoint to list "articles awaiting my review" (scoped by
- *      section for section leads; unscoped for chief editor)
- *   3. an approve/publish action distinct from create
+ * RESOLVED — the backend now has a real status field and endpoint:
+ * PATCH /api/v1/articles/{id}/status, confirmed via the live OpenAPI
+ * schema (ChangeArticleStatusDto). Legal transitions, per that schema:
+ *   draft -> in_review | published
+ *   in_review -> draft | published
+ *   published -> archived
+ *   archived -> published | draft
+ * Only a Section Lead or Chief Editor may reach published or archived —
+ * the backend enforces this; the UI only uses it to decide which actions
+ * to offer (see canPublishDirectly).
  *
- * This type exists now so the frontend has a stable shape to build
- * against, but `reviewStatus` is CLIENT-SIDE ONLY until confirmed — do
- * not assume the backend persists or returns it. Confirm this contract
- * before building a real review-queue UI; guessing it risks the same
- * drift bug EditorRole just had.
+ * This is now authoritative server state once an article has a remoteId,
+ * not client-side-only — it mirrors the real `status` column exactly, so
+ * it's named `status` (not the old `reviewStatus`) to avoid implying a
+ * separate, made-up pipeline.
  */
-export type ReviewStatus = "draft" | "submitted" | "approved" | "published";
+export type ArticleStatus = "draft" | "in_review" | "published" | "archived";
 
 /**
  * Everything the editor route reads and writes for one story. Field names
@@ -73,14 +69,16 @@ export interface DraftState {
   id: string | null;
   /** Server id returned on a successful POST, if the API includes one — response schema currently undocumented. */
   remoteId: string | null;
-  /** Client-side only — see ReviewStatus note above. */
-  reviewStatus: ReviewStatus;
+  /** Server-authoritative once remoteId is set — see ArticleStatus note above. */
+  status: ArticleStatus;
   headline: string;
   slug: string;
   slugEdited: boolean;
   dek: string;
   body: string;
   featuredImageUrl: string;
+  /** Cloudinary handle from POST /articles/images — only set once the image was actually uploaded, not for a local object-URL preview. */
+  featuredImagePublicId: string;
   featuredImageAlt: string;
   featuredImageWidth: number | null;
   featuredImageHeight: number | null;
@@ -105,13 +103,14 @@ export interface RevisionEntry {
 export const emptyDraft = (): DraftState => ({
   id: null,
   remoteId: null,
-  reviewStatus: "draft",
+  status: "draft",
   headline: "",
   slug: "",
   slugEdited: false,
   dek: "",
   body: "",
   featuredImageUrl: "",
+  featuredImagePublicId: "",
   featuredImageAlt: "",
   featuredImageWidth: null,
   featuredImageHeight: null,

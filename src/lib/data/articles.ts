@@ -174,20 +174,6 @@ export const leadStory = allArticles[3]!;
 export const relatedTo = (article: Article) =>
   allArticles.filter((a) => a.section === article.section && a.slug !== article.slug).slice(0, 4);
 
-export function searchArticles(query: string, section?: string) {
-  const q = query.trim().toLowerCase();
-  return allArticles.filter((a) => {
-    const matchesSection = !section || section === "all" || a.section === section;
-    if (!matchesSection) return false;
-    if (!q) return true;
-    return (
-      a.title.toLowerCase().includes(q) ||
-      a.dek.toLowerCase().includes(q) ||
-      a.byline.toLowerCase().includes(q)
-    );
-  });
-}
-
 /* ------------------------------------------------------------------ *
  * Homepage editorial selections (Sprint 2)
  * ------------------------------------------------------------------ */
@@ -229,9 +215,7 @@ export const spotlight = allArticles
   .slice(0, 4);
 
 /** General news feed for the two-column middle block. */
-export const generalNews = allArticles
-  .filter((a) => a.slug !== leadStory.slug)
-  .slice(8, 14);
+export const generalNews = allArticles.filter((a) => a.slug !== leadStory.slug).slice(8, 14);
 
 /** Most read, five entries with interaction metrics. */
 export const mostRead = allArticles

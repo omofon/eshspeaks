@@ -2,11 +2,12 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { sections } from "@/lib/data/sections";
+import { useSectionsCatalog } from "@/hooks/useSectionsCatalog";
 import { ChevronDown, X } from "lucide-react";
 import { WhiteLogo } from "@/components/layout/whiteLogo";
 
 export function MobileNavigationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { sections } = useSectionsCatalog();
   const [expanded, setExpanded] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 

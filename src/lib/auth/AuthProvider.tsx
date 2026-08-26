@@ -26,7 +26,7 @@ interface AuthContextValue {
   needsUsername: boolean;
   /** Loose on purpose — role strings beyond "reader" aren't confirmed yet.
    *  Update this once the backend hands over the real UserRole list. */
-  hasRole: (roles: UserRole | UserRole[]) => boolean;
+  hasRole: (roles: UserRole | readonly UserRole[]) => boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -121,9 +121,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    *  pass a contributor-only check), tell me — this is a one-line change
    *  but it's a real policy call, not a default I should silently pick. */
   const hasRole = useCallback(
-    (required: UserRole | UserRole[]) => {
+    (required: UserRole | readonly UserRole[]) => {
       if (!user) return false;
-      const wanted = Array.isArray(required) ? required : [required];
+      const wanted: readonly UserRole[] = Array.isArray(required) ? required : [required];
       const minRank = Math.min(...wanted.map((r) => ROLE_RANK[r]));
       return ROLE_RANK[user.role] >= minRank;
     },

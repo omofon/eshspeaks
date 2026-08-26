@@ -13,7 +13,12 @@ import {
 import { useAuth } from "@/lib/auth/AuthProvider";
 
 /** Anything above plain reader gets a link into the newsroom admin area. */
-const EDITORIAL_ROLES = ["contributor", "state_correspondent", "section_lead", "chief_editor"] as const;
+const EDITORIAL_ROLES = [
+  "contributor",
+  "state_correspondent",
+  "section_lead",
+  "chief_editor",
+] as const;
 
 export function HeaderAccountMenu() {
   const { user, isAuthenticated, isSubscriber, hasRole, signOut } = useAuth();
@@ -55,12 +60,6 @@ export function HeaderAccountMenu() {
               <Link href="/account" className="flex w-full cursor-pointer items-center gap-2">
                 <UserRound className="h-4 w-4" />
                 Manage account
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/account/saved" className="flex w-full cursor-pointer items-center gap-2">
-                <CircleUserRound className="h-4 w-4" />
-                Saved articles
               </Link>
             </DropdownMenuItem>
             {hasRole(EDITORIAL_ROLES) ? (

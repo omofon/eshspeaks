@@ -7,7 +7,15 @@ import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
 type Mode = "register" | "login";
 
-export function EmailAuthForm({ mode, returnTo, action }: { mode: Mode; returnTo?: string; action?: string }) {
+export function EmailAuthForm({
+  mode,
+  returnTo,
+  action,
+}: {
+  mode: Mode;
+  returnTo?: string;
+  action?: string;
+}) {
   const router = useRouter();
   const inputId = useId();
   const errorId = `${inputId}-error`;
@@ -15,7 +23,9 @@ export function EmailAuthForm({ mode, returnTo, action }: { mode: Mode; returnTo
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");
-  const [error, setError] = useState<{ message: string; hint?: "sign-in" | "register" } | null>(null);
+  const [error, setError] = useState<{ message: string; hint?: "sign-in" | "register" } | null>(
+    null,
+  );
 
   const trimmed = email.trim();
   const showInvalid = touched && trimmed.length > 0 && !isValidEmail(trimmed);
@@ -61,7 +71,10 @@ export function EmailAuthForm({ mode, returnTo, action }: { mode: Mode; returnTo
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <div>
-        <label htmlFor={inputId} className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary">
+        <label
+          htmlFor={inputId}
+          className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary"
+        >
           Continue with email
         </label>
         <input

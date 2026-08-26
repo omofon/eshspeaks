@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import MobileNavigationDrawer from "./MobileNavigationDrawer";
 import MarketTicker from "./MarketTicker";
 import { WhiteLogo } from "./whiteLogo";
 import { HeaderAccountMenu } from "@/components/HeaderAccountMenu";
+import { SearchOverlay } from "@/components/SearchOverlay";
 
 export function MobileHeader() {
   const [open, setOpen] = useState(false);
@@ -27,9 +27,7 @@ export function MobileHeader() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3 text-text-inverse/90">
-          <Link href="/search" aria-label="Search" className="p-1 hover:text-accent">
-            <Search className="h-5 w-5" />
-          </Link>
+          <SearchOverlay inverted />
           <HeaderAccountMenu />
         </div>
       </div>

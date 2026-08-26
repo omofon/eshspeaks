@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Bold, Italic, Underline, Strikethrough, Link2, Quote, Code2, MessageSquare } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Link2,
+  Quote,
+  Code2,
+  MessageSquare,
+} from "lucide-react";
 import { InlinePopover } from "./InlinePopover";
 
 export interface SelectionToolbarProps {

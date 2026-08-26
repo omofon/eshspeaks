@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState, type FormEvent } from "react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { authService, AuthError, validateUsername } from "@/lib/auth/authService";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -27,7 +28,7 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
     try {
       await authService.setUsername(value);
       void refreshAuth(); // push updated user (now has a username) into AuthProvider
-      router.replace(getSafeReturnTo(returnTo));
+      router.replace(getSafeReturnTo(returnTo) as Route);
     } catch (e) {
       setSaving(false);
       if (e instanceof AuthError) {
@@ -47,7 +48,10 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <div>
-        <label htmlFor={inputId} className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary">
+        <label
+          htmlFor={inputId}
+          className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary"
+        >
           Username
         </label>
         <div className="mt-2 flex h-12 items-center rounded-md border border-rule-strong bg-background focus-within:border-navy">

@@ -31,12 +31,24 @@ export function sectionTintClass(tint?: string) {
   }
 }
 
-export function Kicker({ article, tone = "tint" }: { article: Article; tone?: "tint" | "inverse" }) {
-  const section = getSection(article.section);
-  const color = tone === "inverse" ? "text-accent" : sectionTintClass(section?.tint);
+export function Kicker({
+  article,
+  tone = "tint",
+  tint,
+}: {
+  article: Article;
+  tone?: "tint" | "inverse";
+  /** Section tint token, when the caller already knows the article's real section (e.g. a
+   *  section-grouped grid). Falls back to the mock catalog lookup otherwise, which only
+   *  resolves for mock-fixture articles. */
+  tint?: string | undefined;
+}) {
+  const mockSection = getSection(article.section);
+  const label = article.sectionName ?? mockSection?.name ?? article.section;
+  const color = tone === "inverse" ? "text-accent" : sectionTintClass(tint ?? mockSection?.tint);
   return (
     <span className={`kicker ${color}`}>
-      {section?.name ?? article.section}
+      {label}
       {article.premium ? <span className="ml-2 text-maroon">· Premium</span> : null}
     </span>
   );
@@ -80,6 +92,15 @@ export function Media({
   priority?: boolean;
   className?: string;
 }) {
+  if (!article.image) {
+    return (
+      <div
+        className={`media-frame relative bg-muted ${className}`}
+        style={{ aspectRatio: ratio }}
+      />
+    );
+  }
+
   return (
     <div className={`media-frame relative ${className}`} style={{ aspectRatio: ratio }}>
       <Image
@@ -103,7 +124,7 @@ export function SectionHeader({
 }: {
   title: string;
   href?: `/${string}`;
-  tint?: string;
+  tint?: string | undefined;
   blurb?: string;
 }) {
   return (
@@ -111,7 +132,10 @@ export function SectionHeader({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4">
         <h2 className={`kicker ${sectionTintClass(tint)} truncate text-[12px]`}>{title}</h2>
         {href ? (
-          <Link href={href} className="shrink-0 text-[12px] font-semibold text-accent hover:underline">
+          <Link
+            href={href}
+            className="shrink-0 text-[12px] font-semibold text-accent hover:underline"
+          >
             All coverage
           </Link>
         ) : null}

@@ -3,7 +3,7 @@ import type { Article } from "@/lib/data/types";
 import { articleHref, Byline, Kicker, Media } from "./primitives";
 
 /** A: the story that owns the page. */
-export function LeadStory({ article }: { article: Article }) {
+export function LeadStory({ article, tint }: { article: Article; tint?: string | undefined }) {
   return (
     <article className="group">
       <Link href={articleHref(article)} className="block">
@@ -14,7 +14,7 @@ export function LeadStory({ article }: { article: Article }) {
           sizes="(min-width: 1280px) 720px, (min-width: 1024px) 55vw, 100vw"
         />
         <div className="mt-4">
-          <Kicker article={article} />
+          <Kicker article={article} tint={tint} />
           <h2 className="headline-lg mt-2 text-navy transition-colors group-hover:text-accent">
             {article.title}
           </h2>
@@ -24,7 +24,7 @@ export function LeadStory({ article }: { article: Article }) {
       <div className="mt-3">
         <Byline article={article} />
       </div>
-      {article.image.credit ? (
+      {article.image?.credit ? (
         <p className="meta mt-2 text-[10px]">Photograph · {article.image.credit}</p>
       ) : null}
     </article>
@@ -36,10 +36,12 @@ export function StoryCard({
   article,
   showDek = true,
   ratio = "16/9",
+  tint,
 }: {
   article: Article;
   showDek?: boolean;
   ratio?: "16/9" | "4/3" | "3/2";
+  tint?: string | undefined;
 }) {
   return (
     <article className="group">
@@ -50,7 +52,7 @@ export function StoryCard({
           sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 100vw"
         />
         <div className="mt-3">
-          <Kicker article={article} />
+          <Kicker article={article} tint={tint} />
           <h3 className="headline-sm mt-2 text-navy transition-colors group-hover:text-accent">
             {article.title}
           </h3>
@@ -70,9 +72,11 @@ export function StoryCard({
 export function CompactStoryCard({
   article,
   divider = true,
+  tint,
 }: {
   article: Article;
   divider?: boolean;
+  tint?: string | undefined;
 }) {
   return (
     <article className={divider ? "border-b border-border pb-4 last:border-0 last:pb-0" : ""}>
@@ -81,7 +85,7 @@ export function CompactStoryCard({
         className="group grid grid-cols-[minmax(0,1fr)_92px] items-start gap-4 sm:grid-cols-[minmax(0,1fr)_104px]"
       >
         <div className="min-w-0">
-          <Kicker article={article} />
+          <Kicker article={article} tint={tint} />
           <h3 className="mt-1.5 font-serif text-[17px] leading-6 text-navy transition-colors group-hover:text-accent">
             {article.title}
           </h3>

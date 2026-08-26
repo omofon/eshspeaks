@@ -16,10 +16,10 @@ export function SectionLeadGrid({ section, articles }: { section: Section; artic
         blurb={section.blurb}
       />
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-10">
-        <StoryCard article={lead} ratio="3/2" />
+        <StoryCard article={lead} ratio="3/2" tint={section.tint} />
         <div className="space-y-5 lg:border-l lg:border-rule lg:pl-10">
           {rest.slice(0, 4).map((article) => (
-            <CompactStoryCard key={article.slug} article={article} />
+            <CompactStoryCard key={article.slug} article={article} tint={section.tint} />
           ))}
         </div>
       </div>
@@ -46,7 +46,12 @@ export function SectionStoryGrid({
         className={`grid gap-8 sm:grid-cols-2 ${columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
       >
         {articles.slice(0, columns).map((article) => (
-          <StoryCard key={article.slug} article={article} showDek={columns === 3} />
+          <StoryCard
+            key={article.slug}
+            article={article}
+            showDek={columns === 3}
+            tint={section.tint}
+          />
         ))}
       </div>
     </section>

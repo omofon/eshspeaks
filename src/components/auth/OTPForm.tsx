@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type KeyboardEvent,
+} from "react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { authService, AuthError } from "@/lib/auth/authService";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -46,7 +54,10 @@ export function OTPForm({
       setError(null);
       const safeReturnTo = getSafeReturnTo(returnTo);
       try {
-        const session = await authService.verifyEmailCode(email, code, { returnTo: safeReturnTo, action });
+        const session = await authService.verifyEmailCode(email, code, {
+          returnTo: safeReturnTo,
+          action,
+        });
         setStatus("success");
 
         // Push the new session into AuthProvider immediately so header/nav
@@ -67,7 +78,10 @@ export function OTPForm({
           const qs = params.toString();
           router.replace(`/username${qs ? `?${qs}` : ""}`);
         } else {
-          router.replace(safeReturnTo);
+          // safeReturnTo is an arbitrary same-origin path validated by
+          // getSafeReturnTo(), not a statically known route literal —
+          // typedRoutes can't verify it at compile time.
+          router.replace(safeReturnTo as Route);
         }
       } catch (e) {
         setStatus("idle");
@@ -171,7 +185,11 @@ export function OTPForm({
         {error}
       </p>
       <p aria-live="polite" className="text-[13px] leading-5 text-text-secondary">
-        {status === "verifying" ? "Verifying your code\u2026" : status === "success" ? "Verified. Taking you through\u2026" : ""}
+        {status === "verifying"
+          ? "Verifying your code\u2026"
+          : status === "success"
+            ? "Verified. Taking you through\u2026"
+            : ""}
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
@@ -187,7 +205,10 @@ export function OTPForm({
             {resending ? "Sending\u2026" : "Resend code"}
           </button>
         )}
-        <a href={differentEmailHref} className="text-text-secondary underline underline-offset-2 hover:text-navy">
+        <a
+          href={differentEmailHref}
+          className="text-text-secondary underline underline-offset-2 hover:text-navy"
+        >
           Use a different email
         </a>
       </div>

@@ -24,12 +24,7 @@ export type MembershipTier = "FREE" | "PREMIUM";
  * There is no "admin" role in this list — chief_editor is the ceiling.
  */
 export type UserRole =
-  | "reader"
-  | "premium"
-  | "contributor"
-  | "state_correspondent"
-  | "section_lead"
-  | "chief_editor";
+  "reader" | "premium" | "contributor" | "state_correspondent" | "section_lead" | "chief_editor";
 
 export interface CurrentUser {
   id: string;

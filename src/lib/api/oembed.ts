@@ -21,7 +21,9 @@ export function toVideoEmbedUrl(url: string): string {
  * proxy needed, works from the browser as-is.
  */
 export async function fetchTwitterEmbedHtml(url: string): Promise<string> {
-  const res = await fetch(`https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=true`);
+  const res = await fetch(
+    `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=true`,
+  );
   if (!res.ok) throw new Error(`Twitter oEmbed failed (${res.status})`);
   const body = await res.json();
   return body.html as string;

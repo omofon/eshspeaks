@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 import { HeaderAccountMenu } from "@/components/HeaderAccountMenu";
 import { WhiteLogo } from "@/components/layout/whiteLogo";
+import { SearchOverlay } from "@/components/SearchOverlay";
 
 export function UtilityBar() {
   const [today, setToday] = useState("");
@@ -24,13 +24,7 @@ export function UtilityBar() {
     <div className="hidden border-b border-text-inverse/15 bg-navy text-text-inverse md:block">
       <div className="container-eshspeaks grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-2.5">
         <div className="flex items-center gap-4">
-          <Link
-            href="/search"
-            aria-label="Search"
-            className="inline-flex cursor-pointer items-center text-text-inverse/85 transition-colors hover:text-accent"
-          >
-            <Search className="h-[18px] w-[18px]" aria-hidden />
-          </Link>
+          <SearchOverlay inverted />
           <div className="flex flex-col leading-tight">
             <span className="meta text-text-inverse/70">{today || "\u00A0"}</span>
             <Link

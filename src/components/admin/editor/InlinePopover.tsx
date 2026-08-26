@@ -72,7 +72,11 @@ export function InlinePopover({
         />
       )}
       <div className="mt-2 flex justify-end gap-2">
-        <button type="button" onClick={onClose} className="px-2 py-1 text-xs text-[var(--text-muted)] hover:text-[var(--navy)]">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-2 py-1 text-xs text-[var(--text-muted)] hover:text-[var(--navy)]"
+        >
           Cancel
         </button>
         <button type="button" onClick={submit} className="btn-accent px-3 py-1 text-xs">

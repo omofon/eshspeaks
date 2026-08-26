@@ -1,21 +1,23 @@
-"use client";
-
 import Link from "next/link";
 import { Check, Lock } from "lucide-react";
-import { useAuth } from "@/lib/auth/AuthProvider";
-import { usePreview } from "@/lib/dev/previewTier";
 
-export function PaywallPanel() {
-  const { isSubscriber } = useAuth();
-  const { override, enabled } = usePreview();
-
-  // Real subscription status, with a dev-only override layered on top —
-  // never the other way around. In production `override` is always null.
-  const previewingPremium = enabled && override === "premium";
-  const effectivelySubscriber = isSubscriber || previewingPremium;
-
-  if (effectivelySubscriber) return null; // subscriber (real or previewed) never sees the paywall
-
+/**
+ * FIXED: this used to self-gate on `isSubscriber` (plus a dev tier
+ * override that could never affect a real request anyway) and return null
+ * for subscribers. That was backwards — nothing rendered this
+ * conditionally, so it never actually hid itself from a subscriber; worse,
+ * a dev "preview as premium" override has no way to make the *backend*
+ * return the real article body, so letting it hide the panel would have
+ * shown an empty gap where the story should be.
+ *
+ * Per the product spec, GET /articles/:slug is server-gated — the caller
+ * (see ArticlePaywall) decides whether to mount this at all based on
+ * whether the response actually included the article body
+ * (isArticleUnlocked()). This component's only job is to render the
+ * upsell once that decision has already been made; it has no gating logic
+ * of its own to keep in sync with the backend.
+ */
+export function PaywallPanel({ signedIn = false }: { signedIn?: boolean }) {
   return (
     <section className="relative mt-8 rounded-md border border-gold bg-card p-6 shadow-card">
       <div className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-gold-foreground">
@@ -45,11 +47,18 @@ export function PaywallPanel() {
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Link
           href="/pricing"
-          className="rounded-sm bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-navy"
+          className="rounded-sm bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-navy"
         >
           See plans
         </Link>
-        <span className="text-xs text-muted-foreground">From \u20a64,500 per month</span>
+        {!signedIn ? (
+          <Link
+            href="/login?action=subscribe"
+            className="text-xs font-medium text-navy hover:underline"
+          >
+            Already a subscriber? Sign in
+          </Link>
+        ) : null}
       </div>
     </section>
   );

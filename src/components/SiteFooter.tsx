@@ -2,17 +2,10 @@
 
 import Link from "next/link";
 import { useCookieConsent } from "@/lib/cookieConsent";
-import { sections } from "@/lib/data/sections";
+import { useSectionsCatalog } from "@/hooks/useSectionsCatalog";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { NewsletterSignup } from "./NewsletterSignup";
 import { WhiteLogo } from "./layout/whiteLogo";
-
-// TODO(auth): replace with the app's real auth/session state — whatever
-// HeaderAccountMenu already reads internally to decide signed-in vs
-// signed-out. That component wasn't available to inspect here, so this
-// file has no visibility into the real mechanism. Both states below are
-// fully built; only this one flag needs to be swapped for the real
-// hook/selector so the footer stays in sync with the header.
-const isAuthenticated = false;
 
 const company = [
   { label: "About", href: "/about" },
@@ -97,6 +90,8 @@ function NewsletterBlock({
 
 export function SiteFooter() {
   const { openSettings } = useCookieConsent();
+  const { isAuthenticated } = useAuth();
+  const { sections } = useSectionsCatalog();
   const accountLinks = getAccountLinks(isAuthenticated);
 
   return (
@@ -112,7 +107,9 @@ export function SiteFooter() {
             <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">Sections</h3>
             {/* grid-flow-col fills column 1 top-to-bottom first, then column 2 —
                 matches the requested 4-and-4 column split rather than an
-                interleaved row-major fill. Assumes 8 section items. */}
+                interleaved row-major fill. Assumes ~8 section items (today's
+                live catalog); gracefully wraps into more/fewer columns if
+                the backend's section count changes. */}
             <div className="mt-3 grid grid-flow-col grid-rows-4 gap-x-6 gap-y-2.5">
               {sections.map((s) => (
                 <SectionLink key={s.slug} slug={s.slug} name={s.name} />
@@ -143,9 +140,7 @@ export function SiteFooter() {
         >
           {/* Sections */}
           <div>
-            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">
-              Sections
-            </h3>
+            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">Sections</h3>
 
             <ul className="mt-3 space-y-2.5">
               {sections.map((s) => (
@@ -164,10 +159,7 @@ export function SiteFooter() {
 
           {/* Newsletter */}
           <div className="w-full">
-            <NewsletterBlock
-              authenticated={isAuthenticated}
-              onOpenCookieSettings={openSettings}
-            />
+            <NewsletterBlock authenticated={isAuthenticated} onOpenCookieSettings={openSettings} />
           </div>
         </div>
 
@@ -183,9 +175,7 @@ export function SiteFooter() {
         >
           {/* COLUMN 1 — Sections */}
           <div>
-            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">
-              Sections
-            </h3>
+            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">Sections</h3>
 
             <ul className="mt-3 space-y-2.5">
               {sections.map((s) => (
@@ -204,10 +194,7 @@ export function SiteFooter() {
 
           {/* COLUMN 4 — Newsletter */}
           <div className="w-full">
-            <NewsletterBlock
-              authenticated={isAuthenticated}
-              onOpenCookieSettings={openSettings}
-            />
+            <NewsletterBlock authenticated={isAuthenticated} onOpenCookieSettings={openSettings} />
           </div>
         </div>
 

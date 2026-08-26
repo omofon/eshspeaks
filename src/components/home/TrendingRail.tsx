@@ -32,7 +32,7 @@ export function TrendingRail({
       {first ? (
         <Link href={articleHref(first)} className="group mt-5 block border-b border-accent/25 pb-5">
           <span className="kicker text-maroon">
-            {getSection(first.section)?.name ?? first.section}
+            {first.sectionName ?? getSection(first.section)?.name ?? first.section}
           </span>
           <h3 className="headline-sm mt-2 text-navy transition-colors group-hover:text-accent">
             {first.title}

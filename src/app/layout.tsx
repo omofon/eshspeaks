@@ -3,6 +3,8 @@ import { Newsreader, Inter, IBM_Plex_Mono, Bodoni_Moda } from "next/font/google"
 import { CookieBanner } from "@/components/CookieBanner";
 import { CookieSettingsModal } from "@/components/CookieSettingsModal";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
+import { PreviewProvider } from "@/lib/dev/previewTier";
+import { QueryProvider } from "@/lib/query/QueryProvider";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -46,7 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable} ${bodoni.variable}`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <QueryProvider>
+          <PreviewProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </PreviewProvider>
+        </QueryProvider>
         <CookieBanner />
         <CookieSettingsModal />
       </body>

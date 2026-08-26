@@ -36,7 +36,6 @@ export function useAutosave(draft: DraftState, enabled = true) {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     enabled,
     draft.id,

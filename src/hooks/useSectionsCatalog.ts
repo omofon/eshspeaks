@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchSections, type ApiSection } from "@/lib/api/sections";
 import { sections as mockSections } from "@/lib/data/sections";
 
@@ -12,7 +12,7 @@ import { sections as mockSections } from "@/lib/data/sections";
  * an explicit env var per the "controlled dev fallback" rule: never mix
  * mock data into a production response silently.
  */
-const USE_MOCK_FALLBACK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+const USE_MOCK_FALLBACK = process.env["NEXT_PUBLIC_USE_MOCK_DATA"] === "true";
 
 function toMockCatalog(): ApiSection[] {
   return mockSections.map((s) => ({
@@ -20,46 +20,40 @@ function toMockCatalog(): ApiSection[] {
     name: s.name,
     slug: s.slug,
     isSponsored: false,
-    subsegments: s.subsegments.map((sub) => ({ id: `mock-${s.slug}-${sub.slug}`, name: sub.name, slug: sub.slug })),
+    subsegments: s.subsegments.map((sub) => ({
+      id: `mock-${s.slug}-${sub.slug}`,
+      name: sub.name,
+      slug: sub.slug,
+    })),
   }));
 }
 
+/** Shared cache key — every consumer (header, mobile drawer, admin forms,
+ *  editor) resolves to the same React Query cache entry, so mounting the
+ *  hook in five places still fires exactly one network request. */
+export const SECTIONS_QUERY_KEY = ["sections"] as const;
+
 export function useSectionsCatalog() {
-  const [sections, setSections] = useState<ApiSection[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [usingMock, setUsingMock] = useState(false);
+  const { data, isLoading, isFetching, error } = useQuery({
+    queryKey: SECTIONS_QUERY_KEY,
+    queryFn: fetchSections,
+    staleTime: 5 * 60_000,
+    gcTime: 60 * 60_000,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
+  const usingMock = USE_MOCK_FALLBACK && Boolean(error) && !data;
+  const sections = data ?? (usingMock ? toMockCatalog() : []);
 
-    fetchSections()
-      .then((data) => {
-        if (cancelled) return;
-        setSections(data);
-        setUsingMock(false);
-        setError(null);
-      })
-      .catch((e: unknown) => {
-        if (cancelled) return;
-        if (USE_MOCK_FALLBACK) {
-          setSections(toMockCatalog());
-          setUsingMock(true);
-          setError(null);
-        } else {
-          setSections([]);
-          setError(e instanceof Error ? e.message : "Couldn't load sections.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { sections, loading, error, usingMock };
+  return {
+    sections,
+    loading: isLoading,
+    fetching: isFetching,
+    error:
+      !usingMock && error
+        ? error instanceof Error
+          ? error.message
+          : "Couldn't load sections."
+        : null,
+    usingMock,
+  };
 }

@@ -27,7 +27,9 @@ export interface MentionMenuProps {
 }
 
 export function MentionMenu({ top, left, query, onPick }: MentionMenuProps) {
-  const matches = MOCK_PEOPLE.filter((name) => name.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+  const matches = MOCK_PEOPLE.filter((name) =>
+    name.toLowerCase().includes(query.toLowerCase()),
+  ).slice(0, 6);
 
   if (matches.length === 0) return null;
 

@@ -63,7 +63,11 @@ export function InsertMenu({
         <div className="ml-2">
           <div
             className="animate-rise flex items-center gap-1 rounded-full border px-1.5 py-1"
-            style={{ borderColor: "var(--rule)", background: "var(--card)", boxShadow: "var(--shadow-card)" }}
+            style={{
+              borderColor: "var(--rule)",
+              background: "var(--card)",
+              boxShadow: "var(--shadow-card)",
+            }}
           >
             <StripButton label="Upload image" onClick={() => fileInput.current?.click()}>
               <ImagePlus size={ICON_SIZE} />
@@ -71,7 +75,10 @@ export function InsertMenu({
             <StripButton label="Search media library" onClick={() => setPanel("library")}>
               <Search size={ICON_SIZE} />
             </StripButton>
-            <StripButton label="Embed a link (YouTube, X, Facebook, or any URL)" onClick={() => setPanel("embedLink")}>
+            <StripButton
+              label="Embed a link (YouTube, X, Facebook, or any URL)"
+              onClick={() => setPanel("embedLink")}
+            >
               <Link2 size={ICON_SIZE} />
             </StripButton>
             <StripButton

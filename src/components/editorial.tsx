@@ -1,16 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Article, Section } from "@/lib/data/types";
+import type { Route } from "next";
+import type { Article } from "@/lib/data/types";
 import { getSection } from "@/lib/data/sections";
 
-export function articleHref(article: Article) {
-  return `/${article.section}/${article.subsegment}/${article.slug}`;
+/** Prefers the API-provided display name; falls back to the mock catalog for mock-fixture
+ *  articles (whose slugs still match it), then the raw slug as a last resort. */
+function sectionDisplayName(article: Article): string {
+  return article.sectionName ?? getSection(article.section)?.name ?? article.section;
 }
 
-export function SectionBadge({ section }: { section: Section }) {
+/**
+ * Cast as Route: the segments are real data (section/subsegment/slug from
+ * the API or mock fixtures), not statically known literals, so typedRoutes
+ * can't verify this path at compile time.
+ */
+export function articleHref(article: Article): Route {
+  return `/${article.section}/${article.subsegment}/${article.slug}` as Route;
+}
+
+export function SectionBadge({ name }: { name: string }) {
   return (
     <span className="inline-flex rounded-md border border-border bg-brand-orange-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
-      {section.name}
+      {name}
     </span>
   );
 }
@@ -32,9 +44,10 @@ export function OpinionBadge() {
 }
 
 function Meta({ article, short = false }: { article: Article; short?: boolean }) {
+  const bylineLine = article.location ? `${article.byline} · ${article.location}` : article.byline;
   return (
     <p className="text-sm text-text-secondary">
-      {short ? null : `${article.byline} · ${article.location} · `}
+      {short ? null : `${bylineLine} · `}
       {article.readMinutes} min read
     </p>
   );
@@ -80,15 +93,13 @@ export function FeaturedCard({
   article: Article;
   ratio?: string;
 }) {
-  const section = getSection(article.section);
-
   return (
     <article className="group flex flex-col gap-4 border-b border-border pb-8">
       <Link href={articleHref(article)} className="block">
         <ArticleMedia article={article} ratio={ratio} priority />
       </Link>
       <div className="flex flex-wrap items-center gap-2">
-        {section ? <SectionBadge section={section} /> : null}
+        <SectionBadge name={sectionDisplayName(article)} />
       </div>
       <Link href={articleHref(article)} className="block">
         <h2 className="font-serif text-3xl font-bold leading-[1.04] text-brand-navy transition-colors group-hover:text-brand-orange sm:text-4xl lg:text-5xl">
@@ -114,8 +125,6 @@ export function ListCard({
   withImage?: boolean;
   ratio?: string;
 }) {
-  const section = getSection(article.section);
-
   return (
     <article className="group flex flex-col gap-3 border-b border-border pb-5">
       {withImage ? (
@@ -124,7 +133,7 @@ export function ListCard({
         </Link>
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
-        {section ? <SectionBadge section={section} /> : null}
+        <SectionBadge name={sectionDisplayName(article)} />
         {!withImage && article.premium ? <PremiumBadge /> : null}
       </div>
       <Link href={articleHref(article)} className="block">
@@ -146,13 +155,11 @@ export function ListCard({
 
 /** Compact horizontal card: thumbnail beside the headline. */
 export function HorizontalCard({ article }: { article: Article }) {
-  const section = getSection(article.section);
-
   return (
     <article className="group grid grid-cols-[minmax(0,1fr)_96px] items-start gap-4 border-b border-border py-4 sm:grid-cols-[minmax(0,1fr)_140px]">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          {section ? <SectionBadge section={section} /> : null}
+          <SectionBadge name={sectionDisplayName(article)} />
           {article.premium ? <PremiumBadge /> : null}
         </div>
         <Link href={articleHref(article)} className="mt-2 block">
@@ -205,15 +212,13 @@ export function OpinionCard({ article }: { article: Article }) {
 }
 
 export function CuratedCard({ article }: { article: Article }) {
-  const section = getSection(article.section);
-
   return (
     <article className="group flex flex-col gap-3 rounded-lg border border-border bg-background-soft p-5">
       <Link href={articleHref(article)} className="block">
         <ArticleMedia article={article} ratio="aspect-[16/9]" />
       </Link>
       <div className="flex flex-wrap items-center gap-2">
-        {section ? <SectionBadge section={section} /> : null}
+        <SectionBadge name={sectionDisplayName(article)} />
       </div>
       <Link href={articleHref(article)} className="block">
         <h3 className="font-serif text-xl font-bold leading-[1.1] text-brand-navy transition-colors group-hover:text-brand-orange">

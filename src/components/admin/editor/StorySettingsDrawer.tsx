@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, ImagePlus, Lock, Unlock, History } from "lucide-react";
 import type { ApiSection } from "@/lib/api/sections";
+import type { ApiImageUploadResult } from "@/lib/api/types";
 import type { ContentTier, DraftState, RevisionEntry, SourceType } from "@/lib/cms/types";
 import { slugify } from "@/lib/cms/slugify";
 
@@ -17,6 +18,7 @@ interface StorySettingsDrawerProps {
   revisions: RevisionEntry[];
   onClose: () => void;
   onChange: (patch: Partial<DraftState>) => void;
+  onUploadImage: (file: File, alt: string) => Promise<ApiImageUploadResult | null>;
 }
 
 export function StorySettingsDrawer({
@@ -28,7 +30,10 @@ export function StorySettingsDrawer({
   revisions,
   onClose,
   onChange,
+  onUploadImage,
 }: StorySettingsDrawerProps) {
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const refs = {
     image: useRef<HTMLDivElement>(null),
     title: useRef<HTMLDivElement>(null),
@@ -55,7 +60,12 @@ export function StorySettingsDrawer({
       >
         <header className="hairline flex items-center justify-between px-5 py-4">
           <h2 className="headline-sm">Story settings</h2>
-          <button type="button" aria-label="Close story settings" onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--navy)]">
+          <button
+            type="button"
+            aria-label="Close story settings"
+            onClick={onClose}
+            className="text-[var(--text-muted)] hover:text-[var(--navy)]"
+          >
             <X size={18} />
           </button>
         </header>
@@ -66,8 +76,11 @@ export function StorySettingsDrawer({
             <p className="kicker-muted mb-3">Featured image</p>
             {draft.featuredImageUrl ? (
               <div className="media-frame mb-3 aspect-[16/9]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={draft.featuredImageUrl} alt={draft.featuredImageAlt} className="h-full w-full object-cover" />
+                <img
+                  src={draft.featuredImageUrl}
+                  alt={draft.featuredImageAlt}
+                  className="h-full w-full object-cover"
+                />
               </div>
             ) : (
               <div
@@ -77,35 +90,50 @@ export function StorySettingsDrawer({
                 No image selected
               </div>
             )}
-            <label className="btn-ghost inline-flex cursor-pointer text-xs">
+            <label
+              className={`btn-ghost inline-flex text-xs ${imageUploading ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+            >
               <ImagePlus size={14} className="mr-1.5" />
-              {draft.featuredImageUrl ? "Replace image" : "Choose image"}
+              {imageUploading
+                ? "Uploading…"
+                : draft.featuredImageUrl
+                  ? "Replace image"
+                  : "Choose image"}
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
+                disabled={imageUploading}
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
+                  e.target.value = "";
                   if (!file) return;
-                  // TODO(sprint-2-media): no upload endpoint confirmed live —
-                  // this object URL is preview-only and won't survive a
-                  // reload or submit as a real featuredImageUrl. See
-                  // CMS-BACKEND-REQUESTS.md.
-                  const src = URL.createObjectURL(file);
+                  setImageUploadError(null);
+                  setImageUploading(true);
+                  const alt = draft.headline || file.name;
+                  const result = await onUploadImage(file, alt);
+                  setImageUploading(false);
+                  if (!result) {
+                    setImageUploadError("Couldn't upload that image. Try again.");
+                    return;
+                  }
                   const img = new window.Image();
                   img.onload = () => {
                     onChange({
-                      featuredImageUrl: src,
-                      featuredImageAlt: draft.headline || file.name,
-                      featuredImageWidth: img.naturalWidth,
-                      featuredImageHeight: img.naturalHeight,
+                      featuredImageUrl: result.url,
+                      featuredImagePublicId: result.publicId,
+                      featuredImageAlt: alt,
+                      featuredImageWidth: result.width ?? img.naturalWidth,
+                      featuredImageHeight: result.height ?? img.naturalHeight,
                     });
                   };
-                  img.src = src;
-                  e.target.value = "";
+                  img.src = result.url;
                 }}
               />
             </label>
+            {imageUploadError ? (
+              <p className="mt-2 text-xs text-[var(--error)]">{imageUploadError}</p>
+            ) : null}
             {draft.featuredImageUrl ? (
               <input
                 value={draft.featuredImageAlt}
@@ -137,7 +165,8 @@ export function StorySettingsDrawer({
               style={{ borderColor: "var(--border)" }}
             />
             <label className="mb-1 block text-xs text-[var(--text-muted)]">
-              URL slug {draft.slugEdited ? null : <span className="text-[var(--text-muted)]">(auto)</span>}
+              URL slug{" "}
+              {draft.slugEdited ? null : <span className="text-[var(--text-muted)]">(auto)</span>}
             </label>
             <input
               value={draft.slug}
@@ -151,7 +180,10 @@ export function StorySettingsDrawer({
           <section ref={refs.taxonomy} className="mb-8">
             <p className="kicker-muted mb-3">Section &amp; tags</p>
             <label className="mb-1 block text-xs text-[var(--text-muted)]">
-              Section {sectionsLoading ? <span className="text-[var(--text-muted)]">(loading…)</span> : null}
+              Section{" "}
+              {sectionsLoading ? (
+                <span className="text-[var(--text-muted)]">(loading…)</span>
+              ) : null}
             </label>
             <select
               value={draft.sectionId}
@@ -188,7 +220,10 @@ export function StorySettingsDrawer({
             <TagInput tags={draft.sectorTags} onChange={(sectorTags) => onChange({ sectorTags })} />
 
             <label className="mb-1 mt-3 block text-xs text-[var(--text-muted)]">
-              Source type <span className="text-[var(--text-muted)]">(only "ORIGINAL" is confirmed live — see CMS-BACKEND-REQUESTS.md)</span>
+              Source type{" "}
+              <span className="text-[var(--text-muted)]">
+                (only "ORIGINAL" is confirmed live — see CMS-BACKEND-REQUESTS.md)
+              </span>
             </label>
             <select
               value={draft.sourceType}
@@ -222,7 +257,9 @@ export function StorySettingsDrawer({
             </div>
 
             <p className="kicker-muted mb-3 mt-6">SEO</p>
-            <label className="mb-1 block text-xs text-[var(--text-muted)]">Meta title (defaults to the headline)</label>
+            <label className="mb-1 block text-xs text-[var(--text-muted)]">
+              Meta title (defaults to the headline)
+            </label>
             <input
               value={draft.metaTitle}
               onChange={(e) => onChange({ metaTitle: e.target.value })}
@@ -230,7 +267,9 @@ export function StorySettingsDrawer({
               className="mb-3 w-full rounded border px-2 py-1.5 text-sm outline-none"
               style={{ borderColor: "var(--border)" }}
             />
-            <label className="mb-1 block text-xs text-[var(--text-muted)]">Meta description (defaults to the dek)</label>
+            <label className="mb-1 block text-xs text-[var(--text-muted)]">
+              Meta description (defaults to the dek)
+            </label>
             <textarea
               value={draft.metaDescription}
               onChange={(e) => onChange({ metaDescription: e.target.value })}
@@ -239,7 +278,9 @@ export function StorySettingsDrawer({
               className="mb-3 w-full resize-none rounded border px-2 py-1.5 text-sm outline-none"
               style={{ borderColor: "var(--border)" }}
             />
-            <label className="mb-1 block text-xs text-[var(--text-muted)]">Canonical URL (leave blank unless syndicated)</label>
+            <label className="mb-1 block text-xs text-[var(--text-muted)]">
+              Canonical URL (leave blank unless syndicated)
+            </label>
             <input
               value={draft.canonicalUrl}
               onChange={(e) => onChange({ canonicalUrl: e.target.value })}
@@ -304,7 +345,10 @@ function TierOption({
         background: active ? "var(--navy-tint)" : "var(--card)",
       }}
     >
-      <span className="mb-1 flex items-center gap-1.5 text-sm font-medium" style={{ color: "var(--navy)" }}>
+      <span
+        className="mb-1 flex items-center gap-1.5 text-sm font-medium"
+        style={{ color: "var(--navy)" }}
+      >
         {icon}
         {label}
       </span>
@@ -315,7 +359,10 @@ function TierOption({
 
 function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
   return (
-    <div className="flex flex-wrap gap-1.5 rounded border px-2 py-1.5" style={{ borderColor: "var(--border)" }}>
+    <div
+      className="flex flex-wrap gap-1.5 rounded border px-2 py-1.5"
+      style={{ borderColor: "var(--border)" }}
+    >
       {tags.map((tag) => (
         <span
           key={tag}
@@ -323,7 +370,11 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
           style={{ background: "var(--accent-soft)", color: "var(--accent-hover)" }}
         >
           {tag}
-          <button type="button" aria-label={`Remove ${tag}`} onClick={() => onChange(tags.filter((t) => t !== tag))}>
+          <button
+            type="button"
+            aria-label={`Remove ${tag}`}
+            onClick={() => onChange(tags.filter((t) => t !== tag))}
+          >
             <X size={11} />
           </button>
         </span>

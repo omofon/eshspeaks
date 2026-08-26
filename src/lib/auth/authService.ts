@@ -19,10 +19,18 @@ export type AuthErrorKind =
 
 export class AuthError extends Error {
   kind: AuthErrorKind;
-  status?: number;
-  code?: string;
-  retryAfter?: number;
-  constructor(kind: AuthErrorKind, message: string, opts: { status?: number; code?: string; retryAfter?: number } = {}) {
+  status: number | undefined;
+  code: string | undefined;
+  retryAfter: number | undefined;
+  constructor(
+    kind: AuthErrorKind,
+    message: string,
+    opts: {
+      status?: number | undefined;
+      code?: string | undefined;
+      retryAfter?: number | undefined;
+    } = {},
+  ) {
     super(message);
     this.name = "AuthError";
     this.kind = kind;
@@ -39,17 +47,25 @@ export type AuthSession = {
   accessToken: string;
   refreshToken: string;
   onboardingRequired: boolean;
-  onboardingStep?: string;
+  onboardingStep?: string | undefined;
 };
 
 const API_PREFIX = "/api/v1";
 
-/** The real response envelope, confirmed live. Branch on errorCode, never message. */
+/**
+ * The real response envelope, confirmed live. `errorCode` is coarse
+ * (BAD_REQUEST/UNAUTHORIZED/...); the specific reason (OTP_EXPIRED,
+ * USERNAME_TAKEN, ...) lives in `appErrorCode` — confirmed by curling
+ * /auth/email/verify with a stale code, which came back
+ * `{errorCode:"BAD_REQUEST", appErrorCode:"OTP_EXPIRED"}`. Branch on
+ * appErrorCode first, never on message text.
+ */
 interface Envelope<T> {
   success: boolean;
   data: T;
   message: string;
   errorCode?: string;
+  appErrorCode?: string;
 }
 
 /* ------------------------------------------------------------------ errors */
@@ -61,25 +77,58 @@ const MESSAGES: Record<string, [AuthErrorKind, string]> = {
   ACCOUNT_DISABLED: ["account_disabled", "This account has been disabled. Contact support."],
   INVALID_ACCESS_TOKEN: ["unauthorized", "Your session has expired. Sign in again."],
   INVALID_REFRESH_TOKEN: ["unauthorized", "Your session has expired. Sign in again."],
-  INVALID_USERNAME: ["invalid_username", "That username isn't allowed. Use 3\u201330 lower-case letters, numbers or single underscores."],
+  INVALID_USERNAME: [
+    "invalid_username",
+    "That username isn't allowed. Use 3\u201330 lower-case letters, numbers or single underscores.",
+  ],
   USERNAME_TAKEN: ["username_taken", "That username is already taken."],
   OAUTH_FAILED: ["server", "Sign-in with that provider is unavailable right now."],
 };
 
-function mapError(status: number, code?: string, message?: string, retryAfter?: number): AuthError {
+function mapError(
+  status: number,
+  code?: string | undefined,
+  message?: string | undefined,
+  retryAfter?: number | undefined,
+): AuthError {
   const known = code ? MESSAGES[code.toUpperCase()] : undefined;
   if (known) return new AuthError(known[0], message || known[1], { status, code, retryAfter });
 
-  if (status === 429) return new AuthError("rate_limited", message ?? MESSAGES.RATE_LIMIT_EXCEEDED[1], { status, code, retryAfter });
-  if (status === 401) return new AuthError("unauthorized", message ?? "Your session has expired. Sign in again.", { status, code });
-  if (status === 403) return new AuthError("account_disabled", message ?? "You don't have access to that.", { status, code });
-  if (status === 409) return new AuthError("username_taken", message ?? MESSAGES.USERNAME_TAKEN[1], { status, code });
-  if (status === 400 || status === 422) return new AuthError("invalid_email", message ?? "Check the details and try again.", { status, code });
-  if (status >= 500) return new AuthError("server", message ?? "EshSpeaks is having trouble right now.", { status, code });
+  if (status === 429)
+    return new AuthError("rate_limited", message ?? MESSAGES["RATE_LIMIT_EXCEEDED"]![1], {
+      status,
+      code,
+      retryAfter,
+    });
+  if (status === 401)
+    return new AuthError("unauthorized", message ?? "Your session has expired. Sign in again.", {
+      status,
+      code,
+    });
+  if (status === 403)
+    return new AuthError("account_disabled", message ?? "You don't have access to that.", {
+      status,
+      code,
+    });
+  if (status === 409)
+    return new AuthError("username_taken", message ?? MESSAGES["USERNAME_TAKEN"]![1], {
+      status,
+      code,
+    });
+  if (status === 400 || status === 422)
+    return new AuthError("invalid_email", message ?? "Check the details and try again.", {
+      status,
+      code,
+    });
+  if (status >= 500)
+    return new AuthError("server", message ?? "EshSpeaks is having trouble right now.", {
+      status,
+      code,
+    });
   return new AuthError("unknown", message ?? "Something went wrong.", { status, code });
 }
 
-function safeJson(text: string): any {
+function safeJson(text: string): unknown {
   try {
     return JSON.parse(text);
   } catch {
@@ -98,7 +147,7 @@ async function rawRequest(path: string, { auth, ...init }: RequestOptions = {}):
     ...((init.headers as Record<string, string>) ?? {}),
   };
   const token = auth ? tokenStore.access() : null;
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   try {
     // CONFIRMED: the API does set cookies (esh_at / esh_rt) on
@@ -110,9 +159,16 @@ async function rawRequest(path: string, { auth, ...init }: RequestOptions = {}):
     // mechanism for this frontend. credentials:"include" is kept because
     // it's harmless, not because anything here relies on it — the
     // Authorization: Bearer header above is the only real auth mechanism.
-    return await fetch(`${API_BASE_URL}${API_PREFIX}${path}`, { ...init, headers, credentials: "include" });
+    return await fetch(`${API_BASE_URL}${API_PREFIX}${path}`, {
+      ...init,
+      headers,
+      credentials: "include",
+    });
   } catch {
-    throw new AuthError("network", "We couldn't reach EshSpeaks. Check your connection and try again.");
+    throw new AuthError(
+      "network",
+      "We couldn't reach EshSpeaks. Check your connection and try again.",
+    );
   }
 }
 
@@ -132,7 +188,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     const retryHeader = res.headers.get("Retry-After");
     throw mapError(
       res.status,
-      body?.errorCode,
+      body?.appErrorCode ?? body?.errorCode,
       body?.message,
       retryHeader ? Number(retryHeader) : undefined,
     );
@@ -182,17 +238,19 @@ export function googleAuthUrl(returnTo?: string, action?: string) {
 }
 
 /* ----------------------------------------------------------------- service */
+type EmailFlowOpts = { returnTo?: string | undefined; action?: string | undefined };
+
 export const authService = {
-  requestEmailCode: (email: string, opts: { returnTo?: string; action?: string } = {}) =>
+  requestEmailCode: (email: string, opts: EmailFlowOpts = {}) =>
     request<Record<string, never>>("/auth/email/request", {
       method: "POST",
       body: JSON.stringify({ email: email.trim().toLowerCase(), ...opts }),
     }),
 
-  resendEmailCode: (email: string, opts: { returnTo?: string; action?: string } = {}) =>
+  resendEmailCode: (email: string, opts: EmailFlowOpts = {}) =>
     authService.requestEmailCode(email, opts),
 
-  verifyEmailCode: async (email: string, code: string, opts: { returnTo?: string; action?: string } = {}) =>
+  verifyEmailCode: async (email: string, code: string, opts: EmailFlowOpts = {}) =>
     normalizeSession(
       await request<VerifyResult>("/auth/email/verify", {
         method: "POST",
@@ -226,7 +284,8 @@ export const authService = {
   },
 
   googleAuthUrl,
-  startGoogle: (returnTo?: string, action?: string) => window.location.assign(googleAuthUrl(returnTo, action)),
+  startGoogle: (returnTo?: string, action?: string) =>
+    window.location.assign(googleAuthUrl(returnTo, action)),
 };
 
 export const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
@@ -236,6 +295,7 @@ export function validateUsername(raw: string): string | null {
   const value = raw.trim();
   if (value.length < 3 || value.length > 30) return "Use between 3 and 30 characters.";
   if (/[^a-z0-9_]/.test(value)) return "Lower-case letters, numbers and underscores only.";
-  if (!USERNAME_PATTERN.test(value)) return "Underscores must sit between letters or numbers \u2014 no doubles, no edges.";
+  if (!USERNAME_PATTERN.test(value))
+    return "Underscores must sit between letters or numbers \u2014 no doubles, no edges.";
   return null;
 }
