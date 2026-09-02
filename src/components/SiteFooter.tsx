@@ -104,7 +104,9 @@ export function SiteFooter() {
         {/* MOBILE — stacked: Sections (2-col grid) → Company/Account (2-col) → Newsletter */}
         <div className="flex flex-col gap-8 pt-8 md:hidden">
           <div>
-            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">Sections</h3>
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+              Sections
+            </h3>
             {/* grid-flow-col fills column 1 top-to-bottom first, then column 2 —
                 matches the requested 4-and-4 column split rather than an
                 interleaved row-major fill. Assumes ~8 section items (today's
@@ -140,7 +142,9 @@ export function SiteFooter() {
         >
           {/* Sections */}
           <div>
-            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">Sections</h3>
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+              Sections
+            </h3>
 
             <ul className="mt-3 space-y-2.5">
               {sections.map((s) => (
@@ -175,7 +179,9 @@ export function SiteFooter() {
         >
           {/* COLUMN 1 — Sections */}
           <div>
-            <h3 className="text-[11px] font-semibold tracking-[0.12em] text-accent">Sections</h3>
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+              Sections
+            </h3>
 
             <ul className="mt-3 space-y-2.5">
               {sections.map((s) => (
