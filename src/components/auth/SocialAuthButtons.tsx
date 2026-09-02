@@ -1,6 +1,7 @@
 "use client";
 
 import { authService } from "@/lib/auth/authService";
+import { authOutlineButtonClass } from "@/components/auth/authTheme";
 
 /**
  * Google sign-in is a full-page navigation to GET /api/v1/auth/google.
@@ -28,7 +29,7 @@ export function SocialAuthButtons({ returnTo, action }: { returnTo?: string; act
         onClick={(e) => {
           if (!href) e.preventDefault();
         }}
-        className="flex h-12 w-full items-center justify-center gap-3 rounded-md border border-rule-strong bg-background px-4 text-[15px] font-semibold text-text-primary transition-colors hover:bg-background-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        className={authOutlineButtonClass}
       >
         <svg aria-hidden="true" viewBox="0 0 18 18" className="h-[18px] w-[18px]">
           <path

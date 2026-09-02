@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { authService, AuthError, validateUsername } from "@/lib/auth/authService";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getSafeReturnTo } from "@/lib/auth/returnTo";
+import { authPrimaryButtonClass } from "@/components/auth/authTheme";
 
 export function UsernameForm({ returnTo }: { returnTo?: string }) {
   const router = useRouter();
@@ -50,12 +51,12 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
       <div>
         <label
           htmlFor={inputId}
-          className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary"
+          className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft"
         >
           Username
         </label>
-        <div className="mt-2 flex h-12 items-center rounded-md border border-rule-strong bg-background focus-within:border-navy">
-          <span aria-hidden="true" className="pl-4 pr-1 font-mono text-[16px] text-text-muted">
+        <div className="mt-2 flex h-12 items-center rounded-[10px] border border-line bg-input-soft transition-colors focus-within:border-ink focus-within:ring-2 focus-within:ring-peach/50">
+          <span aria-hidden="true" className="pl-4 pr-1 font-mono text-[16px] text-ink-faint">
             @
           </span>
           <input
@@ -74,23 +75,19 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
             placeholder="username"
             aria-describedby={statusId}
             aria-invalid={message ? true : undefined}
-            className="h-full w-full rounded-r-md bg-transparent pr-4 text-[16px] text-text-primary placeholder:text-text-muted focus:outline-none"
+            className="h-full w-full rounded-r-[10px] bg-transparent pr-4 text-[16px] text-ink placeholder:text-ink-faint focus:outline-none"
           />
         </div>
         <p
           id={statusId}
           aria-live="polite"
-          className={`mt-2 min-h-5 text-[13px] leading-5 ${message ? "text-error" : "text-text-muted"}`}
+          className={`mt-2 min-h-5 text-[13px] leading-5 ${message ? "text-error" : "text-ink-faint"}`}
         >
           {message ?? "3\u201330 characters. Lower-case letters, numbers and single underscores."}
         </p>
       </div>
 
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className="flex h-12 w-full items-center justify-center rounded-md bg-navy px-4 text-[15px] font-semibold text-text-inverse transition-colors hover:bg-navy-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-45"
-      >
+      <button type="submit" disabled={!canSubmit} className={authPrimaryButtonClass}>
         {saving ? "Saving\u2026" : "Continue"}
       </button>
     </form>

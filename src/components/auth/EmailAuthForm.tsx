@@ -2,8 +2,14 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, Mail } from "lucide-react";
 import { authService, AuthError, isValidEmail } from "@/lib/auth/authService";
 import { getSafeReturnTo } from "@/lib/auth/returnTo";
+import {
+  authFieldClass,
+  authMicroLabelClass,
+  authPrimaryButtonClass,
+} from "@/components/auth/authTheme";
 
 type Mode = "register" | "login";
 
@@ -69,61 +75,74 @@ export function EmailAuthForm({
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4">
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div>
-        <label
-          htmlFor={inputId}
-          className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-text-secondary"
-        >
-          Continue with email
+        <label htmlFor={inputId} className={authMicroLabelClass}>
+          Email address
         </label>
-        <input
-          id={inputId}
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          autoCapitalize="none"
-          spellCheck={false}
-          required
-          placeholder="Email address"
-          aria-label="Email address"
-          aria-invalid={showInvalid || Boolean(error) ? true : undefined}
-          aria-describedby={showInvalid || error ? errorId : undefined}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onBlur={() => setTouched(true)}
-          disabled={status === "loading"}
-          className="mt-2 h-12 w-full rounded-md border border-rule-strong bg-background px-4 text-[16px] text-text-primary placeholder:text-text-muted focus:border-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60 aria-[invalid=true]:border-error"
-        />
-        {showInvalid && !error ? (
-          <p id={errorId} role="alert" className="mt-2 text-[13px] leading-5 text-error">
-            Enter a valid email address.
-          </p>
-        ) : null}
-        {error ? (
-          <p id={errorId} role="alert" className="mt-2 text-[13px] leading-5 text-error">
-            {error.message}{" "}
-            {error.hint === "sign-in" ? (
-              <a href="/login" className="font-semibold underline underline-offset-2">
-                Sign in instead
-              </a>
-            ) : null}
-            {error.hint === "register" ? (
-              <a href="/register" className="font-semibold underline underline-offset-2">
-                Create an account
-              </a>
-            ) : null}
-          </p>
-        ) : null}
+        <div className="relative mt-2">
+          <Mail
+            aria-hidden="true"
+            className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-ink-faint"
+          />
+          <input
+            id={inputId}
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            placeholder="you@example.com"
+            aria-label="Email address"
+            aria-invalid={showInvalid || Boolean(error) ? true : undefined}
+            aria-describedby={showInvalid || error ? errorId : undefined}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setTouched(true)}
+            disabled={status === "loading"}
+            className={`${authFieldClass} pl-11 pr-4`}
+          />
+        </div>
+        {/* Error message */}
+        <div className="mt-1">
+          {error ? (
+            <p id={errorId} role="alert" className="text-[13px] leading-5 text-error">
+              {error.message}{" "}
+              {error.hint === "sign-in" ? (
+                <a href="/login" className="font-semibold underline underline-offset-2">
+                  Sign in instead
+                </a>
+              ) : null}
+              {error.hint === "register" ? (
+                <a href="/register" className="font-semibold underline underline-offset-2">
+                  Create an account
+                </a>
+              ) : null}
+            </p>
+          ) : showInvalid ? (
+            <p id={errorId} role="alert" className="text-[13px] leading-5 text-error">
+              Enter a valid email address.
+            </p>
+          ) : null}
+        </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className="flex h-12 w-full items-center justify-center rounded-md bg-navy px-4 text-[15px] font-semibold text-text-inverse transition-colors hover:bg-navy-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-45"
-      >
-        {status === "loading" ? "Sending code\u2026" : status === "sent" ? "Code sent" : "Continue"}
+      <button type="submit" disabled={!canSubmit} className={authPrimaryButtonClass}>
+        {status === "loading" ? (
+          "Sending code…"
+        ) : status === "sent" ? (
+          "Code sent"
+        ) : (
+          <>
+            Sign in
+            <ArrowRight
+              aria-hidden="true"
+              className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+            />
+          </>
+        )}
       </button>
 
       <p aria-live="polite" className="sr-only">

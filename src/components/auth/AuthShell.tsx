@@ -1,10 +1,15 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { WhiteLogo } from "@/components/layout/whiteLogo";
+import AuthGallery from "@/components/auth/AuthGallery";
 
 /**
  * Auth-specific shell that intentionally avoids the public newsroom chrome.
- * It uses a distinct editorial login layout with a dark backdrop and centered card.
+ * A single white card floating on a lightly gridded canvas, split into an
+ * image panel (left) and the flow's form (right). Shared by /login,
+ * /verify and /username so the three steps read as one screen.
+ *
+ * Palette classes (auth-canvas, auth-card, gallery-grid, text-ink, bg-peach,
+ * …) resolve against the auth-only tokens in globals.css.
  */
 export function AuthShell({
   kicker,
@@ -14,66 +19,50 @@ export function AuthShell({
   footer,
 }: {
   kicker?: string;
-  title: string;
+  title: ReactNode;
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
 }) {
   return (
-    <main className="min-h-dvh bg-[#0e1d3b] text-white">
-      <div className="mx-auto flex min-h-dvh max-w-[1440px] flex-col px-4 py-4 sm:px-8 lg:px-[170px] lg:py-0">
-        <header className="flex justify-center pb-8 pt-8 sm:pb-10 sm:pt-12">
-          <WhiteLogo size="lg" inverted className="w-full max-w-[280px]" />
-        </header>
+    <main className="auth-canvas flex min-h-dvh flex-col items-center justify-center px-4 py-8 sm:px-8 lg:px-12">
+      {/* Fixed width above the breakpoint so nothing inside can reflow the
+          card's footprint; fluid only on small screens. */}
+      <div className="w-full max-w-[400px] md:max-w-[1040px]">
+        <div className="auth-card grid overflow-hidden rounded-[20px] bg-card md:grid-cols-2">
+          <AuthGallery />
 
-        <div className="flex flex-1 items-center justify-center pb-10">
-          <section className="w-full max-w-[700px] bg-white px-5 py-8 text-navy shadow-[0_18px_45px_rgba(0,0,0,0.18)] sm:px-12 sm:py-10 lg:px-[160px] lg:py-10">
-            <div className="mx-auto max-w-[375px]">
+          {/* min-height matches the gallery panel so the card keeps one
+              fixed height across /login, /verify, /username. */}
+          <section className="flex min-h-[520px] flex-col justify-center px-6 py-11 text-ink sm:px-12 sm:py-14 md:min-h-[640px] lg:px-16">
+            <div className="mx-auto w-full max-w-[380px]">
+              <div className="flex justify-center">
+                <WhiteLogo size="md" inverted={false} />
+              </div>
+
               {kicker ? (
-                <p className="text-center text-[12px] font-medium uppercase tracking-[0.16em] text-accent">
+                <p className="mt-10 text-[11px] font-semibold uppercase tracking-[0.24em] text-peach-strong">
                   {kicker}
                 </p>
               ) : null}
 
-              <h1 className="mt-5 text-center font-serif text-[28px] leading-[1.12] tracking-[-0.04em] text-navy sm:text-[32px]">
+              <h1 className="mt-3 font-serif text-[34px] font-light leading-[1.05] tracking-[-0.02em] text-ink sm:text-[40px]">
                 {title}
               </h1>
 
               {description ? (
-                <div className="mt-4 text-center text-[14px] leading-6 text-text-secondary">
-                  {description}
-                </div>
+                <div className="mt-4 text-[14px] leading-6 text-ink-soft">{description}</div>
               ) : null}
 
-              <div className="mt-8">{children}</div>
+              <div className="mt-9">{children}</div>
+
+              {footer ? <div className="mt-8">{footer}</div> : null}
             </div>
           </section>
         </div>
 
-        {footer ? <div className="mx-auto w-full max-w-[700px] pb-8 pt-2">{footer}</div> : null}
-
-        <footer className="mx-auto w-full max-w-[1100px] border-t border-white/20 pt-6 pb-8 text-[12px] text-white/75">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center">
-            <Link href="/terms" className="transition-colors hover:text-white">
-              Terms of Use
-            </Link>
-            <span className="text-white/40">|</span>
-            <Link href="/privacy" className="transition-colors hover:text-white">
-              Privacy Notice
-            </Link>
-            <span className="text-white/40">|</span>
-            <Link href="/cookies" className="transition-colors hover:text-white">
-              Cookie Policy
-            </Link>
-            <span className="text-white/40">|</span>
-            <Link href="/accessibility" className="transition-colors hover:text-white">
-              Accessibility
-            </Link>
-          </div>
-
-          <p className="mt-4 text-center text-[11px] uppercase tracking-[0.12em] text-white/60">
-            &copy; {new Date().getFullYear()} EshSpeaks Media. All rights reserved.
-          </p>
+        <footer className="pt-6 text-center text-[11px] uppercase tracking-[0.12em] text-ink-faint">
+          &copy; {new Date().getFullYear()} EshSpeaks Media
         </footer>
       </div>
     </main>

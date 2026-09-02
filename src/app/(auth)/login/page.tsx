@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { Suspense } from "react";
 import AuthShell from "@/components/auth/AuthShell";
 import AuthDivider from "@/components/auth/AuthDivider";
@@ -37,61 +38,67 @@ export default async function LoginPage({
 
   return (
     <AuthShell
-      kicker={isRegister ? "Membership" : "Account"}
-      title={isRegister ? "Create your EshSpeaks account" : "Sign in to EshSpeaks"}
-      description="Join the conversation, save stories, and get more from EshSpeaks."
+      kicker={isRegister ? "Membership" : "Welcome back"}
+      title={
+        isRegister ? (
+          <>
+            Create your
+            <br />
+            <em className="font-normal italic">account.</em>
+          </>
+        ) : (
+          <>
+            Return to the
+            <br />
+            <em className="font-normal italic">conversation.</em>
+          </>
+        )
+      }
+      description={
+        isRegister
+          ? "Join the conversation, save stories, and get more from EshSpeaks."
+          : "Your daily read, considered from every angle."
+      }
       footer={
-        <></>
-        // <p className="text-center text-[13px] text-text-secondary">
-        //   {isRegister ? (
-        //     <>
-        //       Already have an account?{" "}
-        //       <Link
-        //         href={toggleModeHref}
-        //         className="font-semibold text-white underline underline-offset-2 hover:text-accent"
-        //       >
-        //         Sign in
-        //       </Link>
-        //     </>
-        //   ) : (
-        //     <>
-        //       New to EshSpeaks?{" "}
-        //       <Link
-        //         href={toggleModeHref}
-        //         className="font-semibold text-white underline underline-offset-2 hover:text-accent"
-        //       >
-        //         Create an account
-        //       </Link>
-        //     </>
-        //   )}
-        // </p>
+        <div className="space-y-4">
+          <p className="text-[10px] leading-5 text-ink-faint">
+            By continuing, you agree to EshSpeaks&rsquo;{" "}
+            <Link
+              href="/terms"
+              className="text-ink underline decoration-peach decoration-2 underline-offset-2"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/privacy"
+              className="text-ink underline decoration-peach decoration-2 underline-offset-2"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
+
+          <p className="border-t border-line pt-4 text-[13px] text-ink-soft">
+            {isRegister ? "Already have an account?" : "New to EshSpeaks?"}{" "}
+            <Link
+              href={toggleModeHref as Route}
+              className="font-semibold text-ink underline decoration-peach decoration-2 underline-offset-4"
+            >
+              {isRegister ? "Sign in" : "Create an account"}
+            </Link>
+          </p>
+        </div>
       }
     >
-      {/* Previously only returnTo was forwarded here, silently dropping
-          `action` for Google sign-in. Both are always passed now. */}
-      <SocialAuthButtons {...continuation} />
-      <AuthDivider />
+      {/* Primary credential path first, social second — matches the
+          reworked split-screen layout. `action` is always forwarded to
+          SocialAuthButtons too; it was silently dropped for Google before. */}
       <Suspense>
         <EmailAuthForm mode={isRegister ? "register" : "login"} {...continuation} />
       </Suspense>
-
-      <p className="mt-6 text-[12px] leading-5 text-text-muted">
-        By continuing, you agree to EshSpeaks&rsquo;{" "}
-        <Link
-          href="/terms"
-          className="underline decoration-rule underline-offset-2 hover:text-text-secondary"
-        >
-          Terms of Service
-        </Link>{" "}
-        and{" "}
-        <Link
-          href="/privacy"
-          className="underline decoration-rule underline-offset-2 hover:text-text-secondary"
-        >
-          Privacy Policy
-        </Link>
-        .
-      </p>
+      <AuthDivider label="or continue with" />
+      <SocialAuthButtons {...continuation} />
     </AuthShell>
   );
 }

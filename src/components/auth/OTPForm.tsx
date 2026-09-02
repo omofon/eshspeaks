@@ -176,7 +176,7 @@ export function OTPForm({
             disabled={disabled}
             aria-label={`Digit ${i + 1} of ${LENGTH}`}
             aria-invalid={error ? true : undefined}
-            className="h-14 w-full max-w-[54px] rounded-md border border-rule-strong bg-background text-center font-mono text-[20px] text-text-primary focus:border-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60 aria-[invalid=true]:border-error"
+            className="h-14 w-full max-w-[54px] rounded-[10px] border border-line bg-input-soft text-center font-mono text-[20px] text-ink transition-colors focus:outline-none focus-visible:border-ink focus-visible:ring-2 focus-visible:ring-peach/50 disabled:opacity-60 aria-[invalid=true]:border-error"
           />
         ))}
       </div>
@@ -184,7 +184,7 @@ export function OTPForm({
       <p aria-live="polite" className="mt-3 min-h-5 text-[13px] leading-5 text-error">
         {error}
       </p>
-      <p aria-live="polite" className="text-[13px] leading-5 text-text-secondary">
+      <p aria-live="polite" className="text-[13px] leading-5 text-ink-soft">
         {status === "verifying"
           ? "Verifying your code\u2026"
           : status === "success"
@@ -194,20 +194,20 @@ export function OTPForm({
 
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
         {countdown > 0 ? (
-          <span className="text-text-muted">Resend code in {countdown}s</span>
+          <span className="text-ink-faint">Resend code in {countdown}s</span>
         ) : (
           <button
             type="button"
             onClick={resend}
             disabled={resending}
-            className="font-semibold text-accent underline underline-offset-2 hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
+            className="font-semibold text-ink underline decoration-peach decoration-2 underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-60"
           >
             {resending ? "Sending\u2026" : "Resend code"}
           </button>
         )}
         <a
           href={differentEmailHref}
-          className="text-text-secondary underline underline-offset-2 hover:text-navy"
+          className="text-ink-soft underline decoration-line underline-offset-2 hover:text-ink"
         >
           Use a different email
         </a>
