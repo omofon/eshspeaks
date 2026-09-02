@@ -8,6 +8,8 @@ import { fetchEditorialArticles } from "@/lib/api/articles";
 import { ApiError } from "@/lib/api/client";
 import type { ApiArticleSummary } from "@/lib/api/types";
 import type { ArticleStatus } from "@/lib/cms/types";
+import { canPublishDirectly } from "@/lib/cms/types";
+import { ReviewActions } from "@/components/admin/ReviewActions";
 
 const STATUS_FILTERS: { value: ArticleStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -51,6 +53,9 @@ export default function EditorialArticlesPage() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const canReview = role ? canPublishDirectly(role) : false;
 
   useEffect(() => {
     if (!role) return;
@@ -77,7 +82,7 @@ export default function EditorialArticlesPage() {
     return () => {
       cancelled = true;
     };
-  }, [role, status, mineOnly, page]);
+  }, [role, status, mineOnly, page, refreshKey]);
 
   if (!role) {
     return (
@@ -171,31 +176,39 @@ export default function EditorialArticlesPage() {
           ) : (
             <ul className="divide-y" style={{ borderColor: "var(--border)" }}>
               {items.map((article) => (
-                <li key={article.id} className="flex items-center justify-between gap-4 py-4">
-                  <div className="min-w-0">
-                    <Link
-                      href={`/admin/articles/editor/${article.slug}`}
-                      className="block truncate font-serif text-lg"
-                      style={{ color: "var(--navy)" }}
+                <li key={article.id} className="py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/admin/articles/editor/${article.slug}`}
+                        className="block truncate font-serif text-lg"
+                        style={{ color: "var(--navy)" }}
+                      >
+                        {article.headline || "Untitled story"}
+                      </Link>
+                      <p className="meta mt-1">
+                        {article.section?.name ?? "No section"}
+                        {article.author?.displayName ? ` · ${article.author.displayName}` : ""}
+                        {" · "}
+                        {new Date(article.updatedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span
+                      className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide"
+                      style={{
+                        background: STATUS_STYLE[article.status].bg,
+                        color: STATUS_STYLE[article.status].fg,
+                      }}
                     >
-                      {article.headline || "Untitled story"}
-                    </Link>
-                    <p className="meta mt-1">
-                      {article.section?.name ?? "No section"}
-                      {article.author?.displayName ? ` · ${article.author.displayName}` : ""}
-                      {" · "}
-                      {new Date(article.updatedAt).toLocaleDateString()}
-                    </p>
+                      {statusLabel(article.status)}
+                    </span>
                   </div>
-                  <span
-                    className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide"
-                    style={{
-                      background: STATUS_STYLE[article.status].bg,
-                      color: STATUS_STYLE[article.status].fg,
-                    }}
-                  >
-                    {statusLabel(article.status)}
-                  </span>
+                  {canReview && article.status === "in_review" ? (
+                    <ReviewActions
+                      articleId={article.id}
+                      onChanged={() => setRefreshKey((k) => k + 1)}
+                    />
+                  ) : null}
                 </li>
               ))}
             </ul>

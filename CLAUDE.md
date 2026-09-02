@@ -49,22 +49,28 @@ article-create are live network calls.
 
 ## CMS / article editor (`src/lib/cms/`, `src/lib/api/articles*.ts`, `src/components/admin/editor/`)
 
-- The only confirmed-live write endpoint is `POST /api/v1/articles`
-  (create). There is **no update/PATCH, no fetch-by-id, and no
-  submit/approve/publish endpoint** yet. Concretely:
-  - Autosave (`useAutosave.ts`) writes to `localStorage` only
-    (`src/lib/storage/draftStorage.ts`, keyed `esh.draft.<id>`) — it never
-    hits the network.
-  - `submitArticle()` in `src/lib/api/articles.ts` is the one and only
-    point that calls the real API, fired once when the editor's
-    submit/publish action is pressed.
-  - `ReviewStatus` (`draft`/`submitted`/`approved`/`published`) on
-    `DraftState` is **client-side only** — the backend has no status field
-    to persist it yet. Don't build a review-queue UI against it without
-    reconfirming the contract first.
-- If you find yourself wanting a draft-update or fetch-by-id endpoint, that
-  gap is already known — check for backend movement before building
-  around it, and don't invent a PUT/PATCH call that looks like it works.
+- **This section previously said only `POST /articles` was live — that is
+  now stale.** Confirmed-live write endpoints (see `src/lib/api/articles.ts`):
+  `POST /articles`, `PATCH /articles/{id}` (content), `PATCH
+  /articles/{id}/status` (the *only* way to move status — the update DTO
+  rejects `status`), `DELETE /articles/{id}` (chief_editor), `POST
+  /articles/images`. Single-article read is `GET /articles/{slug}` only
+  (auth-aware); there is still **no `GET /articles/{id}` by server id**.
+  - `ArticleStatus` (`draft`/`in_review`/`published`/`archived`) is real
+    server state once an article has a `remoteId`. Legal transitions and
+    who may publish/archive (`section_lead`/`chief_editor`) are enforced by
+    the backend; `STATUS_TRANSITIONS` in `ArticleEditor.tsx` only decides
+    which actions to *offer*.
+  - Autosave (`useAutosave.ts`) still writes to `localStorage` only —
+    that's a deliberate choice (no per-keystroke PATCH), not a missing
+    endpoint. Explicit "Save changes" calls `updateArticle()` (PATCH).
+- Still genuinely missing (tracked in `CMS-BACKEND-REQUESTS.md`):
+  `GET /articles/{id}` by id, editor→writer **review notes**
+  (`/articles/{id}/review-notes`), server-side **revision history**, and
+  **notifications** (`/notifications*`). The review UI
+  (`src/components/admin/ReviewActions.tsx`) and `NotificationBell.tsx` are
+  shells wired to that contract — they degrade to a "pending backend" state
+  on 404, they don't fake success.
 
 ## Routing conventions
 

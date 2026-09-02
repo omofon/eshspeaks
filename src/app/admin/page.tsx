@@ -11,6 +11,7 @@ import { fetchEditorialUsers } from "@/lib/api/roles";
 import { ApiError } from "@/lib/api/client";
 import type { ArticleStatus } from "@/lib/cms/types";
 import { DashboardSkeleton } from "@/components/skeletons";
+import { RoleCapabilityCard } from "@/components/admin/RoleCapabilityCard";
 
 const STATUS_FILTERS: { status: ArticleStatus | undefined; label: string }[] = [
   { status: undefined, label: "Total stories" },
@@ -101,6 +102,10 @@ export default function AdminOverviewPage() {
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
           Welcome back{user?.displayName ? `, ${user.displayName}` : ""}.
         </p>
+
+        <div className="mt-6">
+          <RoleCapabilityCard />
+        </div>
 
         {error ? (
           <p

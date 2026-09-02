@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Bell,
   ChevronDown,
   MoreHorizontal,
   Share2,
@@ -830,16 +829,6 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
                 </div>
               ) : null}
             </div>
-
-            <button
-              type="button"
-              disabled
-              aria-label="Notifications — not available yet"
-              title="Notifications aren't wired up yet — no backend endpoint exists (see CMS-BACKEND-REQUESTS.md)"
-              className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full text-[var(--text-muted)] opacity-50"
-            >
-              <Bell size={18} />
-            </button>
 
             <div
               title={`${displayName} \u00b7 ${roleLabel(role)}`}

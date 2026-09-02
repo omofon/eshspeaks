@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { buildLoginHref } from "@/lib/auth/returnTo";
 import { isEditorRole } from "@/lib/cms/types";
+import { NotificationBell } from "@/components/admin/NotificationBell";
 
 /**
  * UX-level gate for everything under /admin — NOT the security boundary.
@@ -78,6 +79,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Sections
           </Link>
         ) : null}
+        <div className="ml-auto">
+          <NotificationBell />
+        </div>
       </nav>
       {children}
     </>
