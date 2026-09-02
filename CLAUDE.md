@@ -15,7 +15,7 @@ nothing (Next only reads one app dir) but confuses tooling. `vite.config.ts`
 and TanStack-era deps are leftover, not active.
 
 `README.md`'s "mock data only, no backend, no real auth" is **stale**.
-There is a real backend now (see Auth and CMS below); article *reads* on
+There is a real backend now (see Auth and CMS below); article _reads_ on
 the public site still come from `src/lib/data/` mocks, but auth and
 article-create are live network calls.
 
@@ -52,15 +52,15 @@ article-create are live network calls.
 - **This section previously said only `POST /articles` was live — that is
   now stale.** Confirmed-live write endpoints (see `src/lib/api/articles.ts`):
   `POST /articles`, `PATCH /articles/{id}` (content), `PATCH
-  /articles/{id}/status` (the *only* way to move status — the update DTO
+/articles/{id}/status` (the _only_ way to move status — the update DTO
   rejects `status`), `DELETE /articles/{id}` (chief_editor), `POST
-  /articles/images`. Single-article read is `GET /articles/{slug}` only
+/articles/images`. Single-article read is `GET /articles/{slug}` only
   (auth-aware); there is still **no `GET /articles/{id}` by server id**.
   - `ArticleStatus` (`draft`/`in_review`/`published`/`archived`) is real
     server state once an article has a `remoteId`. Legal transitions and
     who may publish/archive (`section_lead`/`chief_editor`) are enforced by
     the backend; `STATUS_TRANSITIONS` in `ArticleEditor.tsx` only decides
-    which actions to *offer*.
+    which actions to _offer_.
   - Autosave (`useAutosave.ts`) still writes to `localStorage` only —
     that's a deliberate choice (no per-keystroke PATCH), not a missing
     endpoint. Explicit "Save changes" calls `updateArticle()` (PATCH).
@@ -98,7 +98,10 @@ SSR gates and the API remain the actual authority.
 
 ## Before committing
 
-Run `npm run lint` and `npm run typecheck`. Assets in `public/favicon.*`,
-`apple-touch-icon.png`, `icon-*.png` are generated — edit
-`scripts/generate-favicon.cjs` (and `favicon.svg` to match) and run
-`npm run favicon` rather than hand-editing the binaries.
+Run `npm run lint` and `npm run typecheck`. Favicon assets
+(`public/favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`,
+`apple-touch-icon.png`, `android-chrome-*.png`) are real images
+regenerated from `public/eshspeaks_logo.png` with an external favicon
+generator and committed directly; `scripts/generate-favicon.cjs` is
+retired. Keep `public/site.webmanifest` and the `icons` block in
+`src/app/layout.tsx` in sync if any filenames change.
