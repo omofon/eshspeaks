@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpRight, CreditCard, Receipt, Settings2 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { PremiumBadge } from "@/components/editorial";
 import { ProfileSettings } from "@/components/account/ProfileSettings";
+import { CheckoutReturnBanner } from "@/components/account/CheckoutReturnBanner";
+import { currentTierId, formatPrice, tierById } from "@/lib/membership";
 
 const EDITORIAL_ROLES = [
   "contributor",
@@ -32,119 +34,168 @@ export default function AccountPage() {
   }, [status, router]);
 
   if (status === "loading" || !isAuthenticated || !user) {
-    return <div className="py-16 text-center text-text-secondary">Loading your account\u2026</div>;
+    return <div className="py-16 text-center text-text-secondary">Loading your account...</div>;
   }
 
   const isEditorial = EDITORIAL_ROLES.includes(role as (typeof EDITORIAL_ROLES)[number]);
+  const tier = tierById(currentTierId(user.membershipTier));
+  const displayName = user.displayName ?? user.username ?? user.email.split("@")[0];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      <section className="rounded-lg border border-border bg-card p-8">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
-          Account
-        </p>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <h1 className="font-serif text-4xl text-brand-navy sm:text-5xl">
-            {user.displayName ?? user.username ?? user.email.split("@")[0]}
+    <div className="mx-auto max-w-4xl">
+      <Suspense fallback={null}>
+        <CheckoutReturnBanner />
+      </Suspense>
+
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
+            Your account
+          </p>
+          <h1 className="mt-1 truncate font-serif text-4xl text-brand-navy sm:text-5xl">
+            {displayName}
           </h1>
-          {isSubscriber ? <PremiumBadge /> : null}
+          <p className="mt-1 truncate text-sm text-text-secondary">{user.email}</p>
+          <p className="mt-1 text-sm text-text-secondary">
+            {ROLE_LABEL[role] ?? role}
+            {isEditorial ? (
+              <>
+                {" · "}
+                <Link href="/admin" className="font-medium text-brand-orange hover:underline">
+                  Newsroom admin
+                </Link>
+              </>
+            ) : null}
+          </p>
         </div>
-        <p className="mt-2 text-sm text-text-secondary">{user.email}</p>
-        <p className="mt-1 text-sm text-text-secondary">
-          {ROLE_LABEL[role] ?? role}
-          {isEditorial ? (
-            <>
-              {" \u00b7 "}
-              <Link href="/admin" className="font-medium text-brand-orange hover:underline">
-                Go to newsroom admin
-              </Link>
-            </>
-          ) : null}
-        </p>
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="shrink-0 rounded-md border border-border bg-card px-3.5 py-2 text-xs font-semibold text-brand-navy transition-colors hover:bg-background-soft"
+        >
+          Sign out
+        </button>
+      </header>
 
-        <ProfileSettings />
+      {/* Membership */}
+      <section className="mt-6 grid gap-4 sm:grid-cols-[1.1fr_1fr]">
+        <div
+          className={`flex flex-col justify-between rounded-lg border p-6 ${
+            isSubscriber
+              ? "border-navy bg-navy text-white"
+              : "border-border bg-card text-brand-navy"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-[0.2em]">EshSpeaks</span>
+            <span
+              className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${
+                isSubscriber ? "border-white/30 text-white/80" : "border-border text-text-secondary"
+              }`}
+            >
+              {isSubscriber ? "Active" : "Free"}
+            </span>
+          </div>
+          <p className="mt-10 font-serif text-3xl uppercase tracking-tight">
+            The List <span className="opacity-70">{tier.name}</span>
+          </p>
+          <p
+            className={`mt-6 truncate text-xs font-semibold uppercase tracking-widest ${
+              isSubscriber ? "text-white/70" : "text-text-secondary"
+            }`}
+          >
+            {displayName}
+          </p>
+        </div>
 
-        {/* Subscription */}
-        <div className="mt-8 border-t border-border pt-6">
-          <h2 className="font-serif text-2xl text-brand-navy">Subscription</h2>
-          {isSubscriber ? (
-            <p className="mt-2 text-sm text-text-secondary">
-              You're on Premium. Manage billing from the subscriptions page.
-              {/* TODO: no billing/subscription-management endpoint confirmed
-                  yet — wire this Link once that route exists. */}
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+              Current plan
             </p>
-          ) : (
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <p className="text-sm text-text-secondary">You're on the free plan.</p>
-              <Link
-                href="/pricing"
-                className="rounded-sm bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-navy"
+            <p className="mt-1 font-serif text-xl text-brand-navy">
+              {tier.name}
+              <span className="ml-2 text-sm font-medium text-text-secondary">
+                {tier.price.monthly === 0 ? "Free" : formatPrice(tier.price.monthly, "monthly")}
+              </span>
+            </p>
+          </div>
+          <p className="text-xs text-text-muted">
+            Renewal date and billing history will appear here once the billing backend is connected.
+          </p>
+          <div className="mt-auto flex flex-wrap gap-2">
+            <Link
+              href="/pricing"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-navy px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-navy-soft"
+            >
+              {isSubscriber ? "Change plan" : "Upgrade"}
+              <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
+            </Link>
+            {isSubscriber ? (
+              <button
+                type="button"
+                disabled
+                title="Self-serve cancellation is not live yet"
+                className="cursor-not-allowed rounded-md border border-border px-4 py-2.5 text-sm font-semibold text-text-muted"
               >
-                Upgrade to Premium
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Activity — TODO: backend has no confirmed likes/comments/reposts
-            endpoints yet. This section is a shell; wire it once those
-            routes exist. Don't fetch a guessed endpoint here. */}
-        <div className="mt-8 border-t border-border pt-6">
-          <h2 className="font-serif text-2xl text-brand-navy">Your activity</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <ActivityStub label="Liked" />
-            <ActivityStub label="Comments" />
-            <ActivityStub label="Reposts" />
+                Cancel
+              </button>
+            ) : null}
           </div>
         </div>
-
-        {isEditorial ? (
-          <div className="mt-8 border-t border-border pt-6">
-            <h2 className="font-serif text-2xl text-brand-navy">Editorial</h2>
-            <p className="mt-2 text-sm text-text-secondary">
-              Your role ({ROLE_LABEL[role] ?? role}) has newsroom access.
-              {/* TODO: role-specific stats (drafts pending, assigned state,
-                  section queue) once the CMS endpoints for those exist. */}
-            </p>
-          </div>
-        ) : null}
       </section>
 
-      <aside className="rounded-lg border border-border bg-background-soft p-6">
-        <h2 className="font-serif text-2xl text-brand-navy">Quick links</h2>
-        <ul className="mt-4 space-y-3 text-sm text-text-secondary">
-          <li>
-            <Link href="/pricing" className="font-medium text-brand-orange hover:underline">
-              Pricing
-            </Link>
-          </li>
-          {isEditorial ? (
-            <li>
-              <Link href="/admin" className="font-medium text-brand-orange hover:underline">
-                Newsroom admin
-              </Link>
-            </li>
-          ) : null}
-          <li>
-            <button
-              type="button"
-              onClick={() => void signOut()}
-              className="font-medium text-brand-orange hover:underline"
-            >
-              Sign out
-            </button>
-          </li>
-        </ul>
-      </aside>
-    </div>
-  );
-}
+      <div className="mt-6">
+        <ProfileSettings />
+      </div>
 
-function ActivityStub({ label }: { label: string }) {
-  return (
-    <div className="rounded-md border border-border bg-card p-4 text-center">
-      <p className="text-2xl font-semibold text-brand-navy">\u2014</p>
-      <p className="mt-1 text-xs uppercase tracking-wide text-text-secondary">{label}</p>
+      {/* Billing shells, pending backend */}
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <section className="rounded-lg border border-border bg-card p-5">
+          <h2 className="flex items-center gap-2 font-serif text-lg text-brand-navy">
+            <CreditCard className="h-4 w-4 text-brand-orange" strokeWidth={1.75} />
+            Payment method
+          </h2>
+          <p className="mt-3 text-sm text-text-secondary">
+            Your saved card will show here once the billing provider is connected.
+          </p>
+        </section>
+
+        <section className="rounded-lg border border-border bg-card p-5">
+          <h2 className="flex items-center gap-2 font-serif text-lg text-brand-navy">
+            <Settings2 className="h-4 w-4 text-brand-orange" strokeWidth={1.75} />
+            Preferences
+          </h2>
+          <p className="mt-3 text-sm text-text-secondary">
+            Newsletter and notification preferences arrive with the Sprint 4 preferences work.
+          </p>
+        </section>
+      </div>
+
+      <section className="mt-4 rounded-lg border border-border bg-card p-5">
+        <h2 className="flex items-center gap-2 font-serif text-lg text-brand-navy">
+          <Receipt className="h-4 w-4 text-brand-orange" strokeWidth={1.75} />
+          Invoices
+        </h2>
+        <p className="mt-3 text-sm text-text-secondary">
+          {isSubscriber
+            ? "Your payment receipts will list here once invoice history is exposed by the backend."
+            : "No invoices yet. You are on the free Grey tier."}
+        </p>
+      </section>
+
+      {isEditorial ? (
+        <section className="mt-4 rounded-lg border border-border bg-background-soft p-5">
+          <h2 className="font-serif text-lg text-brand-navy">Editorial</h2>
+          <p className="mt-2 text-sm text-text-secondary">
+            Your role ({ROLE_LABEL[role] ?? role}) has newsroom access.{" "}
+            <Link href="/admin" className="font-medium text-brand-orange hover:underline">
+              Open the newsroom admin
+            </Link>
+            .
+          </p>
+        </section>
+      ) : null}
     </div>
   );
 }

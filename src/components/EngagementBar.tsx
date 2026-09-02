@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Facebook, Link2, Linkedin, MessageSquare, Share2, ThumbsUp } from "lucide-react";
 import { useArticleLike } from "@/hooks/useArticleLike";
+import { recordShare } from "@/lib/api/articles";
 import { useAuthGatedAction } from "@/lib/auth/useAuthGatedAction";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 
@@ -17,11 +18,10 @@ export interface EngagementBarProps {
 }
 
 /**
- * Real backend integration for likes (POST /articles/:id/like — 1 like per
- * account per article, backend-enforced) and share (client-side only; the
- * backend exposes no share/analytics endpoint, confirmed against the live
- * OpenAPI spec, so nothing is invented here). Comment count links to the
- * real thread below.
+ * Real backend integration for likes (POST /articles/:id/like, one like
+ * per account per article, backend-enforced) and share taps
+ * (POST /articles/:id/share, recorded fire-and-forget so the share itself
+ * never waits on it). Comment count links to the real thread below.
  */
 export function EngagementBar({
   articleId,
@@ -37,18 +37,25 @@ export function EngagementBar({
   const [copied, setCopied] = useState(false);
   const shareRef = useOutsideClick<HTMLDivElement>(() => setShareOpen(false));
 
+  /** Log the tap without ever blocking or failing the share itself. */
+  function logShare(channel: string) {
+    void recordShare(articleId, channel).catch(() => {});
+  }
+
   async function nativeShare(): Promise<boolean> {
     if (typeof navigator === "undefined" || !navigator.share) return false;
     try {
       await navigator.share({ title: shareTitle, url: shareUrl });
+      logShare("native");
       return true;
     } catch {
-      return false; // user cancelled — not an error
+      return false; // user cancelled, not an error
     }
   }
 
   async function copyLink() {
     await navigator.clipboard?.writeText(shareUrl);
+    logShare("copy");
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   }
@@ -108,7 +115,10 @@ export function EngagementBar({
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setShareOpen(false)}
+                onClick={() => {
+                  logShare(link.label.toLowerCase());
+                  setShareOpen(false);
+                }}
                 className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-muted"
               >
                 {link.icon ? (

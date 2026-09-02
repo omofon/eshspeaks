@@ -221,6 +221,19 @@ export function toggleArticleLike(id: string): Promise<ApiLikeResult> {
   });
 }
 
+/**
+ * POST /api/v1/articles/{id}/share — records that a share button was
+ * tapped. Fire-and-forget: the share itself (native sheet, copy link,
+ * social link) must never wait on or fail because of this call.
+ */
+export function recordShare(id: string, channel?: string): Promise<void> {
+  return apiRequest<void>(`/articles/${encodeURIComponent(id)}/share`, {
+    method: "POST",
+    auth: true,
+    body: channel ? { channel } : undefined,
+  });
+}
+
 /** POST /api/v1/articles/{id}/feedback */
 export function submitArticleFeedback(id: string, isUseful: boolean): Promise<ApiFeedbackResult> {
   return apiRequest<ApiFeedbackResult>(`/articles/${encodeURIComponent(id)}/feedback`, {
