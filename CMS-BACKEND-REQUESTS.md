@@ -199,6 +199,39 @@ Event `type`s the FE will render (add more freely):
 Real-time (SSE `GET /notifications/stream` or WS) is a nice-to-have for
 later; polling every 60s is fine for v1.
 
+### 5b. Full user directory ← FE page built (`/admin/users`), degrades on 404
+
+`GET /roles/editorial-users` only returns accounts that already hold an
+editorial role, so it cannot back a Chief Editor screen that also lists
+readers and subscribers. The FE has `/admin/users` wired to this contract;
+it shows a "pending backend" panel until the endpoint exists.
+
+```
+GET /admin/users?role=&tier=&status=&search=&page=&limit=   (auth: chief_editor)
+  → 200 {
+      items: [{
+        id, email, username, displayName,
+        role,                         // same lower_snake_case enum as /auth/me
+        membershipTier,               // "FREE" | "PREMIUM"
+        subscription: {               // null if the account never had a paid plan
+          status: "active" | "past_due" | "canceled" | "none",
+          plan: string | null,        // e.g. "The Seat membership - Tier 2"
+          currentPeriodEnd: string | null
+        } | null,
+        lastActiveAt: string | null,  // drives the "active" indicator; null if not tracked
+        createdAt: string
+      }],
+      meta: { page, limit, total, totalPages, hasNext, hasPrevious }
+    }
+```
+
+- `role` filters by the exact role value; `tier` by `membershipTier`;
+  `status` by `subscription.status`; `search` matches email or display name.
+- Promote / demote still goes through the existing `POST /roles/assign`
+  (no change needed there); this endpoint is read-only.
+- Same self-guard as `/roles/assign`: the caller cannot appear with an
+  editable role control for their own row (FE also disables it).
+
 ---
 
 ## P3 — Aggregation (Sprint 5 — Trending / Latest)

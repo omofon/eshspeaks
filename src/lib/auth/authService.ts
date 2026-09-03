@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "./config";
+import { csrfHeader } from "./csrf";
 import { getSafeReturnTo } from "./returnTo";
 import { tokenStore } from "./tokenStore";
 import type { CurrentUser, VerifyResult } from "./types";
@@ -144,21 +145,23 @@ async function rawRequest(path: string, { auth, ...init }: RequestOptions = {}):
   const headers: Record<string, string> = {
     Accept: "application/json",
     ...(init.body ? { "Content-Type": "application/json" } : {}),
+    // Double-submit CSRF token, needed for cookie-authenticated (Google
+    // OAuth) sessions; no-op for the Bearer path below. See lib/auth/csrf.ts.
+    ...csrfHeader(init.method),
     ...((init.headers as Record<string, string>) ?? {}),
   };
   const token = auth ? tokenStore.access() : null;
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   try {
-    // CONFIRMED: the API does set cookies (esh_at / esh_rt) on
-    // /auth/email/verify, but they're scoped to the backend's own domain
-    // (SameSite=Lax, not Secure) and frontend/backend are different
-    // origins — the browser will never attach them to a request this app
-    // makes, and a Next.js server here can't read them either (see the
-    // removed getServerSession.ts). They are not a usable session
-    // mechanism for this frontend. credentials:"include" is kept because
-    // it's harmless, not because anything here relies on it — the
-    // Authorization: Bearer header above is the only real auth mechanism.
+    // The API sets session cookies (esh_at / esh_rt) plus a non-HttpOnly
+    // esh_csrf on /auth/email/verify and on the Google OAuth callback. Email
+    // sign-in also returns bearer tokens in the JSON body, and the
+    // Authorization: Bearer header below is what those sessions run on.
+    // Google OAuth returns no body tokens, so those sessions authenticate by
+    // cookie — the backend now serves them SameSite=None so credentials:
+    // "include" actually carries them cross-site, and csrfHeader() above
+    // satisfies the CSRF guard on writes.
     return await fetch(`${API_BASE_URL}${API_PREFIX}${path}`, {
       ...init,
       headers,

@@ -39,6 +39,7 @@ export function InlinePopover({
 
   return (
     <div
+      data-editor-popover
       className="w-72 rounded-md border p-3 shadow-[var(--shadow-raised)]"
       style={{ background: "var(--card)", borderColor: "var(--border)" }}
       onMouseDown={(e) => e.stopPropagation()}

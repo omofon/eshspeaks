@@ -156,8 +156,16 @@ export default function AdminOverviewPage() {
               ) : null}
               {role === "chief_editor" ? (
                 <QuickLink
-                  href="/admin/roles"
+                  href="/admin/users"
                   icon={Users}
+                  title="People"
+                  body="Every account: readers, subscribers and editorial staff. Search, filter and change roles."
+                />
+              ) : null}
+              {role === "chief_editor" ? (
+                <QuickLink
+                  href="/admin/roles"
+                  icon={Shield}
                   title="Editorial roles"
                   body={
                     editorialUserCount !== null

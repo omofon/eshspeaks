@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "@/lib/auth/config";
 import { tokenStore } from "@/lib/auth/tokenStore";
+import { csrfHeader } from "@/lib/auth/csrf";
 import { authService } from "@/lib/auth/authService";
 
 const API_PREFIX = "/api/v1";
@@ -122,6 +123,11 @@ async function rawFetch(path: string, options: RequestOptions): Promise<Response
   const headers: Record<string, string> = {
     Accept: "application/json",
     ...(body !== undefined && !raw ? { "Content-Type": "application/json" } : {}),
+    // Double-submit CSRF token — required by the backend's CsrfGuard on every
+    // state-changing request that authenticates by cookie (a Google-OAuth
+    // session). No-op for Bearer callers (the guard skips them) and for reads.
+    // See lib/auth/csrf.ts.
+    ...csrfHeader(options.method),
     ...((extraHeaders as Record<string, string>) ?? {}),
   };
   const token = auth ? tokenStore.access() : null;

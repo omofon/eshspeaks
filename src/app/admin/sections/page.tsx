@@ -412,14 +412,17 @@ function SectionForm({
   busy: boolean;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
-  const [slug, setSlug] = useState(initial?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(Boolean(initial));
   const [isSponsored, setIsSponsored] = useState(initial?.isSponsored ?? false);
+
+  // The slug is derived from the name, never typed. A brand-new section gets
+  // a fresh slug ("Power of play" → "power-of-play"); an existing one keeps
+  // the slug it was created with so its published URLs don't break on a rename.
+  const previewSlug = initial?.slug ?? slugify(name);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !slug.trim()) return;
-    onSubmit({ name: name.trim(), slug: slug.trim(), isSponsored });
+    if (!name.trim()) return;
+    onSubmit({ name: name.trim(), slug: previewSlug, isSponsored });
   }
 
   return (
@@ -428,36 +431,21 @@ function SectionForm({
       className="mb-4 flex flex-wrap items-end gap-3 rounded-md border p-4"
       style={{ borderColor: "var(--border)", background: "var(--card)" }}
     >
-      <div className="min-w-[180px] flex-1">
+      <div className="min-w-[220px] flex-1">
         <label className="block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
           Name
         </label>
         <input
           autoFocus
           value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            if (!slugTouched) setSlug(slugify(e.target.value));
-          }}
+          onChange={(e) => setName(e.target.value)}
           required
           className="mt-1 w-full rounded border bg-[var(--background)] px-2.5 py-1.5 text-sm"
           style={{ borderColor: "var(--border)" }}
         />
-      </div>
-      <div className="min-w-[160px] flex-1">
-        <label className="block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-          Slug
-        </label>
-        <input
-          value={slug}
-          onChange={(e) => {
-            setSlugTouched(true);
-            setSlug(slugify(e.target.value));
-          }}
-          required
-          className="mt-1 w-full rounded border bg-[var(--background)] px-2.5 py-1.5 text-sm font-mono"
-          style={{ borderColor: "var(--border)" }}
-        />
+        <p className="meta mt-1">
+          URL: <span className="font-mono">/{previewSlug || "…"}</span>
+        </p>
       </div>
       <label
         className="mb-2 flex items-center gap-2 text-sm"
@@ -494,44 +482,32 @@ function SubsegmentForm({
   busy: boolean;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
-  const [slug, setSlug] = useState(initial?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(Boolean(initial));
+  const previewSlug = initial?.slug ?? slugify(name);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !slug.trim()) return;
-    onSubmit({ name: name.trim(), slug: slug.trim() });
+    if (!name.trim()) return;
+    onSubmit({ name: name.trim(), slug: previewSlug });
   }
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-wrap items-end gap-2 rounded-sm border p-2.5"
+      className="flex flex-wrap items-center gap-2 rounded-sm border p-2.5"
       style={{ borderColor: "var(--border)", background: "var(--card)" }}
     >
-      <input
-        autoFocus
-        placeholder="Name"
-        value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-          if (!slugTouched) setSlug(slugify(e.target.value));
-        }}
-        required
-        className="min-w-[140px] flex-1 rounded border bg-[var(--background)] px-2 py-1 text-sm"
-        style={{ borderColor: "var(--border)" }}
-      />
-      <input
-        placeholder="slug"
-        value={slug}
-        onChange={(e) => {
-          setSlugTouched(true);
-          setSlug(slugify(e.target.value));
-        }}
-        required
-        className="min-w-[120px] flex-1 rounded border bg-[var(--background)] px-2 py-1 text-sm font-mono"
-        style={{ borderColor: "var(--border)" }}
-      />
+      <div className="min-w-[160px] flex-1">
+        <input
+          autoFocus
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full rounded border bg-[var(--background)] px-2 py-1 text-sm"
+          style={{ borderColor: "var(--border)" }}
+        />
+        <p className="meta mt-1">/{previewSlug || "…"}</p>
+      </div>
       <button type="submit" disabled={busy} className="btn-accent px-3 py-1 text-xs">
         {busy ? "…" : initial ? "Save" : "Add"}
       </button>

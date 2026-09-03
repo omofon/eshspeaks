@@ -7,11 +7,16 @@ import {
   Underline,
   Strikethrough,
   Link2,
+  Pilcrow,
   Quote,
   Code2,
   MessageSquare,
   List,
   ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 } from "lucide-react";
 import { InlinePopover } from "./InlinePopover";
 
@@ -24,10 +29,12 @@ export interface SelectionToolbarProps {
   onStrikethrough: () => void;
   onLink: (url: string) => void;
   onHeading: (level: "h1" | "h2" | "h3" | "h4") => void;
+  onParagraph: () => void;
   onQuote: () => void;
   onCode: () => void;
   onBulletList: () => void;
   onNumberedList: () => void;
+  onAlign: (dir: "left" | "center" | "right" | "justify") => void;
   onNote: (note: string) => void;
 }
 
@@ -42,10 +49,12 @@ export function SelectionToolbar({
   onStrikethrough,
   onLink,
   onHeading,
+  onParagraph,
   onQuote,
   onCode,
   onBulletList,
   onNumberedList,
+  onAlign,
   onNote,
 }: SelectionToolbarProps) {
   const [openField, setOpenField] = useState<"link" | "note" | null>(null);
@@ -104,6 +113,9 @@ export function SelectionToolbar({
         <ToolbarButton label="Minor heading (H4)" onClick={() => onHeading("h4")}>
           <span className="font-serif text-[11px] leading-none">H4</span>
         </ToolbarButton>
+        <ToolbarButton label="Paragraph (body text)" onClick={onParagraph}>
+          <Pilcrow size={ICON_SIZE} />
+        </ToolbarButton>
         <ToolbarButton label="Pull quote" onClick={onQuote}>
           <Quote size={ICON_SIZE} />
         </ToolbarButton>
@@ -116,6 +128,19 @@ export function SelectionToolbar({
         </ToolbarButton>
         <ToolbarButton label="Numbered list" onClick={onNumberedList}>
           <ListOrdered size={ICON_SIZE} />
+        </ToolbarButton>
+        <Divider />
+        <ToolbarButton label="Align left" onClick={() => onAlign("left")}>
+          <AlignLeft size={ICON_SIZE} />
+        </ToolbarButton>
+        <ToolbarButton label="Align centre" onClick={() => onAlign("center")}>
+          <AlignCenter size={ICON_SIZE} />
+        </ToolbarButton>
+        <ToolbarButton label="Align right" onClick={() => onAlign("right")}>
+          <AlignRight size={ICON_SIZE} />
+        </ToolbarButton>
+        <ToolbarButton label="Justify" onClick={() => onAlign("justify")}>
+          <AlignJustify size={ICON_SIZE} />
         </ToolbarButton>
         <Divider />
         <ToolbarButton label="Private note" onClick={() => setOpenField("note")}>

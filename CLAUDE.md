@@ -29,12 +29,22 @@ article-create are live network calls.
   lives in a module-level JS variable (memory only, never localStorage),
   refresh token lives in `localStorage` under `esh.refreshToken`. This is a
   documented tradeoff, not an oversight.
-  - **Known contradiction to resolve before trusting it:** `getServerSession.ts`
-    forwards `cookies()` to the backend and assumes HttpOnly session
-    cookies exist — that assumption conflicts with the bearer-only model
-    documented in `tokenStore.ts`/`AuthProvider.tsx`. One of these is wrong
-    about the live API; verify against the real backend before relying on
-    server-side session gating.
+  - **Two session shapes now, not one.** Email/OTP sign-in returns bearer
+    tokens in the JSON body and runs on `Authorization: Bearer` as described
+    above. Google OAuth is a full-page redirect that hands back no body
+    tokens: those sessions authenticate by cookie. The backend serves its
+    session cookies (`esh_at`, `esh_rt`) `SameSite=None` so `credentials:
+    "include"` carries them cross-site (Netlify frontend to Render backend).
+    There is no server-side session gating in this repo (`getServerSession.ts`
+    and the middleware were removed); `AuthProvider` is client-only.
+  - **CSRF header on writes.** The backend runs a double-submit-cookie CSRF
+    guard. It sets a non-HttpOnly `esh_csrf` cookie on sign-in; the client
+    must echo it as `X-CSRF-Token` on every POST/PUT/PATCH/DELETE or the
+    request is `403 CSRF_TOKEN_INVALID`. `src/lib/auth/csrf.ts` reads the
+    cookie and both request layers (`api/client.ts`, `auth/authService.ts`)
+    add the header on mutating methods. The guard skips Bearer callers, so
+    the header is a harmless no-op for email/OTP sessions and only actually
+    matters for the cookie-based Google OAuth session.
 - Response envelope is always `{success, data, message, errorCode}` —
   branch on `errorCode` (see `MESSAGES` map in `authService.ts`), never on
   `message` text.

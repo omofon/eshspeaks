@@ -70,6 +70,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         ) : null}
         {role === "chief_editor" ? (
+          <Link href="/admin/users" className="hover:text-[var(--navy)]">
+            People
+          </Link>
+        ) : null}
+        {role === "chief_editor" ? (
           <Link href="/admin/roles" className="hover:text-[var(--navy)]">
             Roles
           </Link>

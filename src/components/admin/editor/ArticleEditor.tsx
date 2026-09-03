@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ChevronDown,
   MoreHorizontal,
   Share2,
   ImagePlus,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { usePreview } from "@/lib/dev/previewTier";
 import { useAutosave } from "@/hooks/useAutosave";
 import { useDraftLoader } from "@/hooks/useDraftLoader";
 import { useEditorRole } from "@/hooks/useEditorRole";
@@ -48,6 +46,7 @@ import {
 import { SelectionToolbar } from "./SelectionToolbar";
 import { InsertMenu } from "./InsertMenu";
 import { HelperBar } from "./HelperBar";
+import { ReviewNotesPanel } from "@/components/admin/ReviewNotesPanel";
 import { MentionMenu } from "./MentionMenu";
 import { StorySettingsDrawer, type SettingsSection } from "./StorySettingsDrawer";
 import {
@@ -108,12 +107,11 @@ export interface ArticleEditorProps {
 
 export function ArticleEditor({ draftId }: ArticleEditorProps) {
   const { user } = useAuth();
-  // FIXED: useEditorRole() now returns a single value, not [role, setRole].
-  // The dev-only "preview as a role" control writes to PreviewProvider
-  // instead (see RoleSwitcher below) — useEditorRole reads that override
-  // internally, so this component doesn't manage role state itself at all.
+  // useEditorRole() returns a single value, not [role, setRole]. In
+  // production it is always the real session role; the dev-only "preview as
+  // a role" override is read internally, so this component never manages
+  // role state itself. The top bar shows this role read-only, never a picker.
   const role = useEditorRole();
-  const { setRoleOverride, enabled: previewEnabled } = usePreview();
   const {
     draft,
     setDraft,
@@ -358,6 +356,27 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     if (bodyRef.current) patchDraft({ body: bodyRef.current.innerHTML });
   }, [patchDraft]);
 
+  // Paste as clean editorial markup. Word / Google Docs / web copy carries
+  // inline `style` (its own background and text colour, fonts, sizes),
+  // `class` and wrapper `<div>`/`<span>` soup — that's why pasted text used
+  // to sit on a different-coloured block from the rest of the editor. Strip
+  // everything except a small tag allow-list and `href`, so pasted text
+  // inherits the editor's own surface and type.
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const html = e.clipboardData.getData("text/html");
+      const text = e.clipboardData.getData("text/plain");
+      if (html) {
+        document.execCommand("insertHTML", false, cleanPastedHtml(html));
+      } else if (text) {
+        document.execCommand("insertText", false, text);
+      }
+      syncBody();
+    },
+    [syncBody],
+  );
+
   const pickMention = useCallback(
     (name: string) => {
       const anchor = mentionAnchor.current;
@@ -403,6 +422,18 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
 
   useEffect(() => {
     function onSelectionChange() {
+      // The link / embed-URL / media-search / private-note popovers live
+      // inside the selection toolbar and the insert menu, and each one
+      // auto-focuses its input on open. That focus change fires
+      // `selectionchange` with the caret no longer inside the editor body,
+      // which used to immediately null the menu that owns the popover — so
+      // clicking "Embed a link", "Search media library" or "Embed raw HTML"
+      // looked like it did nothing. While a popover field holds focus, leave
+      // the menus exactly as they are.
+      if ((document.activeElement as HTMLElement | null)?.closest("[data-editor-popover]")) {
+        return;
+      }
+
       const sel = window.getSelection();
       const root = bodyRef.current;
       if (!sel || !root || sel.rangeCount === 0 || !root.contains(sel.anchorNode)) {
@@ -481,7 +512,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
   }, []);
 
   const applyBlockFormat = useCallback(
-    (tag: "h1" | "h2" | "h3" | "h4" | "blockquote", className: string) => {
+    (tag: "p" | "h1" | "h2" | "h3" | "h4" | "blockquote", className: string) => {
       document.execCommand("formatBlock", false, tag);
       const sel = window.getSelection();
       const block = closestBlock(sel?.anchorNode ?? null);
@@ -559,6 +590,22 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     },
     numberedList: () => {
       document.execCommand("insertOrderedList");
+      syncBody();
+    },
+    // Reset the current block to plain body text — the way back from a
+    // heading or quote to normal small text.
+    paragraph: () => {
+      applyBlockFormat("p", "");
+      syncBody();
+    },
+    align: (dir: "left" | "center" | "right" | "justify") => {
+      const command = {
+        left: "justifyLeft",
+        center: "justifyCenter",
+        right: "justifyRight",
+        justify: "justifyFull",
+      }[dir];
+      document.execCommand(command);
       syncBody();
     },
     note: (note: string) => {
@@ -706,7 +753,13 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            {previewEnabled ? <RoleSwitcher role={role} onChange={setRoleOverride} /> : null}
+            <span
+              className="meta rounded-full border px-2.5 py-1 text-[11px]"
+              style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+              title="Your newsroom role"
+            >
+              {roleLabel(role)}
+            </span>
 
             {draft.remoteId ? (
               <>
@@ -876,6 +929,12 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
                 onChange={(headline) => patchDraft({ headline })}
               />
 
+              {draft.remoteId ? (
+                <div className="mt-5">
+                  <ReviewNotesPanel articleId={draft.remoteId} />
+                </div>
+              ) : null}
+
               <div
                 ref={bodyRef}
                 contentEditable
@@ -884,6 +943,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
                 className="editor-body body-editorial mt-6 min-h-[50vh] outline-none"
                 onInput={syncBody}
                 onBlur={syncBody}
+                onPaste={handlePaste}
               />
             </>
           )}
@@ -900,10 +960,12 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
           onStrikethrough={editorCommands.strikethrough}
           onLink={editorCommands.link}
           onHeading={editorCommands.heading}
+          onParagraph={editorCommands.paragraph}
           onQuote={editorCommands.quote}
           onCode={editorCommands.code}
           onBulletList={editorCommands.bulletList}
           onNumberedList={editorCommands.numberedList}
+          onAlign={editorCommands.align}
           onNote={editorCommands.note}
         />
       ) : null}
@@ -1147,39 +1209,6 @@ function MenuItem({
   );
 }
 
-// FIXED: role values are underscore-cased to match the real backend enum
-// (state_correspondent / section_lead / chief_editor), and onChange now
-// writes to the dev PreviewProvider override instead of nonexistent local
-// state.
-function RoleSwitcher({
-  role,
-  onChange,
-}: {
-  role: EditorRole;
-  onChange: (r: EditorRole | null) => void;
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={role}
-        onChange={(e) => onChange(e.target.value as EditorRole)}
-        title="Dev-only: preview button state per role"
-        className="meta appearance-none rounded border bg-transparent py-1 pl-2 pr-6 text-[10px]"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <option value="contributor">Contributor</option>
-        <option value="state_correspondent">State correspondent</option>
-        <option value="section_lead">Section lead</option>
-        <option value="chief_editor">Chief editor</option>
-      </select>
-      <ChevronDown
-        size={11}
-        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-      />
-    </div>
-  );
-}
-
 /* ----------------------------------------------------------------- utils */
 
 // FIXED: underscore keys to match EditorRole.
@@ -1206,4 +1235,55 @@ function escapeHtml(s: string) {
     /[&<>"']/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
   );
+}
+
+/**
+ * Tags kept from pasted HTML. Everything else is unwrapped (its text and
+ * children survive, the tag itself is dropped). Every attribute is removed
+ * except `href` on an anchor — this is what stops pasted content from
+ * carrying its own background colour, text colour and fonts into the body.
+ */
+const PASTE_ALLOWED_TAGS = new Set([
+  "P",
+  "BR",
+  "B",
+  "STRONG",
+  "I",
+  "EM",
+  "U",
+  "S",
+  "A",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "UL",
+  "OL",
+  "LI",
+  "BLOCKQUOTE",
+  "CODE",
+  "PRE",
+]);
+
+function cleanPastedHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  const scrub = (node: Node) => {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType !== Node.ELEMENT_NODE) continue;
+      const el = child as HTMLElement;
+      scrub(el);
+      if (!PASTE_ALLOWED_TAGS.has(el.tagName)) {
+        el.replaceWith(...Array.from(el.childNodes));
+        continue;
+      }
+      for (const attr of Array.from(el.attributes)) {
+        if (el.tagName === "A" && attr.name === "href") continue;
+        el.removeAttribute(attr.name);
+      }
+    }
+  };
+
+  scrub(doc.body);
+  return doc.body.innerHTML;
 }

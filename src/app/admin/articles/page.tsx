@@ -10,6 +10,7 @@ import type { ApiArticleSummary } from "@/lib/api/types";
 import type { ArticleStatus } from "@/lib/cms/types";
 import { canPublishDirectly } from "@/lib/cms/types";
 import { ReviewActions } from "@/components/admin/ReviewActions";
+import { ReviewNotesPanel } from "@/components/admin/ReviewNotesPanel";
 
 const STATUS_FILTERS: { value: ArticleStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -54,6 +55,7 @@ export default function EditorialArticlesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [feedbackFor, setFeedbackFor] = useState<string | null>(null);
 
   const canReview = role ? canPublishDirectly(role) : false;
 
@@ -208,6 +210,22 @@ export default function EditorialArticlesPage() {
                       articleId={article.id}
                       onChanged={() => setRefreshKey((k) => k + 1)}
                     />
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFeedbackFor((cur) => (cur === article.id ? null : article.id))
+                    }
+                    className="mt-2 text-xs font-medium hover:underline"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    {feedbackFor === article.id ? "Hide editor feedback" : "Editor feedback"}
+                  </button>
+                  {feedbackFor === article.id ? (
+                    <div className="mt-2">
+                      <ReviewNotesPanel articleId={article.id} />
+                    </div>
                   ) : null}
                 </li>
               ))}
