@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { fetchSections } from "@/lib/api/sections";
 import { fetchAllArticles } from "@/lib/api/articles";
@@ -121,16 +122,18 @@ export default async function HomePage() {
       {lead ? <SectionLeadGrid section={lead} articles={leadArticles} /> : null}
 
       <div className="mt-14">
-        <AdSlot variant="leaderboard" />
+        <AdSlot placement="leaderboard" />
       </div>
 
       {restEntries.map(({ section, articles }, i) => (
-        <SectionStoryGrid
-          key={section.slug}
-          section={section}
-          articles={articles}
-          columns={i % 2 === 0 ? 3 : 4}
-        />
+        <Fragment key={section.slug}>
+          <SectionStoryGrid section={section} articles={articles} columns={i % 2 === 0 ? 3 : 4} />
+          {i === 1 ? (
+            <div className="mt-14">
+              <AdSlot placement="in-feed" />
+            </div>
+          ) : null}
+        </Fragment>
       ))}
 
       <div className="mt-14 grid gap-10 border-t border-rule pt-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_360px]">

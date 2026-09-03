@@ -66,6 +66,10 @@ export default async function SectionPage({
         </p>
       </header>
 
+      <div className="mt-8">
+        <AdSlot placement="leaderboard" section={sectionData.slug} />
+      </div>
+
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div>
           {items.length === 0 ? (
@@ -104,7 +108,7 @@ export default async function SectionPage({
           ) : null}
         </div>
         <aside>
-          <AdSlot variant="sidebar" />
+          <AdSlot placement="sidebar" section={sectionData.slug} />
         </aside>
       </div>
     </>

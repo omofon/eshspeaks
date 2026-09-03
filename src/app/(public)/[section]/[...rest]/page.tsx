@@ -209,7 +209,7 @@ export default async function SectionRestPage({
           ) : null}
         </div>
         <aside>
-          <AdSlot variant="sidebar" />
+          <AdSlot placement="sidebar" section={sectionData.slug} />
         </aside>
       </div>
     </>

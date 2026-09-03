@@ -9,6 +9,7 @@ import { toUiArticle } from "@/lib/api/adapters";
 import { isArticleUnlocked } from "@/lib/api/types";
 import type { ApiArticleSummary } from "@/lib/api/types";
 import { AdSlot } from "@/components/AdSlot";
+import { ReadingProgress } from "@/components/ReadingProgress";
 import { ArticleBody } from "@/components/ArticleBody";
 import { EngagementBar } from "@/components/EngagementBar";
 import { CommentThread } from "@/components/CommentThread";
@@ -101,6 +102,8 @@ export function ArticleView({
 
   return (
     <>
+      <ReadingProgress />
+
       <nav className="text-sm text-text-secondary">
         <Link href={`/${sectionSlug}`} className="font-semibold text-brand-orange hover:underline">
           {sectionName}
@@ -118,7 +121,11 @@ export function ArticleView({
         ) : null}
       </nav>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-6">
+        <AdSlot placement="leaderboard" section={sectionSlug} sector={article.sectorTags?.[0]} />
+      </div>
+
+      <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
         <article>
           <div className="flex flex-wrap items-center gap-2">
             <SectionBadge name={sectionName} />
@@ -170,7 +177,11 @@ export function ArticleView({
               <ArticleFeedback articleId={article.id} />
 
               <div className="mt-8">
-                <AdSlot variant="in-feed" />
+                <AdSlot
+                  placement="in-feed"
+                  section={sectionSlug}
+                  sector={article.sectorTags?.[0]}
+                />
               </div>
 
               <CommentThread articleId={article.id} count={article.commentsCount} />
@@ -184,7 +195,7 @@ export function ArticleView({
             sectionSlug={sectionSlug}
             excludeSlug={article.slug}
           />
-          <AdSlot variant="sidebar" />
+          <AdSlot placement="sidebar" section={sectionSlug} />
         </aside>
       </div>
     </>

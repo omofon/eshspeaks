@@ -6,6 +6,24 @@ import { ApiError } from "@/lib/api/client";
 import type { ApiComment } from "@/lib/api/types";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
+/** Insert a freshly created comment into the tree: nested under its parent, or at the top. */
+function insertComment(
+  list: ApiComment[],
+  created: ApiComment,
+  parentCommentId?: string,
+): ApiComment[] {
+  if (!parentCommentId) return [created, ...list];
+  return list.map((c) => {
+    if (c.id === parentCommentId) {
+      return { ...c, replies: [...(c.replies ?? []), created] };
+    }
+    if (c.replies && c.replies.length > 0) {
+      return { ...c, replies: insertComment(c.replies, created, parentCommentId) };
+    }
+    return c;
+  });
+}
+
 export function useComments(articleId: string) {
   const { isAuthenticated } = useAuth();
   const [comments, setComments] = useState<ApiComment[]>([]);
@@ -35,23 +53,30 @@ export function useComments(articleId: string) {
 
   useEffect(() => load(), [load]);
 
-  async function submit(body: string, parentCommentId?: string): Promise<boolean> {
-    if (!isAuthenticated) return false;
-    setPosting(true);
-    setPostError(null);
-    try {
-      const created = await postComment(articleId, body, parentCommentId);
-      // Optimistic insert — the backend may mark this pending moderation;
-      // `created.status` (from the real response) drives that badge, not a guess.
-      setComments((prev) => [created, ...prev]);
-      return true;
-    } catch (e) {
-      setPostError(e instanceof ApiError ? e.message : "Couldn't post your comment. Try again.");
-      return false;
-    } finally {
-      setPosting(false);
-    }
-  }
+  /**
+   * Post a comment or a reply. Returns the created comment (so the caller
+   * can highlight it) or null on failure. The optimistic insert nests a
+   * reply under its parent; `created.status` from the real response drives
+   * the pending-moderation badge, never a guess.
+   */
+  const submit = useCallback(
+    async (body: string, parentCommentId?: string): Promise<ApiComment | null> => {
+      if (!isAuthenticated) return null;
+      setPosting(true);
+      setPostError(null);
+      try {
+        const created = await postComment(articleId, body, parentCommentId);
+        setComments((prev) => insertComment(prev, created, parentCommentId));
+        return created;
+      } catch (e) {
+        setPostError(e instanceof ApiError ? e.message : "Couldn't post your comment. Try again.");
+        return null;
+      } finally {
+        setPosting(false);
+      }
+    },
+    [articleId, isAuthenticated],
+  );
 
   return { comments, loading, error, posting, postError, submit, reload: load };
 }

@@ -115,6 +115,41 @@ Drives the "Your activity" tiles. Low priority.
 
 ---
 
+## Sprint 4 — ad slots
+
+### S4.1 Ad slot resolution ← FE `<AdSlot>` wired, degrades on 404
+
+`src/components/AdSlot.tsx` calls this on the homepage, section pages and
+article pages. Until it exists the component renders nothing in production
+(a labelled placeholder in dev). Premium readers never call it (suppressed
+client-side).
+
+```
+GET /ads/slot?placement=&section=&sector=          (public, cache ~60s)
+  -> 200 {
+       id: string,
+       placement: "leaderboard" | "in-feed" | "sidebar" | "sponsored-segment",
+       sponsor?: string | null,          // shows as "Sponsored · <sponsor>"
+       creative:
+         | { type: "image",  imageUrl: string, clickUrl: string, alt: string }
+         | { type: "iframe", src: string }        // rendered in a sandboxed iframe
+         | null                                    // no fill -> FE renders nothing
+     }
+```
+
+- `placement` is always sent. `section` (section slug) is sent on section
+  and article pages; `sector` (the article's first `sectorTags` entry) is
+  sent on article pages only. Both are targeting hints and may be ignored.
+- Return `200` with `creative: null` for "no ad to serve" (not `204` —
+  the FE envelope unwrap treats an empty body as an error).
+- Placements in the layout today: `leaderboard` (top of home / section /
+  article), `in-feed` (mid homepage, mid article), `sidebar` (section and
+  article asides). `sponsored-segment` is defined but not yet placed.
+- Tier suppression is enforced client-side; the endpoint can also refuse to
+  serve a request that arrives with a premium bearer token.
+
+---
+
 ## P1 — CMS completion (blocking "Sprint 2 100%")
 
 ### 1. Fetch an editorial article by server id
