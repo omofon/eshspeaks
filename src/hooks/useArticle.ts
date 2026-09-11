@@ -5,6 +5,7 @@ import { fetchArticleBySlug } from "@/lib/api/articles";
 import { ApiError } from "@/lib/api/client";
 import type { ApiArticleDetail } from "@/lib/api/types";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { USE_MOCK_FALLBACK, mockArticleDetail } from "@/lib/data/mockFallback";
 
 export type ArticleLoadState =
   | { status: "loading" }
@@ -38,7 +39,11 @@ export function useArticle(slug: string) {
       .catch((e: unknown) => {
         if (cancelled) return;
         if (e instanceof ApiError && e.kind === "not_found") {
-          setState({ status: "not-found" });
+          // Dev-only fallback (see mockFallback.ts) — the SSR check in the section catch-all
+          // route already decided a mock article is fine to render, so this mirrors that
+          // decision client-side rather than flashing "not found" before the mock loads.
+          const mock = USE_MOCK_FALLBACK ? mockArticleDetail(slug) : null;
+          setState(mock ? { status: "ready", article: mock } : { status: "not-found" });
         } else {
           setState({
             status: "error",

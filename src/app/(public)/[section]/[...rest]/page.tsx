@@ -11,6 +11,12 @@ import { toUiArticle } from "@/lib/api/adapters";
 import { ListCard } from "@/components/editorial";
 import { AdSlot } from "@/components/AdSlot";
 import { ArticleView } from "@/components/ArticleView";
+import {
+  USE_MOCK_FALLBACK,
+  mockArticlesBySubsegment,
+  mockArticleDetail,
+  mockSubsegment,
+} from "@/lib/data/mockFallback";
 
 /**
  * Replaces the old fixed `[section]/[subsegment]/page.tsx` +
@@ -33,11 +39,14 @@ async function resolveSubsegment(section: string, slug: string): Promise<ApiSubs
     // subsegment with `200 {success:true, data:null}` rather than a 404, which normalizes to
     // an empty-string stub here rather than an error. Treat "no real slug came back" as a miss
     // too, not just a thrown not_found.
-    return data.slug ? data : null;
+    if (data.slug) return data;
   } catch (e) {
-    if (e instanceof SectionsApiError && e.kind === "not_found") return null;
-    throw e;
+    if (!(e instanceof SectionsApiError && e.kind === "not_found")) throw e;
   }
+  // Dev-only fallback (see mockFallback.ts): the live backend currently returns every section
+  // with an empty `subsegments` array, so a real lookup always misses. Without this, a mock
+  // subsegment link would misclassify as an article slug instead.
+  return USE_MOCK_FALLBACK ? mockSubsegment(section, slug) : null;
 }
 
 type Resolved =
@@ -65,11 +74,13 @@ export async function generateMetadata({ params }: { params: Promise<RouteParams
 
   try {
     if (resolved.kind === "subsegment") {
-      const subsegmentData = await fetchSubsegment(section, resolved.subsegmentSlug);
-      return {
-        title: subsegmentData.name,
-        description: `Latest ${subsegmentData.name.toLowerCase()} reporting from EshSpeaks.`,
-      };
+      const subsegmentData = await resolveSubsegment(section, resolved.subsegmentSlug);
+      if (subsegmentData) {
+        return {
+          title: subsegmentData.name,
+          description: `Latest ${subsegmentData.name.toLowerCase()} reporting from EshSpeaks.`,
+        };
+      }
     }
     if (resolved.kind === "article") {
       const article = await fetchArticleBySlug(resolved.articleSlug);
@@ -117,8 +128,14 @@ export default async function SectionRestPage({
     try {
       await fetchArticleBySlug(resolved.articleSlug);
     } catch (e) {
-      if (e instanceof ArticleApiError && e.kind === "not_found") notFound();
-      throw e;
+      if (e instanceof ArticleApiError && e.kind === "not_found") {
+        // Dev-only fallback (see mockFallback.ts): the backend has no real row for this slug,
+        // but it may be one of the mock article slugs — useArticle() re-checks the same way
+        // client-side, so this only decides whether to notFound() here, not what renders.
+        if (!(USE_MOCK_FALLBACK && mockArticleDetail(resolved.articleSlug))) notFound();
+      } else {
+        throw e;
+      }
     }
     return (
       <ArticleView
@@ -135,21 +152,32 @@ export default async function SectionRestPage({
   const subsegmentSlug = resolved.subsegmentSlug;
 
   let sectionData;
-  let subsegmentData;
   try {
-    [sectionData, subsegmentData] = await Promise.all([
-      fetchSection(section),
-      fetchSubsegment(section, subsegmentSlug),
-    ]);
+    sectionData = await fetchSection(section);
   } catch (e) {
     if (e instanceof SectionsApiError && e.kind === "not_found") notFound();
     throw e;
   }
+  const subsegmentData = await resolveSubsegment(section, subsegmentSlug);
+  if (!subsegmentData) notFound();
 
-  const { items, meta } = await fetchArticlesBySubsegment(section, subsegmentSlug, {
-    page,
-    limit: 20,
-  });
+  // A mock-only subsegment (the real backend currently has none) may not exist server-side at
+  // all, so the real fetch can 404 outright rather than come back with an empty list — caught
+  // the same way as an empty result, not just as a 200 with `items: []`.
+  let fetched;
+  try {
+    fetched = await fetchArticlesBySubsegment(section, subsegmentSlug, { page, limit: 20 });
+  } catch (e) {
+    if (e instanceof ArticleApiError && e.kind === "not_found" && USE_MOCK_FALLBACK) {
+      fetched = null;
+    } else {
+      throw e;
+    }
+  }
+  const { items, meta } =
+    (fetched === null || fetched.items.length === 0) && USE_MOCK_FALLBACK
+      ? mockArticlesBySubsegment(sectionData.slug, subsegmentData.slug, page, 20)
+      : fetched!;
 
   return (
     <>

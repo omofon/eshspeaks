@@ -3,6 +3,7 @@ import Link from "next/link";
 import { fetchSections } from "@/lib/api/sections";
 import { fetchAllArticles } from "@/lib/api/articles";
 import { toUiArticle, toUiSection } from "@/lib/api/adapters";
+import { USE_MOCK_FALLBACK, mockAllArticles } from "@/lib/data/mockFallback";
 import { SectionLeadGrid, SectionStoryGrid } from "@/components/home";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { AdSlot } from "@/components/AdSlot";
@@ -60,6 +61,10 @@ export default async function HomePage() {
     fetchSections(),
     fetchAllArticles({ limit: 60, sortBy: "publishedAt", sortOrder: "desc" }),
   ]);
+  const effectiveArticlesResult =
+    articlesResult.items.length === 0 && USE_MOCK_FALLBACK
+      ? mockAllArticles(1, 60)
+      : articlesResult;
 
   if (sections.length === 0) {
     return (
@@ -80,7 +85,7 @@ export default async function HomePage() {
   const uiSections = sortSectionsForDisplay(sections.map(toUiSection));
 
   const articlesBySection = new Map<string, ReturnType<typeof toUiArticle>[]>();
-  for (const article of articlesResult.items) {
+  for (const article of effectiveArticlesResult.items) {
     const sectionSlug = article.section?.slug ?? "";
     if (!sectionSlug) continue;
     const list = articlesBySection.get(sectionSlug) ?? [];

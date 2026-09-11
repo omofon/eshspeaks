@@ -69,6 +69,10 @@ export function ArticleView({
   }
 
   const article = state.article;
+  // Dev-only mock fallback articles (see mockFallback.ts) carry a `mock-` id, which isn't a
+  // real backend row — skip the comment thread's live fetch rather than surface a raw backend
+  // error ("Database error (P2023)") for an id the API was never going to recognize.
+  const isMockArticle = article.id.startsWith("mock-");
   const unlocked = isArticleUnlocked(article);
   const sectionSlug = article.section?.slug ?? section;
   const sectionName = article.section?.name ?? section;
@@ -184,7 +188,13 @@ export function ArticleView({
                 />
               </div>
 
-              <CommentThread articleId={article.id} count={article.commentsCount} />
+              {isMockArticle ? (
+                <p className="mt-8 border-t border-border pt-6 text-sm text-text-secondary">
+                  Comments aren&rsquo;t available on preview content.
+                </p>
+              ) : (
+                <CommentThread articleId={article.id} count={article.commentsCount} />
+              )}
             </>
           ) : null}
         </article>

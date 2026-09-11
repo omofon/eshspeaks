@@ -1,15 +1,34 @@
 import type { Section } from "./types";
 
+/**
+ * Slugs and names here match the live backend section list exactly (confirmed
+ * via `GET /sections`, 2026-09-11) so routing and card links line up once
+ * article reads move off the mock fixtures. `subsegments` are mock-only: the
+ * backend currently returns every section with an empty `subsegments` array,
+ * so these are invented to populate the UI and are not real ids.
+ */
 export const sections: Section[] = [
   {
-    slug: "politics",
-    name: "Politics",
-    blurb: "Party machinery, the National Assembly, and the long road to 2027.",
+    slug: "national-assembly",
+    name: "National assembly",
+    blurb: "The Senate, the House of Reps, and the committee fights that decide the budget.",
     tint: "politics",
     subsegments: [
-      { slug: "national-assembly", name: "National assembly" },
-      { slug: "party-politics", name: "Party politics" },
-      { slug: "elections", name: "Elections" },
+      { slug: "senate", name: "Senate" },
+      { slug: "house-of-reps", name: "House of reps" },
+      { slug: "committees", name: "Committees" },
+    ],
+  },
+  {
+    slug: "presidency-executive",
+    name: "Presidency & executive",
+    blurb:
+      "The presidency, the federal executive council, and the appointments that signal intent.",
+    tint: "interviews",
+    subsegments: [
+      { slug: "the-presidency", name: "The presidency" },
+      { slug: "federal-executive-council", name: "Federal executive council" },
+      { slug: "appointments", name: "Appointments" },
     ],
   },
   {
@@ -68,17 +87,6 @@ export const sections: Section[] = [
     ],
   },
   {
-    slug: "foreign-diaspora",
-    name: "Foreign & diaspora",
-    blurb: "Abuja abroad, ECOWAS, and the Nigerians shaping policy from outside.",
-    tint: "foreign",
-    subsegments: [
-      { slug: "ecowas", name: "ECOWAS" },
-      { slug: "bilateral", name: "Bilateral" },
-      { slug: "diaspora", name: "Diaspora" },
-    ],
-  },
-  {
     slug: "tech-innovation",
     name: "Tech & innovation",
     blurb: "Fintech regulation, startup capital and the digital public infrastructure build.",
@@ -87,6 +95,32 @@ export const sections: Section[] = [
       { slug: "fintech", name: "Fintech" },
       { slug: "startups", name: "Startups" },
       { slug: "policy-regulation", name: "Policy & regulation" },
+    ],
+  },
+  {
+    slug: "entertainment",
+    name: "Entertainment",
+    blurb: "Music, film and the culture business behind Nigeria's biggest exports.",
+    tint: "culture",
+    subsegments: [
+      { slug: "music-events", name: "Music & events" },
+      { slug: "film-tv", name: "Film & TV" },
+      { slug: "celebrity-culture", name: "Celebrity & culture" },
+    ],
+  },
+  {
+    // Carried over verbatim from the live backend list (`GET /sections`), typo and all: an
+    // editor created this as a placeholder/test section, not a real editorial desk. Kept as its
+    // own catch-all here rather than dropped, so the mock catalog matches what the API actually
+    // returns instead of quietly hiding a section that will otherwise show up empty in the UI.
+    slug: "nw-sextion",
+    name: "Nw sextion",
+    blurb: "General newsroom briefs that have not been filed under a dedicated desk yet.",
+    tint: "society",
+    subsegments: [
+      { slug: "general", name: "General" },
+      { slug: "briefs", name: "Briefs" },
+      { slug: "updates", name: "Updates" },
     ],
   },
 ];

@@ -5,6 +5,7 @@ import { fetchArticlesBySection } from "@/lib/api/articles";
 import { toUiArticle } from "@/lib/api/adapters";
 import { ListCard } from "@/components/editorial";
 import { AdSlot } from "@/components/AdSlot";
+import { USE_MOCK_FALLBACK, mockArticlesBySection } from "@/lib/data/mockFallback";
 
 export async function generateMetadata({ params }: { params: Promise<{ section: string }> }) {
   const { section } = await params;
@@ -38,7 +39,11 @@ export default async function SectionPage({
     throw e;
   }
 
-  const { items, meta } = await fetchArticlesBySection(section, { page, limit: 20 });
+  const fetched = await fetchArticlesBySection(section, { page, limit: 20 });
+  const { items, meta } =
+    fetched.items.length === 0 && USE_MOCK_FALLBACK
+      ? mockArticlesBySection(sectionData.slug, page, 20)
+      : fetched;
 
   return (
     <>

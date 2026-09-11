@@ -28,6 +28,12 @@ export function sectionTintClass(tint?: string) {
       return "text-tint-foreign";
     case "tech":
       return "text-tint-tech";
+    case "culture":
+      return "text-tint-culture";
+    case "interviews":
+      return "text-tint-interviews";
+    case "society":
+      return "text-tint-society";
     default:
       return "text-accent";
   }
