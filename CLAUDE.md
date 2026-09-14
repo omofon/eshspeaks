@@ -90,12 +90,39 @@ article-create are live network calls.
   `[section]/[subsegment]/[slug]`.
 - `tsconfig.json` path alias: `@/*` → `src/*`.
 
-## Design rules (non-negotiable, see `README.md` for full palette/type table)
+## Design rules (non-negotiable, see `README.md` for full palette/type table — **README's table is stale, mid-rebrand as of this note**)
 
-- No gradients, no emojis, no decorative stock photography, small radii
-  (4–8px), sentence case UI copy (article headlines are the one exception).
-- Fixed brand palette — don't introduce new colors ad hoc; muted gold is
-  reserved for premium badges only.
+The project is being rebranded from EshSpeaks to **Colouresh** (see
+`public/colouresh/` for the reference spec — 18 static HTML prototype
+pages plus `assets/colors.css` and `style-guide (1).html`; that folder is
+reference-only, never edit it directly). The rules below replace the old
+navy/muted-gold/no-gradient system; `src/app/globals.css` is mid-migration
+to them (see the file's own header comment for current status).
+
+- **Five fixed "crayon" hues** — orange, green, yellow, purple, red — each
+  with a base/deep/tint/shade family, on a warm paper-and-ink neutral base
+  (`--paper`/`--ink`, not white/black). Don't introduce a 6th hue or an
+  off-palette shade ad hoc; every section/context picks ONE hue as its
+  accent (see the `--tint-*` assignments in `globals.css`), never two
+  accent hues as equals in the same context.
+- **Gradients are used deliberately**, but narrowly: the logo/wordmark
+  runs a fixed purple-to-slate gradient (`--logo-grad-*` in
+  `globals.css`), distinct from the vibrant crayon system and not to be
+  reused elsewhere as a general decorative gradient.
+- **Pill buttons with a hard offset shadow** (`btn-primary`/`btn-accent`/
+  `btn-ghost` in `globals.css` — full `border-radius: 9999px`, a flat
+  non-blurred `0 4px 0 <hue-deep>` shadow that collapses on press), not
+  the old soft-elevation button style.
+- **Radii generally 12–18px** (`--radius-sm/md/lg/xl`) for cards/inputs/
+  surfaces; pill (`rounded-full`) for buttons/chips/badges specifically.
+- No emojis, no decorative stock photography (everything is inline SVG/
+  illustration per the prototype — see `public/colouresh/assets/`), and
+  sentence case UI copy (article headlines are the one exception) — these
+  three carry over unchanged from the old system.
+- Display type is Fredoka (headlines, `--font-serif`/`--font-fredoka` —
+  aliased, not renamed, so existing `font-serif` call sites and the
+  `headline-*`/`display-xl` utilities picked it up automatically), body/UI
+  is Inter, metadata/tabular numerics stay on IBM Plex Mono.
 
 ## Dev-only tier/role preview
 

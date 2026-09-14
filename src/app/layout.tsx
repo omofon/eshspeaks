@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader, Inter, IBM_Plex_Mono, Bodoni_Moda } from "next/font/google";
+import { Fredoka, Inter, IBM_Plex_Mono } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
 import { CookieSettingsModal } from "@/components/CookieSettingsModal";
 import { CookieConsentProvider } from "@/lib/cookieConsent";
@@ -8,14 +8,16 @@ import { PreviewProvider } from "@/lib/dev/previewTier";
 import { QueryProvider } from "@/lib/query/QueryProvider";
 import "./globals.css";
 
-const newsreader = Newsreader({
+const fredoka = Fredoka({
   subsets: ["latin"],
-  variable: "--font-newsreader",
+  weight: ["400", "500", "600"],
+  variable: "--font-fredoka-google",
   display: "swap",
 });
 
 const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-inter",
   display: "swap",
 });
@@ -27,19 +29,16 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const bodoni = Bodoni_Moda({
-  subsets: ["latin"],
-  variable: "--font-bodoni",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: {
-    default: "ESHSPEAKS",
-    template: "%s | ESHSPEAKS",
+    default: "Colouresh",
+    template: "%s | Colouresh",
   },
-  description:
-    "A modern Nigerian editorial newsroom for politics, business, culture and public life.",
+  description: "Nigerian stories, told in colour.",
+  // TODO(colouresh-domain): repoint at the production Colouresh domain
+  // once it's provisioned — keeping the current one live in the
+  // meantime so canonical/OG URLs stay valid rather than pointing
+  // somewhere that doesn't exist yet.
   metadataBase: new URL("https://www.eshspeaks.com"),
   manifest: "/site.webmanifest",
   icons: {
@@ -55,9 +54,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable} ${bodoni.variable}`}
-      >
+      <body className={`${fredoka.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
         <QueryProvider>
           <PreviewProvider>
             <AuthProvider>

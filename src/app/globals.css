@@ -2,105 +2,152 @@
 @import "tw-animate-css";
 
 /* ==========================================================================
-   ESHSPEAKS Design System v1.0
-   Navy foundation · Orange signature · Restrained maroon · White canvas
-   Editorial serif (Newsreader) · Sans UI (Inter) · Mono metadata (IBM Plex Mono)
-   Wordmark typeface: Bodoni Moda (--font-wordmark)
+   COLOURESH Design System v1.0
+   Five crayon hues (orange · green · yellow · purple · red) on a warm
+   paper-and-ink neutral base. One hue per section — never two accent hues
+   as equals in the same context (see the tint assignments below).
+   Display type: Fredoka · Body/UI: Inter · Metadata/mono: IBM Plex Mono
+   Spec source: public/colouresh/assets/colors.css + style-guide (1).html
    ========================================================================== */
 
 :root {
-  /* --- Canvas & surfaces --- */
-  --background: #fcfbf8; /* off-white editorial canvas */
-  --background-soft: #ffffff;
+  /* --- Base / neutral --- */
+  --paper: #fffbf2; /* main background, warm off-white */
+  --paper-2: #fff4dc; /* secondary section background, deeper cream */
+  --ink: #201a14; /* primary text + borders, warm near-black */
+  --ink-soft: #6b6459; /* secondary text, captions, meta lines */
+  --line: #eae0cc; /* hairlines, dashed dividers, card borders */
+
+  /* dark-UI neutrals (phone mockups, dark cards, stage/illustration bg) */
+  --panel-dark: #2a2a2a;
+  --panel-dark-deep: #141414;
+
+  /* --- Canvas & surfaces (aliased so existing bg-background/text-foreground
+     etc. call sites keep working unchanged) --- */
+  --background: var(--paper);
+  --background-soft: var(--paper-2);
   --card: #ffffff;
-  --card-foreground: #111111;
+  --card-foreground: var(--ink);
+  --foreground: var(--ink);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-muted: var(--ink-soft);
+  --text-inverse: var(--paper);
 
-  /* --- Text --- */
-  --foreground: #111111; /* near-black, never pure black */
-  --text-primary: #111111;
-  --text-secondary: #4e5257;
-  --text-muted: #74797f;
-  --text-inverse: #fcfbf8;
+  --border: var(--line);
+  --rule: var(--line);
+  --rule-strong: var(--ink);
 
-  /* --- Lines --- */
-  --border: #e3e0d9;
-  --rule: #d3cfc6;
-  --rule-strong: #0d1b3d;
+  /* --- Orange — Hero, State of Play/Politics, primary CTAs, breaking --- */
+  --orange: #ff7a1a;
+  --orange-deep: #e85f00;
+  --orange-tint: #ffd8b0;
+  --orange-tint-2: #ffb37a;
+  --orange-liked: #ffe3d1;
+  --orange-shade: #7a3b00;
 
-  /* --- Brand: navy (foundation) --- */
-  --navy: #0d1b3d;
-  --navy-soft: #172a56;
-  --navy-deep: #070f24;
-  --navy-tint: #edf0f7;
+  /* --- Green — The Bag/Business, Spotlights, "up" indicators --- */
+  --green: #2e9e4f;
+  --green-deep: #1f7a3b;
+  --green-tint: #c6ebcf;
+  --green-bg: #eaf6ed;
+  --green-shade: #0f4a22;
 
-  /* --- Brand: orange (signature accent) --- */
-  --accent: #c9541f;
-  --accent-hover: #a9430f;
-  --accent-soft: #faeadf;
+  /* --- Yellow — Money Moves/Finance, This Week, Share Your Story --- */
+  --yellow: #ffc72c;
+  --yellow-deep: #e8a800;
+  --yellow-tint: #ffe49b;
+  --yellow-shade: #8a6300;
+
+  /* --- Purple — The List/membership, Live Thread, Topics & Threads --- */
+  --purple: #7a4fe0;
+  --purple-deep: #5e33c4;
+  --purple-tint: #f1ebff;
+  --purple-tint-2: #d8c9fa;
+  --purple-tint-3: #c6acfa;
+  --purple-slate: #8a5cf0;
+  --purple-shade: #2e1966;
+  --purple-stage: #2a1f52;
+  --purple-stage-deep: #141024;
+
+  /* --- Red — Newsletter/Election Matters, Red Zone/Security, ads --- */
+  --red: #e8402e;
+  --red-deep: #c22a1a;
+  --red-tint: #f5a69a;
+  --red-bg: #fdeae6;
+  --red-shade: #7a1a0f;
+
+  /* --- Legacy brand names, aliased onto the 5 hues so existing call
+     sites (var(--navy), var(--accent), var(--maroon), var(--gold)) keep
+     resolving without a full rename. --- */
+  --navy: var(--ink);
+  --navy-soft: var(--ink-soft);
+  --navy-deep: var(--ink);
+  --navy-tint: var(--paper-2);
+  --accent: var(--orange);
+  --accent-hover: var(--orange-deep);
+  --accent-soft: var(--orange-tint);
   --accent-foreground: #ffffff;
-
-  /* --- Brand: maroon (editorial depth, secondary) --- */
-  --maroon: #6e1f2a;
-  --maroon-soft: #f6eaec;
+  --maroon: var(--red);
+  --maroon-soft: var(--red-bg);
   --maroon-foreground: #ffffff;
-
-  /* --- Support --- */
-  --gold: #d9a441;
-  --gold-foreground: #3d2c0a;
-  --muted: #f2f0eb;
-  --muted-foreground: #5f6368;
+  --gold: var(--yellow);
+  --gold-foreground: var(--yellow-shade);
+  --muted: var(--paper-2);
+  --muted-foreground: var(--ink-soft);
 
   /* --- Feedback --- */
-  --success: #2b7a4b;
-  --success-soft: #eaf7ee;
-  --warning: #a85b00;
-  --warning-soft: #fff4e6;
-  --error: #b42318;
-  --error-soft: #fef3f2;
-  --info: #2f5f9e;
-  --info-soft: #eef4ff;
-  --market-up: #2b7a4b;
-  --market-down: #b42318;
+  --success: var(--green);
+  --success-soft: var(--green-bg);
+  --warning: var(--yellow-deep);
+  --warning-soft: var(--yellow-tint);
+  --error: var(--red);
+  --error-soft: var(--red-bg);
+  --info: var(--purple);
+  --info-soft: var(--purple-tint);
+  --market-up: var(--green);
+  --market-down: var(--red);
 
-  /* --- Section tints (category indicators) --- */
-  --tint-politics: #2f4b8f;
-  --tint-business: #1f6b6b;
-  --tint-security: #a33321;
-  --tint-culture: #6e1f2a;
-  --tint-opinion: #6e1f2a;
-  --tint-technology: #1e6b4f;
-  --tint-society: #7a5a16;
-  --tint-interviews: #c9541f;
+  /* --- Section tints — one of the 5 hues per section. Pairs that already
+     shared a color pre-rebrand (politics/stateofplay, business/foreign,
+     technology/tech/energy, culture/opinion) keep sharing one, now a real
+     hue instead of a coincidence. Nav labels are backend-driven and
+     unaffected by this file; see CLAUDE.md for the tracked section-rename
+     dependency. --- */
+  --tint-politics: var(--orange);
+  --tint-stateofplay: var(--orange);
+  --tint-business: var(--green);
+  --tint-foreign: var(--green);
+  --tint-technology: var(--green);
+  --tint-tech: var(--green);
+  --tint-energy: var(--green);
+  --tint-security: var(--red);
+  --tint-law: var(--red);
+  --tint-interviews: var(--yellow);
+  --tint-society: var(--yellow);
+  --tint-culture: var(--purple);
+  --tint-opinion: var(--purple);
 
-  --tint-stateofplay: #2f4b8f;
-  --tint-energy: #1e6b4f;
-  --tint-law: #6e1f2a;
-  --tint-foreign: #1f6b6b;
-  --tint-tech: #1e6b4f;
+  /* --- Radius — 12–18px editorial-pill geometry (buttons/chips are full
+     pills via Tailwind's rounded-full, already used app-wide) --- */
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 18px;
 
-  /* --- Auth surface (sign-in / verify / username split-card).
-     Deliberately diverges from the newsroom palette — see CLAUDE.md. --- */
-  --ink: #202633;
-  --ink-soft: #5b6170;
-  --ink-faint: #8a8f9c;
-  --peach: #ffbb91;
-  --peach-strong: #b96733;
-  --peach-soft: #fbeade;
-  --line: #e6e3de;
-  --input-soft: #f5f4f2;
-  --gallery: #f4efe8;
+  /* --- Elevation --- */
+  --shadow-card: 0 1px 2px rgba(32, 26, 20, 0.08);
+  --shadow-raised: 0 6px 20px -8px rgba(32, 26, 20, 0.18);
+  /* Hard, non-blurred, per-hue offset shadow — the "crayon sticker" button
+     press effect (see @utility btn-accent etc. below). */
+  --shadow-btn-orange: 0 4px 0 var(--orange-deep);
+  --shadow-btn-green: 0 4px 0 var(--green-deep);
+  --shadow-btn-yellow: 0 4px 0 var(--yellow-deep);
+  --shadow-btn-purple: 0 4px 0 var(--purple-deep);
+  --shadow-btn-red: 0 4px 0 var(--red-deep);
+  --shadow-btn-ink: 0 4px 0 var(--ink);
 
-  /* --- Radius (restrained editorial geometry) --- */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-
-  /* --- Elevation (minimal) --- */
-  --shadow-card: 0 1px 2px rgba(13, 27, 61, 0.08);
-  --shadow-raised: 0 6px 20px -8px rgba(13, 27, 61, 0.18);
-
-  /* --- Spacing scale --- */
+  /* --- Spacing scale (kept for future use; see note in @theme inline) --- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -118,11 +165,23 @@
   --measure: 680px; /* article reading column */
 
   /* --- Type families (next/font vars with web-safe fallbacks) --- */
-  --font-serif: var(--font-newsreader, "Newsreader"), Georgia, "Times New Roman", serif;
+  --font-fredoka: var(--font-fredoka-google, "Fredoka"), ui-rounded, system-ui, sans-serif;
   --font-sans: var(--font-inter, "Inter"), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), ui-monospace, monospace;
-  --font-wordmark:
-    var(--font-blackletter, "UnifrakturCook"), var(--font-bodoni, "Bodoni Moda"), var(--font-serif);
+  /* Aliased (not renamed) so every headline, display-xl, body-editorial
+     utility and every literal `font-serif` call site picks up Fredoka
+     automatically without a per-call-site rename. */
+  --font-serif: var(--font-fredoka);
+  --font-wordmark: var(--font-fredoka);
+
+  /* Wordmark gradient — the logo's own fixed purple-to-slate band,
+     deliberately distinct from the vibrant crayon system above (per the
+     style guide: "Logo palette, fixed, distinct from the site's vibrant
+     crayon system"). Used by the placeholder text wordmark until real
+     lockup assets are sourced — see src/components/layout/whiteLogo.tsx. */
+  --logo-grad-start: #a07ba6;
+  --logo-grad-mid: #8993a8;
+  --logo-grad-end: #7c8ca0;
 }
 
 @theme inline {
@@ -141,6 +200,12 @@
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
 
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+
   --color-navy: var(--navy);
   --color-navy-soft: var(--navy-soft);
   --color-navy-deep: var(--navy-deep);
@@ -157,8 +222,29 @@
   --color-brand-navy: var(--navy);
   --color-brand-navy-soft: var(--navy-soft);
   --color-brand-orange: var(--accent);
+  --color-brand-maroon: var(--maroon);
+  --color-brand-purple: var(--purple);
+  --color-brand-green: var(--green);
   --color-brand-gold: var(--gold);
   --color-brand-gold-foreground: var(--gold-foreground);
+
+  --color-orange: var(--orange);
+  --color-orange-deep: var(--orange-deep);
+  --color-orange-tint: var(--orange-tint);
+  --color-green: var(--green);
+  --color-green-deep: var(--green-deep);
+  --color-green-tint: var(--green-tint);
+  --color-green-bg: var(--green-bg);
+  --color-yellow: var(--yellow);
+  --color-yellow-deep: var(--yellow-deep);
+  --color-yellow-tint: var(--yellow-tint);
+  --color-purple: var(--purple);
+  --color-purple-deep: var(--purple-deep);
+  --color-purple-tint: var(--purple-tint);
+  --color-red: var(--red);
+  --color-red-deep: var(--red-deep);
+  --color-red-tint: var(--red-tint);
+  --color-red-bg: var(--red-bg);
 
   --color-maroon: var(--maroon);
   --color-maroon-soft: var(--maroon-soft);
@@ -168,16 +254,6 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-ink-faint: var(--ink-faint);
-  --color-peach: var(--peach);
-  --color-peach-strong: var(--peach-strong);
-  --color-peach-soft: var(--peach-soft);
-  --color-line: var(--line);
-  --color-input-soft: var(--input-soft);
-  --color-gallery: var(--gallery);
 
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
@@ -209,6 +285,7 @@
 
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-fredoka: var(--font-fredoka);
   --font-mono: var(--font-mono);
   --font-wordmark: var(--font-wordmark);
 
@@ -219,6 +296,12 @@
 
   --shadow-card: var(--shadow-card);
   --shadow-raised: var(--shadow-raised);
+
+  /* NOTE: --space-1…--space-32 (defined in :root above) are intentionally
+     NOT re-exposed here — they were dead (never surfaced as Tailwind
+     utilities) before this rebrand and remain so; kept only in case a
+     future pass wants to wire up a real spacing scale, not a live token
+     today. */
 }
 
 @layer base {
@@ -249,9 +332,9 @@
   h5,
   h6 {
     font-family: var(--font-serif);
-    color: var(--navy);
-    font-weight: 300;
-    letter-spacing: -0.015em;
+    color: var(--ink);
+    font-weight: 600;
+    letter-spacing: -0.01em;
     line-height: 1.12;
     text-wrap: balance;
   }
@@ -276,8 +359,8 @@
   }
 
   ::selection {
-    background: var(--accent-soft);
-    color: var(--navy);
+    background: var(--yellow-tint);
+    color: var(--ink);
   }
 
   :focus-visible {
@@ -288,9 +371,11 @@
 
 /* ==========================================================================
    Auth surface — sign-in / verify / username split-card screens.
-   Palette tokens (--ink, --peach, --gallery, --line, …) are defined in
-   :root above and used only here. The auth screens deliberately diverge
-   from the newsroom design system — see the note in CLAUDE.md.
+   Previously ran a deliberately separate palette (--ink/--peach/--gallery
+   etc. as their own :root block); that block is gone — these classes now
+   consume the shared base tokens above like everything else. See
+   src/components/auth/authTheme.ts for the control classes and CLAUDE.md
+   for the (resolved) history of the divergence.
    ========================================================================== */
 
 .auth-canvas {
@@ -352,44 +437,53 @@
   font-weight: 700;
   letter-spacing: 0.005em;
   line-height: 1;
-  /* Blackletter masthead: never uppercase it, the caps are the drawing */
   text-transform: none;
+  /* Placeholder lockup treatment until real logo assets exist (see
+     src/components/layout/whiteLogo.tsx): a fixed purple-to-slate
+     gradient wordmark, per the style guide's logo spec. Consumers on a
+     dark background should NOT apply this class (use a solid
+     --text-inverse fill instead) since background-clip:text needs a
+     light-enough backdrop to read; see whiteLogo.tsx for the split. */
+  background-image: linear-gradient(90deg, var(--logo-grad-start), var(--logo-grad-end));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 @utility display-xl {
   font-family: var(--font-serif);
   font-size: clamp(2.75rem, 6vw, 5rem);
   line-height: 1.02;
-  letter-spacing: -0.025em;
-  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 
 @utility headline-lg {
   font-family: var(--font-serif);
   font-size: clamp(2rem, 4vw, 3.25rem);
   line-height: 1.06;
-  letter-spacing: -0.02em;
-  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-weight: 600;
 }
 
 @utility headline-md {
   font-family: var(--font-serif);
   font-size: clamp(1.5rem, 2.4vw, 2.25rem);
   line-height: 1.12;
-  letter-spacing: -0.015em;
-  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-weight: 600;
 }
 
 @utility headline-sm {
   font-family: var(--font-serif);
   font-size: clamp(1.125rem, 1.4vw, 1.5rem);
   line-height: 1.2;
-  letter-spacing: -0.01em;
-  font-weight: 500;
+  letter-spacing: -0.008em;
+  font-weight: 600;
 }
 
 @utility body-editorial {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 1.125rem;
   line-height: 1.75;
   color: var(--text-primary);
@@ -402,7 +496,7 @@
   font-family: var(--font-serif);
   font-size: clamp(1.5rem, 3vw, 2.125rem);
   line-height: 1.28;
-  color: var(--navy);
+  color: var(--ink);
   border-left: 3px solid var(--accent);
   padding-left: 1.25rem;
 }
@@ -442,7 +536,7 @@
 }
 
 @utility rule-top-strong {
-  border-top: 2px solid var(--navy);
+  border-top: 2px solid var(--ink);
 }
 
 @utility hairline {
@@ -459,8 +553,8 @@
 
 @utility card-editorial {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-lg);
 }
 
 @utility media-frame {
@@ -489,20 +583,33 @@
   }
 }
 
+/* Pill buttons with a hard, non-blurred offset shadow ("crayon sticker")
+   that collapses on press — the shadow's own hue is set per-variant below
+   so each button reads as one flat colour + one matching dark edge, never
+   a soft/blurred elevation. */
 @utility btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--navy);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background: var(--ink);
   color: var(--text-inverse);
+  box-shadow: var(--shadow-btn-ink);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.625rem 1.125rem;
-  transition: background 160ms ease;
+  font-weight: 600;
+  padding: 0.8rem 1.375rem;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
   &:hover {
-    background: var(--navy-soft);
+    transform: translateY(-2px);
+  }
+  &:active {
+    transform: translateY(4px);
+    box-shadow: none;
   }
 }
 
@@ -511,15 +618,24 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius-sm);
+  border-radius: 9999px;
+  border: 2px solid transparent;
   background: var(--accent);
   color: var(--accent-foreground);
+  box-shadow: var(--shadow-btn-orange);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 0.625rem 1.125rem;
-  transition: background 160ms ease;
+  padding: 0.8rem 1.375rem;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
   &:hover {
-    background: var(--accent-hover);
+    transform: translateY(-2px);
+  }
+  &:active {
+    transform: translateY(4px);
+    box-shadow: none;
   }
 }
 
@@ -528,17 +644,20 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  color: var(--navy);
+  border-radius: 9999px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.625rem 1.125rem;
+  font-weight: 600;
+  padding: 0.8rem 1.375rem;
   transition:
-    border-color 160ms ease,
+    background 160ms ease,
     color 160ms ease;
   &:hover {
-    border-color: var(--navy);
+    background: var(--ink);
+    color: var(--text-inverse);
   }
 }
 
@@ -561,7 +680,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--maroon);
+  color: var(--purple);
 }
 
 /* ==========================================================================
@@ -572,7 +691,7 @@
    ========================================================================== */
 
 .article-body {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 1.125rem;
   line-height: 1.75;
   color: var(--text-primary);
@@ -609,7 +728,7 @@
   font-family: var(--font-serif);
   font-size: clamp(1.375rem, 2.6vw, 1.75rem);
   line-height: 1.35;
-  color: var(--navy);
+  color: var(--ink);
   border-left: 3px solid var(--accent);
   padding-left: 1.25rem;
   font-style: italic;
@@ -642,7 +761,7 @@
 .article-body pre {
   overflow-x: auto;
   border-radius: var(--radius-md);
-  background: var(--navy-deep);
+  background: var(--ink);
   color: var(--text-inverse);
   padding: 1rem 1.25rem;
   font-family: var(--font-mono);
