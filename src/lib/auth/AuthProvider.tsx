@@ -109,6 +109,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // A session can die away from any of this component's own code paths —
+    // the proactive pre-expiry timer failing, or an ordinary API call's
+    // reactive 401-retry finding the refresh token already dead. Either one
+    // calls tokenStore.clear() but has no way to reach this component's
+    // state directly, so without this, `status` stays stuck on the last
+    // "authenticated" value: AdminLayout keeps rendering as permitted, admin
+    // actions keep silently failing, and the user is left to notice on
+    // their own and navigate to /login by hand — which drops returnTo
+    // entirely, since that manual route never goes through
+    // buildLoginHref(pathname). Reacting to the same event here instead
+    // flips `status` to "anonymous" the moment the session actually dies, so
+    // AdminLayout's existing redirect fires with the correct returnTo.
+    return tokenStore.onSessionExpired(() => {
+      clearRefreshTimer();
+      setUser(null);
+      setStatus("anonymous");
+    });
+  }, []);
+
   const signOut = useCallback(async () => {
     clearRefreshTimer();
     await authService.logout();

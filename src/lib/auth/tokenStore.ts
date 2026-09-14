@@ -16,6 +16,18 @@
 
 const REFRESH_KEY = "esh.refreshToken";
 
+/**
+ * Fired whenever `clear()` runs — a real sign-out, or `tryRefresh()` in
+ * authService.ts giving up because the refresh token itself is dead.
+ * Nothing that touches tokens directly can reach back into AuthProvider's
+ * React state, so this is how a session dying in the *background* (an
+ * ordinary 401-retry mid-session, or the proactive pre-expiry refresh)
+ * gets AuthProvider to flip to "anonymous" instead of sitting on a stale
+ * "authenticated" status until something else notices. Same
+ * window-CustomEvent idiom as lib/cookieConsent.ts.
+ */
+const SESSION_EXPIRED_EVENT = "eshspeaks:session-expired";
+
 let accessToken: string | null = null;
 let accessTokenExpiresAt: number | null = null; // epoch ms
 
@@ -41,6 +53,14 @@ export const tokenStore = {
     accessTokenExpiresAt = null;
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(REFRESH_KEY);
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
     }
+  },
+
+  /** AuthProvider-only: react to a session dying wherever it happens to die. */
+  onSessionExpired(handler: () => void): () => void {
+    if (typeof window === "undefined") return () => {};
+    window.addEventListener(SESSION_EXPIRED_EVENT, handler);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handler);
   },
 };

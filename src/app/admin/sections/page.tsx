@@ -414,10 +414,11 @@ function SectionForm({
   const [name, setName] = useState(initial?.name ?? "");
   const [isSponsored, setIsSponsored] = useState(initial?.isSponsored ?? false);
 
-  // The slug is derived from the name, never typed. A brand-new section gets
-  // a fresh slug ("Power of play" → "power-of-play"); an existing one keeps
-  // the slug it was created with so its published URLs don't break on a rename.
-  const previewSlug = initial?.slug ?? slugify(name);
+  // The slug is derived from the name, never typed, and always follows a
+  // rename (chief editor's call: renaming "Power of play" to "Play & culture"
+  // moves the slug too, so published URLs under the old slug 404). Deliberate
+  // tradeoff for URL/name consistency over link stability across a rename.
+  const previewSlug = slugify(name);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -482,7 +483,8 @@ function SubsegmentForm({
   busy: boolean;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
-  const previewSlug = initial?.slug ?? slugify(name);
+  // Same always-follows-the-name rule as SectionForm — see its comment.
+  const previewSlug = slugify(name);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
