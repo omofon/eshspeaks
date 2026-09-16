@@ -79,7 +79,7 @@ export function CheckoutReturnBanner() {
 
   if (state === "checking") {
     return (
-      <div className="mb-6 flex items-center gap-2 rounded-md border border-border bg-background-soft px-4 py-3 text-sm text-text-secondary">
+      <div className="mb-6 flex items-center gap-2 rounded-2xl border-2 border-line bg-white px-4 py-3.5 text-sm text-ink-soft">
         <Loader2 className="h-4 w-4 animate-spin" />
         Confirming your payment. This usually takes a few seconds.
       </div>
@@ -88,7 +88,7 @@ export function CheckoutReturnBanner() {
 
   if (state === "success") {
     return (
-      <div className="mb-6 flex items-center gap-2 rounded-md border border-success bg-success-soft px-4 py-3 text-sm text-success">
+      <div className="mb-6 flex items-center gap-2 rounded-2xl border-2 border-green bg-green-bg px-4 py-3.5 text-sm text-[var(--green-shade)]">
         <CheckCircle2 className="h-4 w-4" />
         Payment confirmed. Your Premium access is active.
       </div>
@@ -97,7 +97,7 @@ export function CheckoutReturnBanner() {
 
   if (state === "failed") {
     return (
-      <div className="mb-6 flex items-center gap-2 rounded-md border border-error bg-error-soft px-4 py-3 text-sm text-error">
+      <div className="mb-6 flex items-center gap-2 rounded-2xl border-2 border-red bg-red-bg px-4 py-3.5 text-sm text-[var(--red-shade)]">
         <XCircle className="h-4 w-4" />
         That payment did not go through. Nothing was charged. You can try again from Pricing.
       </div>
@@ -105,7 +105,7 @@ export function CheckoutReturnBanner() {
   }
 
   return (
-    <div className="mb-6 rounded-md border border-border bg-background-soft px-4 py-3 text-sm text-text-secondary">
+    <div className="mb-6 rounded-2xl border-2 border-line bg-white px-4 py-3.5 text-sm text-ink-soft">
       We could not confirm the payment yet. If you completed checkout, your access will appear here
       once it settles.
     </div>

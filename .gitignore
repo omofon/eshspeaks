@@ -35,3 +35,6 @@ dist-ssr
 *.sln
 *.sw?
 .next/
+
+public/docs/
+public/colouresh/

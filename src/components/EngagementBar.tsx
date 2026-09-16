@@ -165,8 +165,8 @@ export function EngagementBar({
   ];
 
   const pillBase =
-    "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm transition-[transform,background-color,border-color,color] duration-150 active:scale-95";
-  const pillIdle = "border-border text-text-secondary hover:border-navy hover:text-navy";
+    "inline-flex items-center gap-1.5 rounded-full border-2 px-4 py-2 text-[13px] font-semibold transition-[transform,background-color,border-color,color] duration-150 active:scale-95";
+  const pillIdle = "border-ink text-ink bg-white hover:-translate-y-0.5";
 
   const likeButton = (
     <button
@@ -178,7 +178,7 @@ export function EngagementBar({
       className={cn(
         pillBase,
         "disabled:cursor-not-allowed disabled:opacity-60",
-        liked ? "border-accent bg-accent-soft text-accent" : pillIdle,
+        liked ? "border-orange bg-[var(--orange-liked)] text-ink" : pillIdle,
       )}
     >
       <span className="relative grid place-items-center">
@@ -196,7 +196,7 @@ export function EngagementBar({
         />
       </span>
       <span className="overflow-hidden">
-        <span key={count} className="animate-count-in inline-block font-mono text-[12px]">
+        <span key={count} className="animate-count-in inline-block">
           {formatCompact(count)}
         </span>
       </span>
@@ -206,7 +206,7 @@ export function EngagementBar({
   const commentButton = (
     <a href="#comments" className={cn(pillBase, pillIdle)} aria-label="Jump to comments">
       <MessageSquare className="size-4" strokeWidth={1.75} />
-      <span className="font-mono text-[12px]">{formatCompact(comments)}</span>
+      <span>{formatCompact(comments)}</span>
     </a>
   );
 
@@ -228,7 +228,7 @@ export function EngagementBar({
       <div
         role="menu"
         className={cn(
-          "absolute left-0 z-10 mt-2 w-52 rounded-md border border-border bg-card p-1.5 shadow-[var(--shadow-raised)] transition-[opacity,transform] duration-150",
+          "absolute left-0 z-10 mt-2 w-52 rounded-2xl border-2 border-ink bg-white p-2 shadow-[4px_4px_0_var(--ink)] transition-[opacity,transform] duration-150",
           shareOpen
             ? "pointer-events-auto scale-100 opacity-100"
             : "pointer-events-none scale-95 opacity-0",
@@ -245,7 +245,7 @@ export function EngagementBar({
               logShare(link.label.toLowerCase());
               setShareOpen(false);
             }}
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm transition-colors hover:bg-muted"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-semibold transition-colors hover:bg-paper-2"
           >
             <link.icon className="size-4" strokeWidth={1.75} />
             {link.label}
@@ -257,10 +257,10 @@ export function EngagementBar({
             void copyLink();
             setShareOpen(false);
           }}
-          className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm transition-colors hover:bg-muted"
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-semibold transition-colors hover:bg-paper-2"
         >
           {copied ? (
-            <Check className="size-4 text-accent" strokeWidth={2} />
+            <Check className="size-4 text-orange" strokeWidth={2} />
           ) : (
             <Link2 className="size-4" strokeWidth={1.75} />
           )}
@@ -274,7 +274,7 @@ export function EngagementBar({
     <>
       <div
         ref={inlineRef}
-        className="mt-8 flex flex-wrap items-center gap-2 border-y border-rule py-3"
+        className="mt-8 flex flex-wrap items-center gap-2.5 border-y-2 border-line py-4"
       >
         {likeButton}
         {commentButton}
@@ -316,7 +316,7 @@ export function EngagementBar({
           stuck ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0",
         )}
       >
-        <div className="flex items-center gap-2 rounded-full border border-border bg-card/95 p-1.5 shadow-[var(--shadow-raised)] backdrop-blur">
+        <div className="flex items-center gap-2 rounded-full border-2 border-ink bg-white/95 p-1.5 shadow-[4px_4px_0_var(--ink)] backdrop-blur">
           {likeButton}
           {commentButton}
           <button

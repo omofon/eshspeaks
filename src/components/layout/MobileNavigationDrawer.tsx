@@ -1,14 +1,20 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { useSectionsCatalog } from "@/hooks/useSectionsCatalog";
-import { ChevronDown, X } from "lucide-react";
-import { WhiteLogo } from "@/components/layout/whiteLogo";
+import Image from "next/image";
+import { X } from "lucide-react";
+import { NAV_ITEMS } from "./navItems";
 
-export function MobileNavigationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { sections } = useSectionsCatalog();
-  const [expanded, setExpanded] = useState<string | null>(null);
+export function MobileNavigationDrawer({
+  open,
+  onClose,
+  activeHref,
+}: {
+  open: boolean;
+  onClose: () => void;
+  activeHref: string;
+}) {
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -32,75 +38,57 @@ export function MobileNavigationDrawer({ open, onClose }: { open: boolean; onClo
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-navy-deep/50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-ink/50" onClick={onClose}>
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
         tabIndex={-1}
-        className="absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-background shadow-raised outline-none"
+        className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-paper outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-rule px-4 py-4">
-          <WhiteLogo size="sm" />
-          <button
-            aria-label="Close menu"
-            onClick={onClose}
-            className="cursor-pointer p-1 text-navy"
-          >
-            <X className="h-5 w-5" />
+        <div className="flex items-center justify-between border-b-2 border-ink px-5 py-4">
+          <Link href="/" onClick={onClose} className="flex items-center gap-2">
+            <Image
+              src="/colouresh/assets/Eshicon.svg"
+              alt=""
+              width={26}
+              height={26}
+              className="h-[26px] w-[26px]"
+            />
+            <span className="font-serif text-[17px] font-semibold text-ink">Colouresh</span>
+          </Link>
+          <button aria-label="Close menu" onClick={onClose} className="p-1 text-ink">
+            <X className="h-6 w-6" />
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col overflow-auto px-4 py-2">
-          {sections.map((s) => (
-            <div key={s.slug} className="border-b border-border">
-              <div className="flex items-center justify-between">
-                <Link href={`/${s.slug}`} onClick={onClose} className="headline-sm py-3 text-navy">
-                  {s.name}
-                </Link>
-                {s.subsegments?.length ? (
-                  <button
-                    aria-label={`Toggle ${s.name} subsections`}
-                    onClick={() => setExpanded((v) => (v === s.slug ? null : s.slug))}
-                    className="cursor-pointer p-2 text-text-muted"
-                  >
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${expanded === s.slug ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                ) : null}
-              </div>
-
-              {expanded === s.slug && (
-                <div className="mb-3 ml-1 flex flex-col gap-2 border-l-2 border-accent pl-3">
-                  {s.subsegments?.map((sub) => (
-                    <Link
-                      key={sub.slug}
-                      href={`/${s.slug}/${sub.slug}`}
-                      onClick={onClose}
-                      className="text-sm text-text-secondary"
-                    >
-                      {sub.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+        <nav aria-label="Primary" className="flex flex-1 flex-col overflow-auto px-5 py-3">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              onClick={onClose}
+              className={`border-b border-line py-3.5 font-serif text-lg font-semibold ${
+                item.seat ? "text-purple" : activeHref === item.href ? "text-orange" : "text-ink"
+              }`}
+            >
+              {item.label}
+            </Link>
           ))}
-
-          <Link href="/the-seat" onClick={onClose} className="tag-category py-4">
-            The Seat
-          </Link>
         </nav>
 
-        <div className="border-t border-rule px-4 py-4">
-          <Link href="/login" onClick={onClose} className="btn-ghost w-full cursor-pointer">
-            Sign in
+        <div className="flex flex-col gap-2.5 border-t-2 border-ink px-5 py-4">
+          <Link
+            href="/the-seat#composer-anchor"
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-full border-2 border-ink px-4 py-2.5 text-[13.5px] font-semibold text-ink"
+          >
+            Raise a Topic
           </Link>
-          <Link href="/pricing" onClick={onClose} className="btn-accent mt-2 w-full cursor-pointer">
-            Subscribe
+          <Link href="/the-seat#membership" onClick={onClose} className="btn-purple justify-center">
+            Join The List
           </Link>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import {
   fetchSection,
   fetchSubsegment,
@@ -8,9 +7,9 @@ import {
 } from "@/lib/api/sections";
 import { fetchArticlesBySubsegment, fetchArticleBySlug, ArticleApiError } from "@/lib/api/articles";
 import { toUiArticle } from "@/lib/api/adapters";
-import { ListCard } from "@/components/editorial";
-import { AdSlot } from "@/components/AdSlot";
 import { ArticleView } from "@/components/ArticleView";
+import { SectionLandingPage, type SectionFilter } from "@/components/sections/SectionLandingPage";
+import { hueForSlug } from "@/lib/data/sectionHue";
 import {
   USE_MOCK_FALLBACK,
   mockArticlesBySubsegment,
@@ -138,11 +137,13 @@ export default async function SectionRestPage({
       }
     }
     return (
-      <ArticleView
-        section={section}
-        subsegment={resolved.subsegmentSlug}
-        slug={resolved.articleSlug}
-      />
+      <div className="container-eshspeaks py-8 lg:py-12">
+        <ArticleView
+          section={section}
+          subsegment={resolved.subsegmentSlug}
+          slug={resolved.articleSlug}
+        />
+      </div>
     );
   }
 
@@ -179,93 +180,31 @@ export default async function SectionRestPage({
       ? mockArticlesBySubsegment(sectionData.slug, subsegmentData.slug, page, 20)
       : fetched!;
 
-  return (
-    <>
-      <header className="border-b border-border pb-8">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
-          {sectionData.name}
-        </p>
-        <h1 className="mt-3 font-serif text-4xl text-brand-navy sm:text-5xl">
-          {subsegmentData.name}
-        </h1>
-        <p className="mt-3 text-base leading-7 text-text-secondary">
-          {meta.total} {meta.total === 1 ? "story" : "stories"} filed under{" "}
-          {subsegmentData.name.toLowerCase()}.
-        </p>
-      </header>
-
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div>
-          {items.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border p-10 text-center text-sm text-text-secondary">
-              No stories published here yet. Check back soon.
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              {items.map((article) => (
-                <ListCard
-                  key={article.slug}
-                  article={toUiArticle(article, {
-                    sectionSlug: sectionData.slug,
-                    subsegmentSlug: subsegmentData.slug,
-                  })}
-                />
-              ))}
-            </div>
-          )}
-
-          {meta.totalPages > 1 ? (
-            <nav className="mt-10 flex items-center justify-between border-t border-border pt-6 text-sm">
-              <PageLink
-                section={sectionData.slug}
-                subsegment={subsegmentData.slug}
-                page={page - 1}
-                disabled={!meta.hasPrevious}
-                label="Newer"
-              />
-              <span className="text-text-secondary">
-                Page {meta.page} of {meta.totalPages}
-              </span>
-              <PageLink
-                section={sectionData.slug}
-                subsegment={subsegmentData.slug}
-                page={page + 1}
-                disabled={!meta.hasNext}
-                label="Older"
-              />
-            </nav>
-          ) : null}
-        </div>
-        <aside>
-          <AdSlot placement="sidebar" section={sectionData.slug} />
-        </aside>
-      </div>
-    </>
+  const articles = items.map((a) =>
+    toUiArticle(a, { sectionSlug: sectionData.slug, subsegmentSlug: subsegmentData.slug }),
   );
-}
+  const { hue, hueDeep } = hueForSlug(sectionData.slug);
+  const filters: SectionFilter[] = [{ label: "All" }];
 
-function PageLink({
-  section,
-  subsegment,
-  page,
-  disabled,
-  label,
-}: {
-  section: string;
-  subsegment: string;
-  page: number;
-  disabled: boolean;
-  label: string;
-}) {
-  if (disabled) {
-    return <span className="cursor-not-allowed text-text-secondary/40">{label}</span>;
-  }
   return (
-    <Link
-      href={`/${section}/${subsegment}?page=${page}`}
-      className="font-semibold text-brand-orange hover:underline"
-    >
-      {label}
-    </Link>
+    <SectionLandingPage
+      sectionSlug={sectionData.slug}
+      hue={hue}
+      hueDeep={hueDeep}
+      chipLabel={sectionData.name}
+      title={subsegmentData.name}
+      description={`${meta.total} ${meta.total === 1 ? "story" : "stories"} filed under ${subsegmentData.name.toLowerCase()}.`}
+      filters={filters}
+      moreHeading={`More from ${subsegmentData.name}`}
+      briefTitle={`${subsegmentData.name}, Weekly`}
+      briefDescription={`The latest from ${subsegmentData.name.toLowerCase()}, in your inbox.`}
+      articles={articles}
+      pagination={{
+        page: meta.page,
+        totalPages: meta.totalPages,
+        hasNext: meta.hasNext,
+        hasPrevious: meta.hasPrevious,
+      }}
+    />
   );
 }

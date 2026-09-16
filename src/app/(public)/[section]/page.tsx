@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { fetchSection, SectionsApiError } from "@/lib/api/sections";
 import { fetchArticlesBySection } from "@/lib/api/articles";
 import { toUiArticle } from "@/lib/api/adapters";
-import { ListCard } from "@/components/editorial";
-import { AdSlot } from "@/components/AdSlot";
 import { USE_MOCK_FALLBACK, mockArticlesBySection } from "@/lib/data/mockFallback";
+import { hueForSlug } from "@/lib/data/sectionHue";
+import { SectionLandingPage, type SectionFilter } from "@/components/sections/SectionLandingPage";
 
 export async function generateMetadata({ params }: { params: Promise<{ section: string }> }) {
   const { section } = await params;
@@ -20,6 +19,13 @@ export async function generateMetadata({ params }: { params: Promise<{ section: 
   }
 }
 
+/**
+ * Generic landing page for every real backend section that doesn't have
+ * its own Colouresh-branded page (State of Play, The Bag and Money Moves
+ * have dedicated routes — see their own page.tsx files). Uses the same
+ * SectionLandingPage template as those, just driven entirely by the
+ * section's own real name/blurb/subsegments instead of hand-authored copy.
+ */
 export default async function SectionPage({
   params,
   searchParams,
@@ -39,107 +45,47 @@ export default async function SectionPage({
     throw e;
   }
 
-  const fetched = await fetchArticlesBySection(section, { page, limit: 20 });
+  const fetched = await fetchArticlesBySection(section, {
+    page,
+    limit: 20,
+    sortBy: "publishedAt",
+    sortOrder: "desc",
+  });
   const { items, meta } =
     fetched.items.length === 0 && USE_MOCK_FALLBACK
       ? mockArticlesBySection(sectionData.slug, page, 20)
       : fetched;
 
+  const articles = items.map((a) => toUiArticle(a, { sectionSlug: sectionData.slug }));
+  const { hue, hueDeep, chipLabel } = hueForSlug(sectionData.slug);
+
+  const filters: SectionFilter[] = [
+    { label: "All" },
+    ...sectionData.subsegments.map((sub) => ({
+      label: sub.name,
+      href: `/${sectionData.slug}/${sub.slug}` as `/${string}`,
+    })),
+  ];
+
   return (
-    <>
-      <header className="border-b border-border pb-8">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
-          Section
-        </p>
-        <h1 className="mt-3 font-serif text-4xl text-brand-navy sm:text-5xl">{sectionData.name}</h1>
-        {sectionData.subsegments.length > 0 ? (
-          <div className="mt-4 flex flex-wrap gap-3">
-            {sectionData.subsegments.map((sub) => (
-              <Link
-                key={sub.slug}
-                href={`/${sectionData.slug}/${sub.slug}`}
-                className="rounded-full border border-border px-3 py-1 text-sm text-text-secondary hover:border-brand-orange hover:text-brand-orange"
-              >
-                {sub.name}
-              </Link>
-            ))}
-          </div>
-        ) : null}
-        <p className="mt-3 text-base leading-7 text-text-secondary">
-          {meta.total} {meta.total === 1 ? "story" : "stories"} filed under{" "}
-          {sectionData.name.toLowerCase()}.
-        </p>
-      </header>
-
-      <div className="mt-8">
-        <AdSlot placement="leaderboard" section={sectionData.slug} />
-      </div>
-
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div>
-          {items.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border p-10 text-center text-sm text-text-secondary">
-              No stories published in this section yet. Check back soon.
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              {items.map((article) => (
-                <ListCard
-                  key={article.slug}
-                  article={toUiArticle(article, { sectionSlug: sectionData.slug })}
-                />
-              ))}
-            </div>
-          )}
-
-          {meta.totalPages > 1 ? (
-            <nav className="mt-10 flex items-center justify-between border-t border-border pt-6 text-sm">
-              <PageLink
-                section={sectionData.slug}
-                page={page - 1}
-                disabled={!meta.hasPrevious}
-                label="Newer"
-              />
-              <span className="text-text-secondary">
-                Page {meta.page} of {meta.totalPages}
-              </span>
-              <PageLink
-                section={sectionData.slug}
-                page={page + 1}
-                disabled={!meta.hasNext}
-                label="Older"
-              />
-            </nav>
-          ) : null}
-        </div>
-        <aside>
-          <AdSlot placement="sidebar" section={sectionData.slug} />
-        </aside>
-      </div>
-    </>
-  );
-}
-
-function PageLink({
-  section,
-  page,
-  disabled,
-  label,
-}: {
-  section: string;
-  page: number;
-  disabled: boolean;
-  label: string;
-}) {
-  if (disabled) {
-    return <span className="cursor-not-allowed text-text-secondary/40">{label}</span>;
-  }
-  return (
-    <Link
-      href={`/${section}?page=${page}`}
-      className="font-semibold text-brand-orange hover:underline"
-    >
-      {label}
-    </Link>
+    <SectionLandingPage
+      sectionSlug={sectionData.slug}
+      hue={hue}
+      hueDeep={hueDeep}
+      chipLabel={chipLabel}
+      title={sectionData.name}
+      description={`${meta.total} ${meta.total === 1 ? "story" : "stories"} filed under ${sectionData.name.toLowerCase()}.`}
+      filters={filters}
+      moreHeading={`More from ${sectionData.name}`}
+      briefTitle={`${sectionData.name}, Weekly`}
+      briefDescription={`The latest from ${sectionData.name.toLowerCase()}, in your inbox.`}
+      articles={articles}
+      pagination={{
+        page: meta.page,
+        totalPages: meta.totalPages,
+        hasNext: meta.hasNext,
+        hasPrevious: meta.hasPrevious,
+      }}
+    />
   );
 }

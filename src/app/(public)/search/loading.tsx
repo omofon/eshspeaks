@@ -2,7 +2,7 @@ import { ArticleCardSkeleton } from "@/components/skeletons";
 
 export default function Loading() {
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+    <div className="container-eshspeaks grid gap-8 py-8 lg:py-12 lg:grid-cols-[minmax(0,1fr)_280px]">
       <section>
         <div className="border-b border-border pb-8">
           <div className="h-3 w-16 animate-pulse rounded bg-muted" />

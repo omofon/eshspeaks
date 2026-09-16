@@ -2,16 +2,24 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Clock3, CornerDownRight, MessageSquare, Minus, Plus } from "lucide-react";
+import { Clock3, CornerDownRight, Minus, Plus } from "lucide-react";
 import { useComments } from "@/hooks/useComments";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, relativeTime } from "@/lib/utils";
 import type { ApiComment } from "@/lib/api/types";
+import { btnPurpleSm } from "@/components/seat/seatButtons";
 
 type Sort = "newest" | "oldest";
 
 const MAX_INDENT = 4;
+const AVATAR_COLORS = [
+  "var(--orange)",
+  "var(--purple)",
+  "var(--green)",
+  "var(--red)",
+  "var(--yellow-deep)",
+];
 
 function countAll(c: ApiComment): number {
   return 1 + (c.replies ?? []).reduce((n, r) => n + countAll(r), 0);
@@ -34,9 +42,19 @@ function nameFor(c: ApiComment): string {
   return c.author?.displayName ?? (c.author?.username ? `@${c.author.username}` : "Reader");
 }
 
-function Avatar({ initials }: { initials: string }) {
+function colorFor(c: ApiComment): string {
+  const seed = c.id || nameFor(c);
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length]!;
+}
+
+function Avatar({ initials, color }: { initials: string; color: string }) {
   return (
-    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-navy-tint font-mono text-[10px] text-navy">
+    <span
+      className="grid size-9 shrink-0 place-items-center rounded-full text-[13px] font-bold text-white"
+      style={{ background: color }}
+    >
       {initials}
     </span>
   );
@@ -78,90 +96,89 @@ function CommentNode({
   }
 
   return (
-    <div className={cn("relative", indent > 0 && "pl-4 sm:pl-5")}>
-      {indent > 0 ? (
-        <button
-          type="button"
-          aria-label={collapsed ? "Expand thread" : "Collapse thread"}
-          onClick={() => setCollapsed((v) => !v)}
-          className="group absolute left-0 top-0 h-full w-4 cursor-pointer"
-        >
-          <span className="absolute left-[7px] top-0 h-full w-px bg-border transition-colors group-hover:bg-accent" />
-        </button>
-      ) : null}
-
-      <div className={cn("rounded-sm py-3 pl-1", freshIds.has(comment.id) && "animate-flash")}>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setCollapsed((v) => !v)}
-            aria-label={collapsed ? "Expand" : "Collapse"}
-            className="grid size-5 shrink-0 place-items-center rounded-sm border border-border text-text-muted transition-colors hover:border-navy hover:text-navy active:scale-90"
-          >
-            {collapsed ? <Plus className="size-3" /> : <Minus className="size-3" />}
-          </button>
-          <Avatar initials={initialsFor(comment)} />
-          <span className="text-[13px] font-semibold text-text-primary">{nameFor(comment)}</span>
-          {comment.status === "pending" ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-warning-soft px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-warning">
-              <Clock3 className="size-2.5" />
-              Pending
+    <div className={cn("relative", indent > 0 && "ml-[38px] sm:ml-[52px]")}>
+      <div
+        className={cn(
+          "flex gap-3.5 border-b border-line py-5 last:border-b-0",
+          freshIds.has(comment.id) && "animate-flash",
+        )}
+      >
+        <Avatar initials={initialsFor(comment)} color={colorFor(comment)} />
+        <div className="flex-1">
+          <div className="mb-0.5 flex flex-wrap items-center gap-2">
+            <span className="text-[13.5px] font-bold text-ink">{nameFor(comment)}</span>
+            {comment.status === "pending" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-yellow-tint px-2 py-0.5 text-[10px] font-bold text-yellow-shade">
+                <Clock3 className="size-2.5" />
+                Pending
+              </span>
+            ) : null}
+            <span className="text-xs font-medium text-ink-soft">
+              {relativeTime(comment.createdAt)}
             </span>
-          ) : null}
-          <span className="meta text-[10px] normal-case tracking-normal">
-            · {relativeTime(comment.createdAt)}
-          </span>
-          {collapsed && replyCount > 0 ? (
-            <span className="meta text-[10px] normal-case tracking-normal text-accent">
-              · {replyCount} {replyCount === 1 ? "reply" : "replies"} hidden
-            </span>
-          ) : null}
-        </div>
-
-        {/* grid-rows 0fr -> 1fr gives a smooth height collapse with no fixed max-height */}
-        <div
-          className={cn(
-            "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-            collapsed ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
-          )}
-        >
-          <div className="overflow-hidden">
-            <p className="ml-7 mt-1.5 max-w-[68ch] whitespace-pre-line text-[15px] leading-7 text-text-primary">
-              {comment.body}
-            </p>
-
-            <div className="ml-6 mt-1.5 flex items-center gap-1">
+            {collapsed && replyCount > 0 ? (
               <button
                 type="button"
-                onClick={() => setReplying((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-sm px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-text-muted transition-colors hover:bg-muted hover:text-navy active:scale-95"
+                onClick={() => setCollapsed(false)}
+                className="text-xs font-semibold text-orange"
               >
-                <CornerDownRight className="size-3" /> Reply
+                · {replyCount} {replyCount === 1 ? "reply" : "replies"} hidden
               </button>
-            </div>
+            ) : null}
+            {indent === 0 && !collapsed && replyCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => setCollapsed(true)}
+                aria-label="Collapse thread"
+                className="ml-auto grid size-6 shrink-0 place-items-center rounded-full border-2 border-line text-ink-soft transition-colors hover:border-ink hover:text-ink"
+              >
+                <Minus className="size-3" />
+              </button>
+            ) : null}
+            {indent === 0 && collapsed ? (
+              <button
+                type="button"
+                onClick={() => setCollapsed(false)}
+                aria-label="Expand thread"
+                className="ml-auto grid size-6 shrink-0 place-items-center rounded-full border-2 border-line text-ink-soft transition-colors hover:border-ink hover:text-ink"
+              >
+                <Plus className="size-3" />
+              </button>
+            ) : null}
+          </div>
 
-            <div
-              className={cn(
-                "grid transition-[grid-template-rows] duration-300 ease-out",
-                replying ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-              )}
-            >
-              <div className="overflow-hidden">
-                <form onSubmit={postReply} className="ml-7 mt-3 max-w-2xl">
+          {!collapsed ? (
+            <>
+              <p className="mb-2 max-w-[68ch] whitespace-pre-line text-[14.5px] text-ink">
+                {comment.body}
+              </p>
+
+              <div className="flex items-center gap-4 text-[12.5px] font-semibold text-ink-soft">
+                <button
+                  type="button"
+                  onClick={() => setReplying((v) => !v)}
+                  className="flex items-center gap-1.5 hover:text-ink"
+                >
+                  <CornerDownRight className="size-3.5" /> Reply
+                </button>
+              </div>
+
+              {replying ? (
+                <form onSubmit={postReply} className="mt-3 max-w-2xl">
                   <textarea
                     rows={3}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     placeholder={`Reply to ${nameFor(comment)}…`}
                     disabled={posting}
-                    className="w-full resize-y rounded-sm border border-border bg-background-soft p-3 text-[15px] outline-none transition-colors focus:border-navy disabled:opacity-60"
+                    className="w-full resize-y rounded-xl border-2 border-line p-3 text-[14.5px] outline-none transition-colors focus:border-ink disabled:opacity-60"
                   />
                   {localError ? <p className="mt-1 text-xs text-error">{localError}</p> : null}
-                  <div className="mt-2 flex gap-2">
+                  <div className="mt-2.5 flex gap-2">
                     <button
                       type="submit"
                       disabled={posting}
-                      className="rounded-full bg-navy px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-text-inverse transition-colors hover:bg-navy-soft disabled:opacity-60"
+                      className="rounded-full bg-purple px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-60"
                     >
                       {posting ? "Posting…" : "Post reply"}
                     </button>
@@ -172,30 +189,28 @@ function CommentNode({
                         setDraft("");
                         setLocalError("");
                       }}
-                      className="rounded-full border border-border px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-navy"
+                      className="rounded-full border-2 border-ink px-4 py-2 text-[13px] font-semibold text-ink"
                     >
                       Cancel
                     </button>
                   </div>
                 </form>
-              </div>
-            </div>
+              ) : null}
 
-            {comment.replies && comment.replies.length > 0 ? (
-              <div className="ml-3 mt-1">
-                {comment.replies.map((r) => (
-                  <CommentNode
-                    key={r.id}
-                    comment={r}
-                    depth={depth + 1}
-                    freshIds={freshIds}
-                    posting={posting}
-                    onReply={onReply}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
+              {comment.replies && comment.replies.length > 0
+                ? comment.replies.map((r) => (
+                    <CommentNode
+                      key={r.id}
+                      comment={r}
+                      depth={depth + 1}
+                      freshIds={freshIds}
+                      posting={posting}
+                      onReply={onReply}
+                    />
+                  ))
+                : null}
+            </>
+          ) : null}
         </div>
       </div>
     </div>
@@ -254,49 +269,46 @@ export function CommentThread({ articleId, count }: { articleId: string; count: 
   }
 
   return (
-    <section id="comments" className="mt-14 scroll-mt-24">
-      <div className="flex items-center gap-3 border-t-2 border-navy pt-4">
-        <MessageSquare className="size-4 text-navy" />
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-navy">
-          {total} {total === 1 ? "comment" : "comments"}
-        </h2>
-      </div>
+    <section id="comments" className="mt-9 scroll-mt-24">
+      <h2 className="mb-4 text-lg font-bold text-ink">Comments ({total})</h2>
 
       {isAuthenticated ? (
-        <form
-          onSubmit={onSubmit}
-          className="mt-5 rounded-sm border border-border bg-background-soft p-4"
-        >
-          <textarea
-            rows={3}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="What do you make of this reporting?"
-            aria-label="Post a comment"
-            disabled={posting}
-            className="w-full resize-y rounded-sm border border-border bg-background p-3 text-[15px] outline-none transition-colors focus:border-navy disabled:opacity-60"
-          />
-          {validationError ? <p className="mt-1 text-sm text-error">{validationError}</p> : null}
-          {postError ? <p className="mt-1 text-sm text-error">{postError}</p> : null}
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="meta text-[10px] normal-case tracking-normal">
-              Signed in as {user?.displayName ?? user?.username ?? user?.email}. Comments are
-              reviewed before they appear.
-            </p>
-            <button
-              type="submit"
+        <form onSubmit={onSubmit} className="mb-5 flex gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-[13px] font-bold text-white">
+            {(user?.displayName ?? user?.username ?? "Y")[0]?.toUpperCase()}
+          </span>
+          <div className="flex-1">
+            <textarea
+              rows={2}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Join the discussion..."
+              aria-label="Post a comment"
               disabled={posting}
-              className="shrink-0 rounded-full bg-accent px-5 py-2 font-mono text-[10px] uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent-hover disabled:opacity-60"
-            >
-              {posting ? "Posting…" : "Comment"}
-            </button>
+              className="w-full resize-y rounded-2xl border-2 border-line p-3.5 text-[14.5px] outline-none transition-colors focus:border-ink disabled:opacity-60"
+            />
+            {validationError ? <p className="mt-1 text-sm text-error">{validationError}</p> : null}
+            {postError ? <p className="mt-1 text-sm text-error">{postError}</p> : null}
+            <div className="mt-2.5 flex items-center justify-between gap-3">
+              <p className="text-xs text-ink-soft">
+                Signed in as {user?.displayName ?? user?.username ?? user?.email}. Comments are
+                reviewed before they appear.
+              </p>
+              <button
+                type="submit"
+                disabled={posting}
+                className={cn(btnPurpleSm, "shrink-0 disabled:opacity-60")}
+              >
+                {posting ? "Posting…" : "Post"}
+              </button>
+            </div>
           </div>
         </form>
       ) : (
-        <div className="mt-5 rounded-sm border border-border bg-background-soft p-4 text-sm">
-          <p className="text-text-secondary">
+        <div className="mb-5 rounded-2xl border-2 border-line bg-paper-2 p-4 text-sm">
+          <p className="text-ink-soft">
             Sign in to join the discussion.{" "}
-            <Link href="/login" className="font-medium text-accent hover:underline">
+            <Link href="/login" className="font-semibold text-orange hover:underline">
               Sign in
             </Link>
             .
@@ -304,16 +316,16 @@ export function CommentThread({ articleId, count }: { articleId: string; count: 
         </div>
       )}
 
-      <div className="mt-5 flex items-center gap-1 border-b border-border pb-2">
-        <span className="meta mr-2">Sort by</span>
+      <div className="mb-2 flex items-center gap-2 border-b-2 border-line pb-3">
+        <span className="mr-1 text-xs font-semibold text-ink-soft">Sort by</span>
         {(["newest", "oldest"] as Sort[]).map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => setSort(s)}
             className={cn(
-              "rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors duration-150",
-              sort === s ? "bg-navy text-text-inverse" : "text-text-secondary hover:bg-muted",
+              "rounded-full border-2 px-3.5 py-1.5 text-xs font-bold capitalize transition-colors",
+              sort === s ? "border-ink bg-ink text-white" : "border-line text-ink-soft",
             )}
           >
             {s}
@@ -325,7 +337,7 @@ export function CommentThread({ articleId, count }: { articleId: string; count: 
         <div className="mt-6 space-y-6">
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex gap-3">
-              <Skeleton className="size-6 shrink-0 rounded-full" />
+              <Skeleton className="size-9 shrink-0 rounded-full" />
               <div className="w-full space-y-2">
                 <Skeleton className="h-3 w-32" />
                 <Skeleton className="h-4 w-full" />
@@ -337,11 +349,9 @@ export function CommentThread({ articleId, count }: { articleId: string; count: 
       ) : error ? (
         <p className="mt-6 text-sm text-error">{error}</p>
       ) : sorted.length === 0 ? (
-        <p className="mt-6 text-sm text-text-secondary">
-          No comments yet. Be the first to weigh in.
-        </p>
+        <p className="mt-6 text-sm text-ink-soft">No comments yet. Be the first to weigh in.</p>
       ) : (
-        <div className="mt-2 divide-y divide-border">
+        <div>
           {sorted.map((c) => (
             <CommentNode
               key={c.id}

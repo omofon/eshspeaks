@@ -28,13 +28,16 @@ export function PaywallPanel({
   previewWordCount?: number | null;
 }) {
   return (
-    <section className="relative mt-8 rounded-md border border-gold bg-card p-6 shadow-card">
-      <div className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-1 text-[11px] font-medium text-gold-foreground">
+    <section
+      className="relative mt-9 rounded-2xl border-2 border-ink bg-white p-6"
+      style={{ boxShadow: "6px 6px 0 var(--yellow-deep)" }}
+    >
+      <div className="absolute -top-3.5 left-6 inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-yellow px-3 py-1 text-[11px] font-bold text-ink">
         <Lock className="h-3 w-3" strokeWidth={2} />
         Premium reporting
       </div>
-      <h2 className="mt-2 font-serif text-2xl text-navy">Continue reading — for subscribers</h2>
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+      <h2 className="mt-2.5 text-2xl font-semibold text-ink">Continue reading — for subscribers</h2>
+      <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-ink-soft">
         {previewWordCount
           ? `You've read the first ${previewWordCount.toLocaleString()} words. `
           : ""}
@@ -49,22 +52,19 @@ export function PaywallPanel({
           "Section newsletters, curated weekly",
         ].map((item) => (
           <li key={item} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" strokeWidth={2} />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange" strokeWidth={2} />
             <span>{item}</span>
           </li>
         ))}
       </ul>
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <Link
-          href="/pricing"
-          className="rounded-sm bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-navy"
-        >
+      <div className="mt-5 flex flex-wrap items-center gap-3.5">
+        <Link href="/pricing" className="btn-accent">
           See plans
         </Link>
         {!signedIn ? (
           <Link
             href="/login?action=subscribe"
-            className="text-xs font-medium text-navy hover:underline"
+            className="text-xs font-semibold text-ink hover:underline"
           >
             Already a subscriber? Sign in
           </Link>

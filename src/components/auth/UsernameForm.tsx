@@ -55,8 +55,8 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
         >
           Username
         </label>
-        <div className="mt-2 flex h-12 items-center rounded-[10px] border border-line bg-input-soft transition-colors focus-within:border-ink focus-within:ring-2 focus-within:ring-peach/50">
-          <span aria-hidden="true" className="pl-4 pr-1 font-mono text-[16px] text-ink-faint">
+        <div className="mt-2 flex h-12 items-center rounded-[var(--radius-md)] border border-line bg-background-soft transition-colors focus-within:border-ink focus-within:ring-2 focus-within:ring-purple/45">
+          <span aria-hidden="true" className="pl-4 pr-1 font-mono text-[16px] text-ink-soft">
             @
           </span>
           <input
@@ -75,13 +75,13 @@ export function UsernameForm({ returnTo }: { returnTo?: string }) {
             placeholder="username"
             aria-describedby={statusId}
             aria-invalid={message ? true : undefined}
-            className="h-full w-full rounded-r-[10px] bg-transparent pr-4 text-[16px] text-ink placeholder:text-ink-faint focus:outline-none"
+            className="h-full w-full rounded-r-[var(--radius-md)] bg-transparent pr-4 text-[16px] text-ink placeholder:text-ink-soft focus:outline-none"
           />
         </div>
         <p
           id={statusId}
           aria-live="polite"
-          className={`mt-2 min-h-5 text-[13px] leading-5 ${message ? "text-error" : "text-ink-faint"}`}
+          className={`mt-2 min-h-5 text-[13px] leading-5 ${message ? "text-error" : "text-ink-soft"}`}
         >
           {message ?? "3\u201330 characters. Lower-case letters, numbers and single underscores."}
         </p>

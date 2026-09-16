@@ -8,11 +8,10 @@ EshSpeaks Newsroom — a Nigerian political/business/security news platform
 Next.js App Router (React 19, TypeScript strict, Tailwind v4). The project
 was originally scaffolded as TanStack Start (see stale references in
 `AGENTS.md`), then migrated to Next.js. **The App Router lives at
-`src/app/`, not a top-level `app/`.** A top-level `app/` from before the
-`src/` move still exists as deleted-but-uncommitted in git status — don't
-resurrect it or create a new top-level `app/`; it will silently shadow
-nothing (Next only reads one app dir) but confuses tooling. `vite.config.ts`
-and TanStack-era deps are leftover, not active.
+`src/app/`, not a top-level `app/`.** The pre-migration top-level `app/`
+and `vite.config.ts` have since been removed; don't resurrect them or
+create a new top-level `app/`, it would silently shadow nothing (Next only
+reads one app dir) but would confuse tooling.
 
 `README.md`'s "mock data only, no backend, no real auth" is **stale**.
 There is a real backend now (see Auth and CMS below); article _reads_ on
@@ -74,8 +73,10 @@ article-create are live network calls.
   - Autosave (`useAutosave.ts`) still writes to `localStorage` only —
     that's a deliberate choice (no per-keystroke PATCH), not a missing
     endpoint. Explicit "Save changes" calls `updateArticle()` (PATCH).
-- Still genuinely missing (tracked in `CMS-BACKEND-REQUESTS.md`):
-  `GET /articles/{id}` by id, editor→writer **review notes**
+- Still genuinely missing (the tracking doc for these,
+  `CMS-BACKEND-REQUESTS.md`, has been removed; raise a new one if you need
+  to track backend asks again): `GET /articles/{id}` by id, editor→writer
+  **review notes**
   (`/articles/{id}/review-notes`), server-side **revision history**, and
   **notifications** (`/notifications*`). The review UI
   (`src/components/admin/ReviewActions.tsx`) and `NotificationBell.tsx` are

@@ -1,62 +1,55 @@
-import Link from "next/link";
-import { fetchArticlesBySubsegment } from "@/lib/api/articles";
+import { fetchAllArticles } from "@/lib/api/articles";
 import { toUiArticle } from "@/lib/api/adapters";
-import { ListCard } from "@/components/editorial";
+import { USE_MOCK_FALLBACK, mockAllArticles } from "@/lib/data/mockFallback";
+import { SeatHero } from "@/components/seat/SeatHero";
+import { SeatTopics } from "@/components/seat/SeatTopics";
+import { SeatThread } from "@/components/seat/SeatThread";
+import { SeatCorner } from "@/components/seat/SeatCorner";
+import { SeatPicks } from "@/components/seat/SeatPicks";
+import { SeatCommunity } from "@/components/seat/SeatCommunity";
+import { SeatNewsletter } from "@/components/seat/SeatNewsletter";
+import { SeatMembership } from "@/components/seat/SeatMembership";
+import { SeatEvents } from "@/components/seat/SeatEvents";
+import { SeatClosing } from "@/components/seat/SeatClosing";
 
 export const metadata = {
   title: "The Seat",
-  description: "Opinion and voice-driven journalism from EshSpeaks.",
+  description:
+    "A forum for the views, opinions, and perspective that don't fit in a headline. Started by EshSpeaks, carried forward by whoever's willing to talk.",
 };
 
 /**
- * The backend now models The Seat as a real subsegment
- * (features-ideas/the-seat, confirmed live) rather than a frontend-only
- * concept — so this reads real data through that subsegment instead of
- * the mock "politics or business-economy" placeholder curation it used
- * before. The distinct voice-led framing/layout is unchanged; only the
- * data source moved from mock to live.
+ * The Seat is specced in CMS-BACKEND-REQUESTS-2 (B1) as a full community
+ * forum (topics, posts, corner, editor's picks, spotlights, partnerships,
+ * newsletter, membership, live events) but none of those /seat/* endpoints
+ * exist yet — "Suggest freezing the forum contract (B1) before the
+ * frontend builds the real page" is that doc's own recommendation. So this
+ * builds the visual page now, ahead of the backend, same as that plan
+ * anticipates: every section below is either real content this app
+ * already has, or static/local-only UI until its own endpoint exists.
+ *
+ * Editor's picks reads the general real article feed (there is no real or
+ * mock "features-ideas/the-seat" subsegment with actual content, so
+ * reading that empty subsegment the way the old /the-seat page did would
+ * always render an empty picks rail).
  */
 export default async function TheSeatPage() {
-  const { items } = await fetchArticlesBySubsegment("features-ideas", "the-seat", { limit: 12 });
-  const stories = items.map((a) =>
-    toUiArticle(a, { sectionSlug: "features-ideas", subsegmentSlug: "the-seat" }),
-  );
+  const result = await fetchAllArticles({ limit: 6, sortBy: "publishedAt", sortOrder: "desc" });
+  const effective = result.items.length === 0 && USE_MOCK_FALLBACK ? mockAllArticles(1, 6) : result;
+  const articles = effective.items.map((a) => toUiArticle(a));
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-      <section>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
-          Opinion / voices
-        </p>
-        <h1 className="mt-3 font-serif text-4xl text-brand-navy sm:text-5xl">The Seat</h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-text-secondary">
-          A distinct editorial channel for voices, essays and longer-form commentary that sits
-          alongside the daily newsroom feed.
-        </p>
-        <div className="mt-8 grid gap-6">
-          {stories.length > 0 ? (
-            stories.map((article) => <ListCard key={article.slug} article={article} />)
-          ) : (
-            <div className="rounded-md border border-dashed border-border p-10 text-center text-sm text-text-secondary">
-              Nothing filed under The Seat yet. Check back soon.
-            </div>
-          )}
-        </div>
-      </section>
-
-      <aside className="rounded-lg border border-border bg-brand-maroon-soft p-8">
-        <h2 className="font-serif text-2xl text-brand-navy">Editorial note</h2>
-        <p className="mt-4 text-sm leading-7 text-text-secondary">
-          The Seat is designed to feel slightly different from the daily wire: more voice-led, more
-          reflective, and more personal.
-        </p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex rounded-md bg-brand-navy px-5 py-3 text-sm font-semibold text-white hover:bg-brand-navy/90"
-        >
-          Return to homepage
-        </Link>
-      </aside>
+    <div>
+      <SeatHero />
+      <SeatTopics />
+      <SeatThread />
+      <SeatCorner />
+      <SeatPicks articles={articles} />
+      <SeatCommunity />
+      <SeatNewsletter />
+      <SeatMembership />
+      <SeatEvents />
+      <SeatClosing />
     </div>
   );
 }

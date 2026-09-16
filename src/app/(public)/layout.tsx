@@ -6,7 +6,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="container-eshspeaks py-8 lg:py-12">{children}</main>
+      <main>{children}</main>
       <SiteFooter />
     </div>
   );

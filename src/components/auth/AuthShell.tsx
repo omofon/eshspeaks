@@ -8,8 +8,9 @@ import AuthGallery from "@/components/auth/AuthGallery";
  * image panel (left) and the flow's form (right). Shared by /login,
  * /verify and /username so the three steps read as one screen.
  *
- * Palette classes (auth-canvas, auth-card, gallery-grid, text-ink, bg-peach,
- * …) resolve against the auth-only tokens in globals.css.
+ * Structural classes (auth-canvas, auth-card, gallery-grid) live in
+ * globals.css; color classes resolve against the shared Colouresh tokens,
+ * accented with purple (this flow's hue in the section-tint system).
  */
 export function AuthShell({
   kicker,
@@ -41,7 +42,7 @@ export function AuthShell({
               </div>
 
               {kicker ? (
-                <p className="mt-10 text-[11px] font-semibold uppercase tracking-[0.24em] text-peach-strong">
+                <p className="mt-10 text-[11px] font-semibold uppercase tracking-[0.24em] text-purple-deep">
                   {kicker}
                 </p>
               ) : null}
@@ -61,7 +62,7 @@ export function AuthShell({
           </section>
         </div>
 
-        <footer className="pt-6 text-center text-[11px] uppercase tracking-[0.12em] text-ink-faint">
+        <footer className="pt-6 text-center text-[11px] uppercase tracking-[0.12em] text-ink-soft">
           &copy; {new Date().getFullYear()} EshSpeaks Media
         </footer>
       </div>

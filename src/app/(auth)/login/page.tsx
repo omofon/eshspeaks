@@ -61,18 +61,18 @@ export default async function LoginPage({
       }
       footer={
         <div className="space-y-4">
-          <p className="text-[10px] leading-5 text-ink-faint">
+          <p className="text-[10px] leading-5 text-ink-soft">
             By continuing, you agree to EshSpeaks&rsquo;{" "}
             <Link
               href="/terms"
-              className="text-ink underline decoration-peach decoration-2 underline-offset-2"
+              className="text-ink underline decoration-purple decoration-2 underline-offset-2"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
               href="/privacy"
-              className="text-ink underline decoration-peach decoration-2 underline-offset-2"
+              className="text-ink underline decoration-purple decoration-2 underline-offset-2"
             >
               Privacy Policy
             </Link>
@@ -83,7 +83,7 @@ export default async function LoginPage({
             {isRegister ? "Already have an account?" : "New to EshSpeaks?"}{" "}
             <Link
               href={toggleModeHref as Route}
-              className="font-semibold text-ink underline decoration-peach decoration-2 underline-offset-4"
+              className="font-semibold text-ink underline decoration-purple decoration-2 underline-offset-4"
             >
               {isRegister ? "Sign in" : "Create an account"}
             </Link>

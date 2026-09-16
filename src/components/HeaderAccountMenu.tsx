@@ -30,7 +30,7 @@ export function HeaderAccountMenu() {
         <button
           type="button"
           aria-label={isAuthenticated ? "Open account menu" : "Open sign in menu"}
-          className="inline-flex items-center justify-center rounded-full border border-text-inverse/30 p-2 text-text-inverse transition-colors hover:border-text-inverse hover:text-accent"
+          className="inline-flex items-center justify-center rounded-full border-2 border-ink p-1.5 text-ink transition-colors hover:text-accent"
         >
           <CircleUserRound className="h-5 w-5" />
         </button>

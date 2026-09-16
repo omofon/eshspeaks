@@ -83,7 +83,7 @@ export function EmailAuthForm({
         <div className="relative mt-2">
           <Mail
             aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-ink-faint"
+            className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-ink-soft"
           />
           <input
             id={inputId}

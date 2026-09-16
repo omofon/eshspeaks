@@ -16,7 +16,7 @@ export default async function SearchPage({
   const sections = await fetchSections();
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+    <div className="container-eshspeaks grid gap-8 py-8 lg:py-12 lg:grid-cols-[minmax(0,1fr)_280px]">
       <section>
         <header className="border-b border-border pb-8">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">

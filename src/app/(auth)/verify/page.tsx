@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
 import { maskEmail } from "@/lib/auth/maskEmail";
@@ -31,15 +30,6 @@ export default async function VerifyPage({
     mode: authMode,
   } satisfies { returnTo: string; action?: string; mode: "login" | "register" };
 
-  const startOverHref = (() => {
-    const qs = new URLSearchParams();
-    if (authMode === "register") qs.set("mode", "register");
-    if (safeReturnTo !== "/") qs.set("returnTo", safeReturnTo);
-    if (action) qs.set("action", action);
-    const s = qs.toString();
-    return `/login${s ? `?${s}` : ""}`;
-  })();
-
   return (
     <AuthShell
       kicker="Verification"
@@ -49,18 +39,6 @@ export default async function VerifyPage({
           We sent a 6-digit code to{" "}
           <span className="font-mono text-text-primary">{maskEmail(email)}</span>.
         </>
-      }
-      footer={
-        <></>
-        // <p className="text-center text-[13px] text-text-secondary">
-        //   Wrong address?{" "}
-        //   <Link
-        //     href={startOverHref}
-        //     className="font-semibold text-navy underline underline-offset-2 hover:text-accent"
-        //   >
-        //     Start over
-        //   </Link>
-        // </p>
       }
     >
       <OTPForm email={email} {...otpProps} />

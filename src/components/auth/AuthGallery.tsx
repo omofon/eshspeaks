@@ -40,18 +40,10 @@ export function AuthGallery() {
 
   return (
     <section
-      className="auth-gallery relative flex min-h-[360px] items-center justify-center overflow-hidden bg-gallery px-6 py-16 sm:px-10 md:min-h-[640px]"
+      className="auth-gallery relative flex min-h-[360px] items-center justify-center overflow-hidden bg-background-soft px-6 py-16 sm:px-10 md:min-h-[640px]"
       aria-label="Editorial illustrations"
     >
       <div className="gallery-grid pointer-events-none absolute inset-0" aria-hidden="true" />
-
-      {/* Tiny masthead labels — the only text permitted over the image. */}
-      {/* <div className="pointer-events-none absolute inset-x-5 top-5 flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.2em] text-ink/45 sm:inset-x-8 sm:top-8">
-        <span className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-peach" /> EshSpeaks
-        </span>
-        <span>Vol. 01 / 2026</span>
-      </div> */}
 
       {/* Fixed 360px-tall, horizontally centred image container. */}
       <div className="relative mx-auto h-[360px] w-full max-w-[420px]">

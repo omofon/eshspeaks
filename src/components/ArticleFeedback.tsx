@@ -36,21 +36,21 @@ export function ArticleFeedback({ articleId }: { articleId: string }) {
 
   if (state.status === "done") {
     return (
-      <div className="mt-8 rounded-md border border-border bg-background-soft px-4 py-3 text-sm text-text-secondary">
+      <div className="mt-6 rounded-2xl border-2 border-line bg-white px-4 py-3.5 text-sm text-ink-soft">
         Thanks for the feedback — you found this {state.isUseful ? "useful" : "not useful"}.
       </div>
     );
   }
 
   return (
-    <div className="mt-8 flex flex-wrap items-center gap-3 rounded-md border border-border bg-background-soft px-4 py-3">
-      <p className="text-sm font-medium text-brand-navy">Was this useful?</p>
+    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line bg-white px-4 py-3.5">
+      <p className="text-sm font-semibold text-ink">Was this useful?</p>
       <div className="flex items-center gap-2">
         <button
           type="button"
           disabled={state.status === "submitting"}
           onClick={() => runOrRedirectToLogin(() => send(true))}
-          className="inline-flex items-center gap-1.5 rounded-sm border border-border px-3 py-1.5 text-sm transition-colors hover:border-brand-navy disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink px-3.5 py-1.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <ThumbsUp className="h-3.5 w-3.5" strokeWidth={1.75} />
           Yes
@@ -59,7 +59,7 @@ export function ArticleFeedback({ articleId }: { articleId: string }) {
           type="button"
           disabled={state.status === "submitting"}
           onClick={() => runOrRedirectToLogin(() => send(false))}
-          className="inline-flex items-center gap-1.5 rounded-sm border border-border px-3 py-1.5 text-sm transition-colors hover:border-brand-navy disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink px-3.5 py-1.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <ThumbsDown className="h-3.5 w-3.5" strokeWidth={1.75} />
           No
