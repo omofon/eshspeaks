@@ -66,7 +66,7 @@ export function SeatEvents() {
 
   return (
     <section id="events" className="bg-ink py-14 text-white sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           inverted
           dot="var(--orange)"

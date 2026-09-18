@@ -12,7 +12,7 @@ export function LegalPageLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="container-eshspeaks max-w-3xl py-10 sm:py-14">
+    <div className="container-colouresh max-w-3xl py-10 sm:py-14">
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-orange">
         {kicker}
       </p>

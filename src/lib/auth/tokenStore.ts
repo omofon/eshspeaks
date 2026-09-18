@@ -26,7 +26,7 @@ const REFRESH_KEY = "esh.refreshToken";
  * "authenticated" status until something else notices. Same
  * window-CustomEvent idiom as lib/cookieConsent.ts.
  */
-const SESSION_EXPIRED_EVENT = "eshspeaks:session-expired";
+const SESSION_EXPIRED_EVENT = "colouresh:session-expired";
 
 let accessToken: string | null = null;
 let accessTokenExpiresAt: number | null = null; // epoch ms

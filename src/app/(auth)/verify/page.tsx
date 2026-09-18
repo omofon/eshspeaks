@@ -7,7 +7,7 @@ import { getSafeReturnTo } from "@/lib/auth/returnTo";
 export const metadata = {
   title: "Check your email",
   description:
-    "Enter the verification code we sent to your email to finish signing in to EshSpeaks.",
+    "Enter the verification code we sent to your email to finish signing in to Colouresh.",
 };
 
 export default async function VerifyPage({

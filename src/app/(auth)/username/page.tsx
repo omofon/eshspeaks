@@ -4,7 +4,7 @@ import { getSafeReturnTo } from "@/lib/auth/returnTo";
 
 export const metadata = {
   title: "Choose your username",
-  description: "Pick the public name other readers will see when you comment on EshSpeaks.",
+  description: "Pick the public name other readers will see when you comment on Colouresh.",
 };
 
 export default async function UsernamePage({
@@ -22,7 +22,7 @@ export default async function UsernamePage({
     <AuthShell
       kicker="Public profile"
       title="Choose your username"
-      description="This is the name other readers will see when you comment on EshSpeaks."
+      description="This is the name other readers will see when you comment on Colouresh."
     >
       <UsernameForm returnTo={safeReturnTo} />
     </AuthShell>

@@ -8,7 +8,7 @@ export function BreakingBar({ articles }: { articles: Article[] }) {
 
   return (
     <div className="overflow-hidden border-b-2 border-ink bg-red">
-      <div className="container-eshspeaks flex items-center gap-4 py-3">
+      <div className="container-colouresh flex items-center gap-4 py-3">
         <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-xs font-bold text-white">
           <span className="h-[7px] w-[7px] animate-pulse-dot rounded-full bg-yellow" />
           BREAKING

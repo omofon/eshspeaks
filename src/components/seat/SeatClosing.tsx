@@ -30,7 +30,7 @@ function ShareStory() {
 
   return (
     <section id="story" className="bg-yellow py-14 text-center sm:py-20">
-      <div className="container-eshspeaks mx-auto max-w-[620px]">
+      <div className="container-colouresh mx-auto max-w-[620px]">
         <span className="chip mb-4 border-transparent bg-black/[0.08]">Your voice is powerful</span>
         <h2 className="mb-3.5 text-[32px] font-semibold text-ink sm:text-[38px]">
           Let it reach the right audience.
@@ -98,16 +98,16 @@ function ShareStory() {
 function Profile() {
   return (
     <section id="profile" className="py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <span className="chip">
               <span className="inline-block h-2 w-2 rounded-full bg-ink" />
               Company profile
             </span>
-            <h2 className="my-3.5 text-[32px] font-semibold text-ink">Built by EshSpeaks LLP</h2>
+            <h2 className="my-3.5 text-[32px] font-semibold text-ink">Built by Colouresh LLP</h2>
             <p className="text-[15.5px] text-ink-soft">
-              The Seat is EshSpeaks&rsquo; community engagement arm, media intelligence and
+              The Seat is Colouresh&rsquo;s community engagement arm, media intelligence and
               strategic communications behind it. If you&rsquo;re a vendor, an investor, or a brand
               looking to be part of where the conversation happens, here&rsquo;s the front door.
             </p>
@@ -158,7 +158,7 @@ function Profile() {
 function AdsCTA() {
   return (
     <section className="bg-red py-10 text-white">
-      <div className="container-eshspeaks flex flex-wrap items-center justify-between gap-6">
+      <div className="container-colouresh flex flex-wrap items-center justify-between gap-6">
         <div>
           <h4 className="mb-1.5 text-[22px] font-semibold text-white">Advertise on The Seat</h4>
           <p className="max-w-[420px] text-sm text-white/80">

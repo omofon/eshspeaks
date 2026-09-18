@@ -102,7 +102,7 @@ export function ArticleView({
     article.author?.displayName ??
     (article.author?.username
       ? `@${article.author.username}`
-      : (article.author?.name ?? "EshSpeaks Newsroom"));
+      : (article.author?.name ?? "Colouresh Newsroom"));
   const publishedAt = article.publishedAt ?? article.createdAt;
   const dateLabel = new Date(publishedAt).toLocaleDateString(undefined, {
     year: "numeric",

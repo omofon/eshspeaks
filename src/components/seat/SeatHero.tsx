@@ -47,7 +47,7 @@ export function SeatHero() {
         aria-hidden
       />
 
-      <div className="container-eshspeaks relative z-[1]">
+      <div className="container-colouresh relative z-[1]">
         <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border-2 border-ink bg-white py-[7px] pl-[7px] pr-4">
           <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-red">
             <span className="h-[7px] w-[7px] animate-pulse-dot rounded-full bg-white" />
@@ -77,7 +77,7 @@ export function SeatHero() {
             </h1>
             <p className="mt-2 max-w-[460px] text-[16px] text-ink-soft sm:text-[17px]">
               A forum for the views, opinions, and perspective that don&rsquo;t fit in a headline.
-              Started by EshSpeaks, carried forward by whoever&rsquo;s willing to talk, online and
+              Started by Colouresh, carried forward by whoever&rsquo;s willing to talk, online and
               in the room.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">

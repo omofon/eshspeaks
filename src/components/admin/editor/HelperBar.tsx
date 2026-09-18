@@ -20,7 +20,7 @@ export function HelperBar() {
       className="fixed inset-x-0 bottom-0 z-20 border-t"
       style={{ background: "var(--background-soft)", borderColor: "var(--rule)" }}
     >
-      <div className="container-eshspeaks flex items-center justify-center gap-4 py-4">
+      <div className="container-colouresh flex items-center justify-center gap-4 py-4">
         <button
           type="button"
           aria-label="Previous hint"

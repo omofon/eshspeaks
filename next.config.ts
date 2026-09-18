@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       // The CMS editor's "search media library" insert action — a placeholder source, not real
       // production images, but it does render through next/image in the editor preview.
       { protocol: "https", hostname: "picsum.photos" },
+      // YouTube video thumbnails — used when a featured/OG image is a pasted
+      // video thumbnail URL rather than an uploaded article image.
+      { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
 };

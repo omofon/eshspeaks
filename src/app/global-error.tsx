@@ -30,7 +30,7 @@ export default function GlobalError({
       >
         <div style={{ maxWidth: "28rem", width: "100%", textAlign: "center" }}>
           <h1 style={{ fontSize: "1.25rem", margin: "0 0 0.5rem", color: "#0D1B3D" }}>
-            EshSpeaks didn&apos;t load
+            Colouresh didn&apos;t load
           </h1>
           <p style={{ color: "#2C2C2A", margin: "0 0 1.5rem" }}>
             Something went wrong on our end. Try again, or come back in a moment.

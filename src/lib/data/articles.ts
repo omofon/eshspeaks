@@ -497,7 +497,7 @@ for (const section of sections) {
     articles.push({
       slug: `${slugify(title)}-${counter}`,
       title,
-      dek: "Officials say the process was consultative. Documents seen by EshSpeaks suggest the timeline was set before consultation began.",
+      dek: "Officials say the process was consultative. Documents seen by Colouresh suggest the timeline was set before consultation began.",
       section: section.slug,
       subsegment: sub?.slug ?? "",
       byline: author,
@@ -552,8 +552,8 @@ export const theSeat: Article = {
   premium: true,
   image: {
     src: "/images/news/the-seat/executive-desk.jpg",
-    alt: "The Chief Administrator at the editorial desk in the EshSpeaks newsroom",
-    credit: "EshSpeaks",
+    alt: "The Chief Administrator at the editorial desk in the Colouresh newsroom",
+    credit: "Colouresh",
   },
   likes: 412,
   commentCount: 38,

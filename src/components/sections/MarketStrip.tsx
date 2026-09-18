@@ -13,7 +13,7 @@ export function MarketStrip() {
 
   return (
     <div className="overflow-hidden border-y-2 border-ink bg-ink py-3">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <div className="flex w-max animate-ticker gap-9 whitespace-nowrap [animation-duration:22s]">
           {loop.map((item, i) => (
             <span

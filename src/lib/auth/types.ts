@@ -1,5 +1,5 @@
 /**
- * Types mirror the EshSpeaks API response confirmed live from
+ * Types mirror the backend API response confirmed live from
  * POST /auth/email/verify and GET /auth/me.
  *
  * CONFIRMED from a real response: role "reader", membershipTier "FREE".

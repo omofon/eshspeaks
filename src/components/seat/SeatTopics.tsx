@@ -65,7 +65,7 @@ export function SeatTopics() {
 
   return (
     <section id="topics" className="bg-paper-2 border-b-2 border-ink py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           dot="var(--yellow-deep)"
           chipLabel="This week"

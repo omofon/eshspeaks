@@ -35,7 +35,7 @@ export default function AccountPage() {
 
   if (status === "loading" || !isAuthenticated || !user) {
     return (
-      <div className="container-eshspeaks py-16 text-center text-ink-soft">
+      <div className="container-colouresh py-16 text-center text-ink-soft">
         Loading your account...
       </div>
     );
@@ -46,7 +46,7 @@ export default function AccountPage() {
   const displayName = user.displayName ?? user.username ?? user.email.split("@")[0];
 
   return (
-    <div className="container-eshspeaks mx-auto max-w-4xl py-10 sm:py-14">
+    <div className="container-colouresh mx-auto max-w-4xl py-10 sm:py-14">
       <Suspense fallback={null}>
         <CheckoutReturnBanner />
       </Suspense>

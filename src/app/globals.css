@@ -409,7 +409,7 @@
    Layout utilities
    ========================================================================== */
 
-@utility container-eshspeaks {
+@utility container-colouresh {
   margin-inline: auto;
   width: 100%;
   max-width: var(--container-max);

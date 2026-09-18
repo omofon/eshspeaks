@@ -24,10 +24,10 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="container-eshspeaks py-20">
+    <div className="container-colouresh py-20">
       <div className="mx-auto max-w-2xl text-center">
         <div className="flex justify-center">
-          <WhiteLogo size="md" inverted={false} asLink={false} className="hover:cursor-default" />
+          <WhiteLogo size="md" asLink={false} className="hover:cursor-default" />
         </div>
 
         <p className="kicker mt-10">Something went wrong</p>

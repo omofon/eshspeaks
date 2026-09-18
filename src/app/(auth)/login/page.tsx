@@ -8,8 +8,8 @@ import EmailAuthForm from "@/components/auth/EmailAuthForm";
 import { getSafeReturnTo, buildContinuationQuery } from "@/lib/auth/returnTo";
 
 export const metadata = {
-  title: "Sign in to EshSpeaks",
-  description: "Sign in to comment, save stories and manage your EshSpeaks account.",
+  title: "Sign in to Colouresh",
+  description: "Sign in to comment, save stories and manage your Colouresh account.",
 };
 
 export default async function LoginPage({
@@ -56,13 +56,13 @@ export default async function LoginPage({
       }
       description={
         isRegister
-          ? "Join the conversation, save stories, and get more from EshSpeaks."
+          ? "Join the conversation, save stories, and get more from Colouresh."
           : "Your daily read, considered from every angle."
       }
       footer={
         <div className="space-y-4">
           <p className="text-[10px] leading-5 text-ink-soft">
-            By continuing, you agree to EshSpeaks&rsquo;{" "}
+            By continuing, you agree to Colouresh&rsquo;s{" "}
             <Link
               href="/terms"
               className="text-ink underline decoration-purple decoration-2 underline-offset-2"
@@ -80,7 +80,7 @@ export default async function LoginPage({
           </p>
 
           <p className="border-t border-line pt-4 text-[13px] text-ink-soft">
-            {isRegister ? "Already have an account?" : "New to EshSpeaks?"}{" "}
+            {isRegister ? "Already have an account?" : "New to Colouresh?"}{" "}
             <Link
               href={toggleModeHref as Route}
               className="font-semibold text-ink underline decoration-purple decoration-2 underline-offset-4"

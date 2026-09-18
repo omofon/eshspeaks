@@ -2,14 +2,14 @@ import { LegalPageLayout, LegalSection } from "@/components/legal/LegalPageLayou
 
 export const metadata = {
   title: "Careers",
-  description: "Work at EshSpeaks.",
+  description: "Work at Colouresh.",
 };
 
 export default function CareersPage() {
   return (
     <LegalPageLayout
       kicker="Careers"
-      title="Work at EshSpeaks"
+      title="Work at Colouresh"
       intro="We're a small newsroom that cares more about the reporting than the org chart."
     >
       <LegalSection title="No open roles listed right now">
@@ -29,7 +29,7 @@ export default function CareersPage() {
           >
             careers@eshspeaks.com
           </a>
-          . Tell us what you cover and why EshSpeaks — generic applications are easy to spot and
+          . Tell us what you cover and why Colouresh - generic applications are easy to spot and
           easy to skip.
         </p>
       </LegalSection>

@@ -82,7 +82,7 @@ export function SearchOverlay({ inverted = true }: { inverted?: boolean }) {
         <div className="fixed inset-x-0 top-0 z-50 border-b border-rule bg-background shadow-raised">
           <div
             ref={panelRef}
-            className="container-eshspeaks flex flex-col gap-3 py-4"
+            className="container-colouresh flex flex-col gap-3 py-4"
             role="search"
           >
             <div className="flex items-center gap-3">
@@ -95,7 +95,7 @@ export function SearchOverlay({ inverted = true }: { inverted?: boolean }) {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") submitSearch();
                 }}
-                placeholder="Search EshSpeaks…"
+                placeholder="Search Colouresh…"
                 aria-label="Search articles"
                 className="w-full border-none bg-transparent font-serif text-xl text-brand-navy outline-none placeholder:text-text-muted"
               />

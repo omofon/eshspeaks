@@ -37,7 +37,7 @@ export default function CookiesPage() {
     <LegalPageLayout
       kicker="Legal"
       title="Cookie policy"
-      intro="EshSpeaks uses four categories of cookies and local storage. Only Essential is required."
+      intro="Colouresh uses four categories of cookies and local storage. Only Essential is required."
     >
       <div className="space-y-6">
         {CATEGORIES.map((c) => (

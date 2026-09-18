@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useCookieConsent } from "@/lib/cookieConsent";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { LogoWordmark } from "./layout/Logo";
 import { NewsletterSignup } from "./NewsletterSignup";
 
 const SECTIONS = [
@@ -73,21 +73,14 @@ export function SiteFooter() {
 
   return (
     <footer className="bg-ink text-white/60">
-      <div className="container-eshspeaks py-12 sm:py-14">
+      <div className="container-colouresh py-12 sm:py-14">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <Link href="/" className="mb-2.5 flex items-center gap-2 text-white">
-              <Image
-                src="/colouresh/assets/Eshicon.svg"
-                alt=""
-                width={26}
-                height={26}
-                className="h-[26px] w-[26px]"
-              />
-              <span className="font-serif text-lg font-semibold">Colouresh</span>
+            <Link href="/" className="mb-2.5 flex items-center">
+              <LogoWordmark className="w-[140px]" />
             </Link>
             <p className="max-w-[220px] text-[12.5px]">
-              Nigerian stories, told in colour. A product of EshSpeaks LLP: Media Intelligence,
+              Nigerian stories, told in colour. A product of Colouresh LLP: Media Intelligence,
               Strategic Communications, Public Affairs.
             </p>
           </div>
@@ -118,7 +111,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-[11.5px] sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Colouresh, an EshSpeaks LLP product</span>
+          <span>© {new Date().getFullYear()} Colouresh LLP</span>
           <span>We tell it in colour.</span>
         </div>
       </div>

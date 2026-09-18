@@ -21,7 +21,7 @@ export const defaultPreferences: CookiePreferences = {
   advertising: false,
 };
 
-const STORAGE_KEY = "eshspeaks.cookie-consent";
+const STORAGE_KEY = "colouresh.cookie-consent";
 
 function readStoredPreferences(): CookiePreferences | null {
   if (typeof window === "undefined") return null;
@@ -43,7 +43,7 @@ function readStoredPreferences(): CookiePreferences | null {
 }
 
 /** Writes the decision to storage, mirrors it onto `<html data-*>` for CSS/analytics-script
- *  hooks, and notifies anything listening for `eshspeaks:cookie-consent` (e.g. a future
+ *  hooks, and notifies anything listening for `colouresh:cookie-consent` (e.g. a future
  *  analytics loader gated on consent). Called directly from the action that made the
  *  decision, never from an effect keyed on `preferences` — that pattern used to fire once
  *  with default (not-yet-hydrated) values on every mount, silently overwriting a real prior
@@ -51,7 +51,7 @@ function readStoredPreferences(): CookiePreferences | null {
 function persist(next: CookiePreferences) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  window.dispatchEvent(new CustomEvent("eshspeaks:cookie-consent", { detail: next }));
+  window.dispatchEvent(new CustomEvent("colouresh:cookie-consent", { detail: next }));
   const root = document.documentElement;
   root.dataset["analyticsConsent"] = String(next.analytics);
   root.dataset["personalizationConsent"] = String(next.personalization);

@@ -23,7 +23,7 @@ export default async function ComingSoonPage({
   const color = match?.color ?? "var(--purple)";
 
   return (
-    <div className="container-eshspeaks py-14 sm:py-20">
+    <div className="container-colouresh py-14 sm:py-20">
       <div className="mx-auto max-w-[560px] text-center">
         <div
           className="mx-auto mb-5 flex h-[88px] w-[88px] items-center justify-center rounded-2xl"

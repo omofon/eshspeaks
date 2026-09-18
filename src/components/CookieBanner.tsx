@@ -14,7 +14,7 @@ export function CookieBanner() {
         <div className="max-w-3xl">
           <h2 className="font-serif text-2xl text-brand-navy">We use cookies</h2>
           <p className="mt-2 text-sm leading-6 text-text-secondary">
-            EshSpeaks uses cookies to keep the site working, understand how readers use our
+            Colouresh uses cookies to keep the site working, understand how readers use our
             publication, and improve your experience. You can review or change your choices at any
             time.
           </p>

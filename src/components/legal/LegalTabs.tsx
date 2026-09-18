@@ -44,7 +44,7 @@ export function LegalTabs() {
         <div className="text-[14.5px] leading-[1.7] text-ink-soft">
           <h2 className="mb-2.5 text-xl font-semibold text-ink">Privacy Policy</h2>
           <p className="mb-3.5">
-            Colouresh, a product of EshSpeaks LLP, collects the information you give us directly:
+            Colouresh, a product of Colouresh LLP, collects the information you give us directly:
             your name and email when you subscribe to a newsletter, register for The List, RSVP to
             an event, or post on The Seat. We also collect basic usage data (pages viewed, device
             type) to keep the site running well.

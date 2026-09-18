@@ -2,11 +2,11 @@
 
 import { Fragment, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { NAV_ITEMS } from "./layout/navItems";
 import { MobileNavigationDrawer } from "./layout/MobileNavigationDrawer";
+import { LogoWordmark } from "./layout/Logo";
 import { HeaderAccountMenu } from "./HeaderAccountMenu";
 import { SearchOverlay } from "./SearchOverlay";
 
@@ -20,19 +20,9 @@ export function SiteHeader() {
   return (
     <Fragment>
       <header className="sticky top-0 z-40 border-b-2 border-ink bg-paper/95 backdrop-blur-sm">
-        <div className="container-eshspeaks flex items-center justify-between gap-3 py-3">
-          <Link href="/" className="flex shrink-0 items-center gap-2">
-            <Image
-              src="/colouresh/assets/Eshicon.svg"
-              alt="Colouresh"
-              width={28}
-              height={28}
-              className="h-7 w-7"
-              priority
-            />
-            <span className="font-serif text-[18px] font-semibold text-ink sm:text-[19px]">
-              Colouresh
-            </span>
+        <div className="container-colouresh flex items-center justify-between gap-3 py-3">
+          <Link href="/" className="flex shrink-0 items-center">
+            <LogoWordmark className="w-[120px] sm:w-[132px]" priority />
           </Link>
 
           <nav aria-label="Primary" className="hidden items-center gap-5 lg:flex">

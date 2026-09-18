@@ -3,17 +3,17 @@ import { ALL_DESKS } from "@/lib/data/desks";
 import { SectionHeading } from "./SectionHeading";
 
 const SOCIAL_ITEMS = [
-  { platform: "W", color: "#25D366", text: "#NairaWatch, forwarded 12k times" },
-  { platform: "T", color: "#000000", text: "Zoning drama, trending #3 nationally" },
-  { platform: "X", color: "var(--ink)", text: "Analysts split on FPI inflow read" },
-  { platform: "I", color: "#E1306C", text: "Election Matters clips, 400k views" },
-  { platform: "Y", color: "#FF0000", text: "Front Bench Ep. 41, climbing fast" },
+  { platform: "W", color: "#25D366", text: "#NairaWatch, forwarded 12k times", q: "naira" },
+  { platform: "T", color: "#000000", text: "Zoning drama, trending #3 nationally", q: "zoning" },
+  { platform: "X", color: "var(--ink)", text: "Analysts split on FPI inflow read", q: "FPI" },
+  { platform: "I", color: "#E1306C", text: "Election Matters clips, 400k views", q: "election" },
+  { platform: "Y", color: "#FF0000", text: "Front Bench Ep. 41, climbing fast", q: "front bench" },
 ];
 
 export function TrendingSocial() {
   return (
     <section className="border-y-2 border-ink bg-green-bg py-14 sm:py-16">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           dot="var(--green)"
           chipLabel="Trending"
@@ -22,9 +22,10 @@ export function TrendingSocial() {
         />
         <div className="flex gap-3 overflow-x-auto pb-1.5">
           {SOCIAL_ITEMS.map((s, i) => (
-            <div
+            <Link
               key={i}
-              className="flex shrink-0 items-center gap-2.5 rounded-full border-2 border-ink bg-white px-4 py-2.5 text-[12.5px] font-bold"
+              href={`/search?q=${encodeURIComponent(s.q)}`}
+              className="flex shrink-0 items-center gap-2.5 rounded-full border-2 border-ink bg-white px-4 py-2.5 text-[12.5px] font-bold transition-colors hover:bg-green-tint"
             >
               <span
                 className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-extrabold text-white"
@@ -33,7 +34,7 @@ export function TrendingSocial() {
                 {s.platform}
               </span>
               {s.text}
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -78,7 +79,7 @@ const POPULAR_ITEMS = [
 
 export function PopularGrid() {
   return (
-    <section className="container-eshspeaks pt-14 sm:pt-16">
+    <section className="container-colouresh py-14 sm:py-16">
       <SectionHeading
         dot="var(--purple)"
         chipLabel="Popular right now"
@@ -167,7 +168,7 @@ const OPPORTUNITIES = [
 export function EventsOpportunities() {
   return (
     <section className="bg-ink py-14 sm:py-16">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           inverted
           dot="var(--green)"
@@ -203,7 +204,7 @@ export function EventsOpportunities() {
 
 export function SeatCTA() {
   return (
-    <section className="container-eshspeaks pt-14 sm:pt-16">
+    <section className="container-colouresh py-14 sm:py-16">
       <SectionHeading
         dot="var(--red)"
         chipLabel="Live from The Seat"
@@ -233,7 +234,7 @@ export function SeatCTA() {
 export function ShareStoryCTA() {
   return (
     <section className="bg-yellow py-14 text-center sm:py-16">
-      <div className="container-eshspeaks mx-auto max-w-[600px]">
+      <div className="container-colouresh mx-auto max-w-[600px]">
         <span className="chip border-transparent bg-black/[0.08]">Your voice is powerful</span>
         <h2 className="mt-3.5 text-[28px] font-semibold text-ink sm:text-[34px]">
           Got a story only you can tell?
@@ -254,7 +255,7 @@ const PARTNER_LOGOS = ["Paystack", "MTN", "GTCO", "Wakanow", "Air Peace"];
 
 export function Partners() {
   return (
-    <section className="container-eshspeaks pt-14 sm:pt-16">
+    <section className="container-colouresh py-14 sm:py-16">
       <SectionHeading
         dot="var(--green)"
         chipLabel="Who we work with"
@@ -293,7 +294,7 @@ export function Partners() {
 export function ExploreDesks() {
   return (
     <section className="bg-ink py-14 sm:py-16">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           inverted
           dot="var(--yellow)"

@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function EventsPage() {
   return (
-    <div className="container-eshspeaks py-14 sm:py-20">
+    <div className="container-colouresh py-14 sm:py-20">
       <div className="mx-auto max-w-[560px] text-center">
         <div className="mx-auto mb-5 flex h-[88px] w-[88px] items-center justify-center rounded-2xl bg-red">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2}>

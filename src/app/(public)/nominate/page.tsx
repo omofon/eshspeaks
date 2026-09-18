@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function NominatePage() {
   return (
-    <div className="container-eshspeaks py-10 sm:py-14">
+    <div className="container-colouresh py-10 sm:py-14">
       <div className="mx-auto max-w-[620px]">
         <NominateForm />
       </div>

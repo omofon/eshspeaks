@@ -21,7 +21,7 @@ export function Hero() {
         aria-hidden
       />
 
-      <div className="container-eshspeaks relative z-[1]">
+      <div className="container-colouresh relative z-[1]">
         <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border-2 border-ink bg-white py-[7px] pl-[7px] pr-4">
           <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-red">
             <span className="h-[7px] w-[7px] animate-pulse-dot rounded-full bg-white" />

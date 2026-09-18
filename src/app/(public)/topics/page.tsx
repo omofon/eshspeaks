@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TopicsPage() {
   return (
-    <div className="container-eshspeaks py-8 sm:py-10">
+    <div className="container-colouresh py-8 sm:py-10">
       <TopicsBrowser />
     </div>
   );

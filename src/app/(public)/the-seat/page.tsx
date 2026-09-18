@@ -15,7 +15,7 @@ import { SeatClosing } from "@/components/seat/SeatClosing";
 export const metadata = {
   title: "The Seat",
   description:
-    "A forum for the views, opinions, and perspective that don't fit in a headline. Started by EshSpeaks, carried forward by whoever's willing to talk.",
+    "A forum for the views, opinions, and perspective that don't fit in a headline. Started by Colouresh, carried forward by whoever's willing to talk.",
 };
 
 /**

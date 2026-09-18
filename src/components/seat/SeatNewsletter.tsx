@@ -16,17 +16,17 @@ const LISTS = [
     defaultChecked: false,
   },
   {
-    name: "EshSpeaks Editions",
+    name: "Colouresh Editions",
     desc: "Bi-weekly, general list, Eshomomoh's personal take, signed",
     defaultChecked: false,
   },
   {
-    name: "EshSpeaks Specials",
+    name: "Colouresh Specials",
     desc: "Event-driven, curated, rapid takes on breaking developments",
     defaultChecked: false,
   },
   {
-    name: "EshSpeaks Signals",
+    name: "Colouresh Signals",
     desc: "Weekly, premium, sourced intelligence for active political interests",
     defaultChecked: false,
   },
@@ -56,7 +56,7 @@ export function SeatNewsletter() {
 
   return (
     <section id="newsletter" className="border-b-2 border-ink bg-[#FDEAE6] py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           dot="var(--red)"
           chipLabel="Stay in it"

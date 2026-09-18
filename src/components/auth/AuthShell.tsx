@@ -38,7 +38,7 @@ export function AuthShell({
           <section className="flex min-h-[520px] flex-col justify-center px-6 py-11 text-ink sm:px-12 sm:py-14 md:min-h-[640px] lg:px-16">
             <div className="mx-auto w-full max-w-[380px]">
               <div className="flex justify-center">
-                <WhiteLogo size="md" inverted={false} />
+                <WhiteLogo size="md" />
               </div>
 
               {kicker ? (
@@ -63,7 +63,7 @@ export function AuthShell({
         </div>
 
         <footer className="pt-6 text-center text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-          &copy; {new Date().getFullYear()} EshSpeaks Media
+          &copy; {new Date().getFullYear()} Colouresh Media
         </footer>
       </div>
     </main>

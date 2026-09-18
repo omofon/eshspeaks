@@ -131,7 +131,7 @@ export function toUiArticle(
 ): Article {
   const byline =
     api.author?.displayName ??
-    (api.author?.username ? `@${api.author.username}` : (api.author?.name ?? "EshSpeaks Newsroom"));
+    (api.author?.username ? `@${api.author.username}` : (api.author?.name ?? "Colouresh Newsroom"));
   const bodyText = "body" in api && typeof api.body === "string" ? api.body : "";
   const publishedAt = api.publishedAt ?? api.createdAt;
 

@@ -1,40 +1,35 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
-import LogoBlueHorizontal from "@/assets/logo_blue_horizontal.png";
-import LogoWhiteHorizontal from "@/assets/logo_white_horizontal.png";
+import { LogoWordmark } from "./Logo";
 
 type Size = "xs" | "sm" | "md" | "lg";
 
 const sizes: Record<Size, string> = {
   xs: "w-[90px]",
-  sm: "w-[132px]",
-  md: "w-[172px]",
-  lg: "w-[220px] md:w-[260px]",
+  sm: "w-[110px]",
+  md: "w-[140px]",
+  lg: "w-[180px] md:w-[210px]",
 };
 
 /**
- * The ESHSPEAKS masthead logo button.
+ * The Colouresh masthead logo button.
  */
 export function WhiteLogo({
   size = "md",
-  inverted = true,
   asLink = true,
   className = "",
 }: {
   size?: Size;
-  inverted?: boolean;
   asLink?: boolean;
   className?: string;
 }) {
   const router = useRouter();
-  const logo = inverted ? LogoWhiteHorizontal : LogoBlueHorizontal;
 
   const content = (
-    <span className={`inline-flex cursor-pointer ${sizes[size]} ${className}`}>
-      <Image src={logo} alt="EshSpeaks" className="h-auto w-full" priority />
+    <span className={`inline-flex cursor-pointer ${className}`}>
+      <LogoWordmark className={sizes[size]} priority />
     </span>
   );
 
@@ -43,7 +38,7 @@ export function WhiteLogo({
   return (
     <button
       type="button"
-      aria-label="EshSpeaks home"
+      aria-label="Colouresh home"
       onClick={() => router.push("/")}
       className="inline-flex cursor-pointer items-center justify-center rounded-sm transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
     >

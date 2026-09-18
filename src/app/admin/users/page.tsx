@@ -155,7 +155,7 @@ export default function AdminUsersPage() {
 
   if (!permitted) {
     return (
-      <div className="container-eshspeaks py-16 text-center">
+      <div className="container-colouresh py-16 text-center">
         <h1 className="headline-sm" style={{ color: "var(--navy)" }}>
           Not available
         </h1>
@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--background)" }}>
       <header className="hairline sticky top-0 z-10" style={{ background: "var(--background)" }}>
-        <div className="container-eshspeaks flex h-16 items-center justify-between">
+        <div className="container-colouresh flex h-16 items-center justify-between">
           <h1 className="headline-sm" style={{ color: "var(--navy)" }}>
             People
           </h1>
@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
         </div>
       </header>
 
-      <div className="container-eshspeaks pt-6">
+      <div className="container-colouresh pt-6">
         <div className="flex flex-wrap items-center gap-4">
           <form onSubmit={onSearchSubmit} className="relative">
             <Search

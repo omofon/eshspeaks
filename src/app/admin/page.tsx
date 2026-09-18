@@ -84,7 +84,7 @@ export default function AdminOverviewPage() {
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--background)" }}>
       <header className="hairline sticky top-0 z-10" style={{ background: "var(--background)" }}>
-        <div className="container-eshspeaks flex h-16 items-center justify-between">
+        <div className="container-colouresh flex h-16 items-center justify-between">
           <h1 className="headline-sm" style={{ color: "var(--navy)" }}>
             Newsroom overview
           </h1>
@@ -98,7 +98,7 @@ export default function AdminOverviewPage() {
         </div>
       </header>
 
-      <div className="container-eshspeaks pt-6">
+      <div className="container-colouresh pt-6">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
           Welcome back{user?.displayName ? `, ${user.displayName}` : ""}.
         </p>

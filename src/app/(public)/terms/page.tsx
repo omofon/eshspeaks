@@ -2,7 +2,7 @@ import { LegalPageLayout, LegalSection } from "@/components/legal/LegalPageLayou
 
 export const metadata = {
   title: "Terms of use",
-  description: "The terms for using EshSpeaks.",
+  description: "The terms for using Colouresh.",
 };
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
     >
       <LegalSection title="Using the site">
         <p>
-          Most EshSpeaks reporting is free to read. Some stories are marked Premium and available
+          Most Colouresh reporting is free to read. Some stories are marked Premium and available
           only to subscribers with an active membership. Creating an account requires a valid email
           address you actually control — accounts used to evade the comment or moderation rules
           below may be suspended.
@@ -31,7 +31,7 @@ export default function TermsPage() {
 
       <LegalSection title="Our content">
         <p>
-          Articles, photography and design on EshSpeaks are owned by EshSpeaks Media or licensed to
+          Articles, photography and design on Colouresh are owned by Colouresh Media or licensed to
           us. You're welcome to share links and short excerpts with attribution; republishing full
           articles requires our permission — email{" "}
           <a

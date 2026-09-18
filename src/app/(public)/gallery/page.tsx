@@ -40,7 +40,7 @@ export const metadata = {
 export default function GalleryPage() {
   return (
     <div className="bg-ink py-10 text-white sm:py-14">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <span className="chip border-white/20 bg-white/10 text-white">
           <span className="inline-block h-2 w-2 rounded-full bg-orange" />
           The Seat, Live

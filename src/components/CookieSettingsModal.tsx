@@ -81,7 +81,7 @@ export function CookieSettingsModal() {
               Cookie settings
             </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-text-secondary">
-              Choose how EshSpeaks uses cookies on this device.
+              Choose how Colouresh uses cookies on this device.
             </DialogDescription>
           </div>
           <button

@@ -21,7 +21,7 @@ const TIERS = [
       "Everything in Grey",
       "Priority invites to physical events",
       "Curated content drops",
-      "Access to the wider EshSpeaks network",
+      "Access to the wider Colouresh network",
     ],
     btn: "btn-primary",
   },
@@ -48,7 +48,7 @@ const TIERS = [
 export function SeatMembership() {
   return (
     <section id="membership" className="py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           dot="var(--purple)"
           chipLabel="Community"

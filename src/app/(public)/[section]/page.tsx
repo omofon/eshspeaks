@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ section: 
     const sectionData = await fetchSection(section);
     return {
       title: sectionData.name,
-      description: `Latest ${sectionData.name.toLowerCase()} reporting from EshSpeaks.`,
+      description: `Latest ${sectionData.name.toLowerCase()} reporting from Colouresh.`,
     };
   } catch {
     return { title: "Section" };

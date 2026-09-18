@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { X } from "lucide-react";
 import { NAV_ITEMS } from "./navItems";
+import { LogoWordmark } from "./Logo";
 
 export function MobileNavigationDrawer({
   open,
@@ -49,15 +49,8 @@ export function MobileNavigationDrawer({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b-2 border-ink px-5 py-4">
-          <Link href="/" onClick={onClose} className="flex items-center gap-2">
-            <Image
-              src="/colouresh/assets/Eshicon.svg"
-              alt=""
-              width={26}
-              height={26}
-              className="h-[26px] w-[26px]"
-            />
-            <span className="font-serif text-[17px] font-semibold text-ink">Colouresh</span>
+          <Link href="/" onClick={onClose} className="flex items-center">
+            <LogoWordmark className="w-[128px]" />
           </Link>
           <button aria-label="Close menu" onClick={onClose} className="p-1 text-ink">
             <X className="h-6 w-6" />

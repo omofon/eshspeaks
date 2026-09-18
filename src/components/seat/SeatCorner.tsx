@@ -19,7 +19,7 @@ export function SeatCorner() {
 
   return (
     <section className="bg-ink py-14 text-white sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <div className="grid items-center gap-9 sm:grid-cols-[200px_1fr]">
           <div
             className="h-[180px] w-[180px] rounded-3xl p-[5px]"

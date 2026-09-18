@@ -48,7 +48,7 @@ export function SearchResults({ initialQuery }: { initialQuery: string }) {
           </p>
         ) : !query.trim() ? (
           <p className="rounded-md border border-dashed border-border p-10 text-center text-sm text-text-secondary">
-            Start typing to search recent EshSpeaks stories.
+            Start typing to search recent Colouresh stories.
           </p>
         ) : results.length === 0 ? (
           <p className="rounded-md border border-dashed border-border p-10 text-center text-sm text-text-secondary">

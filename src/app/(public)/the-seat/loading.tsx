@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="container-eshspeaks py-14 sm:py-20">
+    <div className="container-colouresh py-14 sm:py-20">
       <div className="h-8 w-40 animate-pulse rounded-full bg-muted" />
       <div className="mt-5 h-14 w-full max-w-lg animate-pulse rounded bg-muted" />
       <div className="mt-4 h-4 w-full max-w-md animate-pulse rounded bg-muted" />

@@ -104,7 +104,7 @@ export function SectionLandingPage({
           style={{ background: hue }}
           aria-hidden
         />
-        <div className="container-eshspeaks relative z-[1]">
+        <div className="container-colouresh relative z-[1]">
           <span className="chip">
             <span className="inline-block h-2 w-2 rounded-full" style={{ background: hue }} />
             {chipLabel}
@@ -143,7 +143,7 @@ export function SectionLandingPage({
 
       {marketStrip}
 
-      <section className="container-eshspeaks pt-10 sm:pt-11">
+      <section className="container-colouresh pt-10 sm:pt-11">
         {lead ? (
           <div className="mb-11 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <Link

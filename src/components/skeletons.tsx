@@ -74,7 +74,7 @@ export function SectionStoryGridSkeleton({ columns = 3 }: { columns?: 3 | 4 }) {
 
 export function HomePageSkeleton() {
   return (
-    <div className="container-eshspeaks py-6 sm:py-8">
+    <div className="container-colouresh py-6 sm:py-8">
       <SectionLeadGridSkeleton />
       <Skeleton className="mt-14 h-24 w-full" />
       <SectionStoryGridSkeleton columns={3} />
@@ -86,7 +86,7 @@ export function HomePageSkeleton() {
 /** Section/subsegment listing pages: header strip + a uniform article grid. */
 export function SectionPageSkeleton({ cards = 9 }: { cards?: number }) {
   return (
-    <div className="container-eshspeaks py-6 sm:py-8">
+    <div className="container-colouresh py-6 sm:py-8">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="mt-3 h-10 w-64" />
       <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -102,7 +102,7 @@ export function SectionPageSkeleton({ cards = 9 }: { cards?: number }) {
 /** Full article page: kicker, headline, byline strip, hero image, body lines. */
 export function ArticlePageSkeleton() {
   return (
-    <div className="container-eshspeaks max-w-3xl py-8">
+    <div className="container-colouresh max-w-3xl py-8">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="mt-4 h-10 w-full" />
       <Skeleton className="mt-2 h-10 w-4/5" />

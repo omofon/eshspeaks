@@ -738,10 +738,10 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
     <div className="min-h-screen pb-24" style={{ background: "var(--background)" }}>
       {/* ------------------------------------------------------------- top bar */}
       <header className="hairline sticky top-0 z-30" style={{ background: "var(--background)" }}>
-        <div className="container-eshspeaks flex h-16 items-center justify-between">
+        <div className="container-colouresh flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="wordmark text-xl" style={{ color: "var(--navy)" }}>
-              EshSpeaks
+              Colouresh
             </span>
             <StatusPill
               label={statusLabel}
@@ -918,7 +918,7 @@ export function ArticleEditor({ draftId }: ArticleEditorProps) {
       {uploadError ? <Banner tone="error">{uploadError}</Banner> : null}
 
       {/* ------------------------------------------------------------- canvas */}
-      <main className="container-eshspeaks">
+      <main className="container-colouresh">
         <div className="measure mx-auto pt-16">
           {loadingDraft ? (
             <EditorSkeleton />
@@ -1157,7 +1157,7 @@ function Banner({
     },
   }[tone];
   return (
-    <div className="container-eshspeaks pt-4">
+    <div className="container-colouresh pt-4">
       <div className="rounded-md border px-4 py-3 text-sm" style={styles}>
         {children}
       </div>

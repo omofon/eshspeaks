@@ -17,11 +17,11 @@ import {
 } from "@/components/home/colouresh/StaticSections";
 
 export const metadata = {
-  title: "Colouresh — Nigerian stories, told in colour",
+  title: "Colouresh - Nigerian stories, told in colour",
   description:
     "Nigeria's stories, watched, listened to, read and argued about, all in one place: politics, business, security and public life.",
   openGraph: {
-    title: "Colouresh — Nigerian stories, told in colour",
+    title: "Colouresh - Nigerian stories, told in colour",
     description:
       "Nigeria's stories, watched, listened to, read and argued about, all in one place.",
     type: "website",
@@ -44,7 +44,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <h1 className="sr-only">Colouresh — today&rsquo;s front page</h1>
+      <h1 className="sr-only">Colouresh - today&rsquo;s front page</h1>
 
       <Hero />
       <BreakingBar articles={articles.slice(0, 4)} />
@@ -59,7 +59,7 @@ export default async function HomePage() {
       <Partners />
       <ExploreDesks />
 
-      <div className="border-t-2 border-line py-6">
+      <div className="container-colouresh border-t-2 border-line py-6">
         <AdSlot placement="leaderboard" />
       </div>
     </div>

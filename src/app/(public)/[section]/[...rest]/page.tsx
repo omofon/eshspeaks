@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: { params: Promise<RouteParams
       if (subsegmentData) {
         return {
           title: subsegmentData.name,
-          description: `Latest ${subsegmentData.name.toLowerCase()} reporting from EshSpeaks.`,
+          description: `Latest ${subsegmentData.name.toLowerCase()} reporting from Colouresh.`,
         };
       }
     }
@@ -106,7 +106,7 @@ export async function generateMetadata({ params }: { params: Promise<RouteParams
   } catch {
     // fall through to the generic titles below
   }
-  return { title: "EshSpeaks" };
+  return { title: "Colouresh" };
 }
 
 export default async function SectionRestPage({
@@ -137,7 +137,7 @@ export default async function SectionRestPage({
       }
     }
     return (
-      <div className="container-eshspeaks py-8 lg:py-12">
+      <div className="container-colouresh py-8 lg:py-12">
         <ArticleView
           section={section}
           subsegment={resolved.subsegmentSlug}

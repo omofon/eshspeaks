@@ -2,7 +2,7 @@ import { LegalPageLayout, LegalSection } from "@/components/legal/LegalPageLayou
 
 export const metadata = {
   title: "Privacy policy",
-  description: "How EshSpeaks handles your data.",
+  description: "How Colouresh handles your data.",
 };
 
 export default function PrivacyPage() {
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="How sign-in works">
         <p>
-          EshSpeaks uses short-lived access tokens and a longer-lived refresh token instead of
+          Colouresh uses short-lived access tokens and a longer-lived refresh token instead of
           server-side session cookies. The access token lives only in your browser's memory for the
           length of your visit; the refresh token is stored in your browser's local storage so you
           don't have to re-verify your email every time you return. Signing out clears both.
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
         <p>
           Some articles embed content from other platforms (for example, a tweet or a video). When
           an embed loads, the platform it comes from may set its own cookies or collect data under
-          its own privacy policy — that's between you and that platform, not something EshSpeaks
+          its own privacy policy — that's between you and that platform, not something Colouresh
           controls.
         </p>
       </LegalSection>

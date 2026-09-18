@@ -3,17 +3,17 @@ import { sections } from "@/lib/data/sections";
 import { WhiteLogo } from "@/components/layout/whiteLogo";
 
 export const metadata = {
-  title: "Page not found — EshSpeaks",
+  title: "Page not found — Colouresh",
   description:
-    "The page you requested no longer exists or has moved. Browse EshSpeaks sections or return to the front page.",
+    "The page you requested no longer exists or has moved. Browse Colouresh sections or return to the front page.",
 };
 
 export default function NotFound() {
   return (
-    <div className="container-eshspeaks py-20">
+    <div className="container-colouresh py-20">
       <div className="mx-auto max-w-2xl text-center">
         <div className="flex justify-center">
-          <WhiteLogo size="md" inverted={false} asLink={false} className="hover:cursor-default" />
+          <WhiteLogo size="md" asLink={false} className="hover:cursor-default" />
         </div>
 
         <p className="kicker mt-10">Error 404</p>

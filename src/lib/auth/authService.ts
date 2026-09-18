@@ -122,7 +122,7 @@ function mapError(
       code,
     });
   if (status >= 500)
-    return new AuthError("server", message ?? "EshSpeaks is having trouble right now.", {
+    return new AuthError("server", message ?? "Colouresh is having trouble right now.", {
       status,
       code,
     });
@@ -170,7 +170,7 @@ async function rawRequest(path: string, { auth, ...init }: RequestOptions = {}):
   } catch {
     throw new AuthError(
       "network",
-      "We couldn't reach EshSpeaks. Check your connection and try again.",
+      "We couldn't reach Colouresh. Check your connection and try again.",
     );
   }
 }

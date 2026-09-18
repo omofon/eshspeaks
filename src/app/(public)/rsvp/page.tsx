@@ -13,7 +13,7 @@ export default async function RsvpPage({
   const { event } = await searchParams;
 
   return (
-    <div className="container-eshspeaks py-10 sm:py-14">
+    <div className="container-colouresh py-10 sm:py-14">
       <div className="mx-auto max-w-[560px]">
         <RsvpForm initialEvent={event} />
       </div>

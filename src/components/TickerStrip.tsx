@@ -101,7 +101,7 @@ export function TickerStrip({
 
   return (
     <div className="border-y border-text-inverse/15 bg-navy-deep text-text-inverse">
-      <div className="container-eshspeaks flex items-center gap-4 py-1.5">
+      <div className="container-colouresh flex items-center gap-4 py-1.5">
         <span className="hidden shrink-0 items-center gap-2 border-r border-text-inverse/20 pr-4 md:inline-flex">
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">
             Markets

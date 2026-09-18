@@ -93,7 +93,7 @@ export function SeatThread() {
 
   return (
     <section id="thread" className="border-b-2 border-ink bg-[#F1EBFF] py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           dot="var(--purple)"
           chipLabel="Open right now"

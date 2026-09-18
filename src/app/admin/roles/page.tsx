@@ -92,7 +92,7 @@ export default function RolesAdminPage() {
 
   if (!permitted) {
     return (
-      <div className="container-eshspeaks py-16 text-center">
+      <div className="container-colouresh py-16 text-center">
         <h1 className="headline-sm" style={{ color: "var(--navy)" }}>
           Not available
         </h1>
@@ -112,14 +112,14 @@ export default function RolesAdminPage() {
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--background)" }}>
       <header className="hairline sticky top-0 z-10" style={{ background: "var(--background)" }}>
-        <div className="container-eshspeaks flex h-16 items-center">
+        <div className="container-colouresh flex h-16 items-center">
           <h1 className="headline-sm" style={{ color: "var(--navy)" }}>
             Editorial roles
           </h1>
         </div>
       </header>
 
-      <div className="container-eshspeaks pt-6">
+      <div className="container-colouresh pt-6">
         {error ? (
           <p
             className="mb-4 rounded-md border px-4 py-3 text-sm"

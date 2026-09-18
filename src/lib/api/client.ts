@@ -146,7 +146,7 @@ async function rawFetch(path: string, options: RequestOptions): Promise<Response
   } catch {
     throw new ApiError(
       "network",
-      "We couldn't reach EshSpeaks. Check your connection and try again.",
+      "We couldn't reach Colouresh. Check your connection and try again.",
     );
   }
 }
@@ -167,7 +167,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     throw buildError(res.status, parsed);
   }
   if (!parsed)
-    throw new ApiError("server", "EshSpeaks returned an empty response.", { status: res.status });
+    throw new ApiError("server", "Colouresh returned an empty response.", { status: res.status });
   return parsed.data;
 }
 
@@ -190,7 +190,7 @@ export async function apiRequestPaginated<T>(
     throw buildError(res.status, parsed);
   }
   if (!parsed)
-    throw new ApiError("server", "EshSpeaks returned an empty response.", { status: res.status });
+    throw new ApiError("server", "Colouresh returned an empty response.", { status: res.status });
 
   return {
     items: Array.isArray(parsed.data) ? parsed.data : [],

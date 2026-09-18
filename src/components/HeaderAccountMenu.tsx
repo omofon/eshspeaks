@@ -83,7 +83,7 @@ export function HeaderAccountMenu() {
           <>
             <DropdownMenuLabel className="px-2 pb-2 pt-1">
               <div className="space-y-2">
-                <p className="text-base font-semibold text-brand-navy">Welcome to EshSpeaks</p>
+                <p className="text-base font-semibold text-brand-navy">Welcome to Colouresh</p>
                 <p className="text-sm text-text-secondary">
                   Sign in to continue reading and commenting.
                 </p>

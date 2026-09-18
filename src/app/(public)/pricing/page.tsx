@@ -97,7 +97,7 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="container-eshspeaks mx-auto max-w-5xl py-10 sm:py-14">
+    <div className="container-colouresh mx-auto max-w-5xl py-10 sm:py-14">
       <header className="text-center">
         <span className="chip">
           <span className="inline-block h-2 w-2 rounded-full bg-purple" />

@@ -2,7 +2,7 @@ import { LegalPageLayout, LegalSection } from "@/components/legal/LegalPageLayou
 
 export const metadata = {
   title: "Contact",
-  description: "Get in touch with the EshSpeaks newsroom.",
+  description: "Get in touch with the Colouresh newsroom.",
 };
 
 const CHANNELS = [

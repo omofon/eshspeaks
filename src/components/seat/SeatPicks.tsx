@@ -51,7 +51,7 @@ export function SeatPicks({ articles }: { articles: Article[] }) {
 
   return (
     <section id="picks" className="py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <div className="grid gap-10 lg:grid-cols-[1fr_300px]">
           <div>
             <SectionHeading

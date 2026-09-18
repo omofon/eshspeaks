@@ -56,7 +56,7 @@ function Spotlights() {
 
   return (
     <section id="spotlights" className="border-y-2 border-ink bg-green-bg py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           dot="var(--green)"
           chipLabel="Spotlights"
@@ -125,7 +125,7 @@ function Partnerships() {
 
   return (
     <section className="bg-ink py-14 sm:py-20">
-      <div className="container-eshspeaks">
+      <div className="container-colouresh">
         <SectionHeading
           inverted
           dot="var(--yellow)"

@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function LegalPage() {
   return (
-    <div className="container-eshspeaks max-w-[760px] py-10 sm:py-14">
+    <div className="container-colouresh max-w-[760px] py-10 sm:py-14">
       <LegalTabs />
     </div>
   );

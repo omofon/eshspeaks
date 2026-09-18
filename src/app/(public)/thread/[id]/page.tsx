@@ -14,7 +14,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
   if (!topic) notFound();
 
   return (
-    <div className="container-eshspeaks py-8 sm:py-10">
+    <div className="container-colouresh py-8 sm:py-10">
       <ThreadView topic={topic} />
     </div>
   );

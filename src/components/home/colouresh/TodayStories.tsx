@@ -62,7 +62,7 @@ function StoryCard({ article }: { article: Article }) {
 
 export function TodayStories({ articles }: { articles: Article[] }) {
   return (
-    <section className="container-eshspeaks pt-14 sm:pt-16">
+    <section className="container-colouresh py-14 sm:py-16">
       <div className="mb-12">
         <AdSlot placement="leaderboard" />
       </div>
